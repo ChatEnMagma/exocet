@@ -1,0 +1,40 @@
+#include "gfx/texture.hpp"
+
+#include "handler.hpp"
+
+using namespace std;
+using namespace exocet;
+
+Texture::Texture(Handler* han, SDL_Renderer* ren, string path) {
+    SDL_Surface* surface = IMG_Load(path.c_str());
+    
+    setHandler(han);
+
+    if(surface == NULL) {
+        clog << "Failed to load the texture from `" << path << "`: " << IMG_GetError() << endl;
+        return;
+    }
+
+    w = surface->w;
+    h = surface->h;
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(ren, surface);
+    SDL_FreeSurface(surface);
+
+    if(texture == NULL) {
+        clog << "Failed to create the texture from `" << path << "`: " << SDL_GetError() << endl;
+    }
+
+    tex = texture;
+}
+
+void Texture::render(Vector2D<int> pos, int w, int h) {
+    SDL_Rect src = { x, y, this->w, this->h };
+    SDL_Rect dest = { 
+        pos.x - handler->getGraphic()->getCamera()->getPosition().x, 
+        pos.y - handler->getGraphic()->getCamera()->getPosition().y, 
+        w, h 
+    };
+
+    SDL_RenderCopy(handler->getSubsystem()->getRenderer(), tex, &src, &dest);
+}
