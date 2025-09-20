@@ -28,6 +28,7 @@ namespace exocet {
 
             // ALL GETTERS
             inline Vector2D<int> getPosition() const { return pos; }
+            inline int getPositionX() const { return pos.x; }
             inline Vector2D<float> getVelocity() const { return vel; }
 
             // ALL SETTERS

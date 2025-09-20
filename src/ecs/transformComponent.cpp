@@ -1,5 +1,7 @@
 #include "ecs/transformComponent.hpp"
 
+#include "handler.hpp"
+
 using namespace std;
 using namespace exocet;
 
@@ -15,6 +17,6 @@ Vector2D<int> TransformComponent::move() const {
         tmp.y += (int) ceil(vel.y);
     else if(isMovingDown())
         tmp.y += (int) floor(vel.y);
-                
+
     return tmp;
 }

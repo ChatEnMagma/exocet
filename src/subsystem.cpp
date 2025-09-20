@@ -4,19 +4,20 @@ using namespace std;
 using namespace exocet;
 
 bool Subsystem::init(int w, int h, string title) {
+    // init the SDL
     if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         cerr << "Fail to initiate SDL: " << SDL_GetError() << endl;
         return false;
     }
-
+    // init the TTF
     if(TTF_Init() != 0) {
         cerr << "Fail to initiate TTF: " << TTF_GetError() << endl;
         return false;
     }
-
+    // set the window size
     this->w = max(WIN_MIN_WIDTH, w);
     this->h = max(WIN_MIN_HEIGHT, h);
-
+    // set the title window
     this->title = title;
 
     win = SDL_CreateWindow(
@@ -33,6 +34,7 @@ bool Subsystem::init(int w, int h, string title) {
         return false; 
     }
 
+    // create the renderer
     gfx = new Graphic(SDL_CreateRenderer(
         win, 
         -1, 
@@ -66,6 +68,7 @@ void Subsystem::handleEvents() {
 void Subsystem::clean() {
     gfx->clean();
 
+    // All SDL clean
     SDL_DestroyWindow(win);
     SDL_Quit();
     TTF_Quit();

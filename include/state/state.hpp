@@ -13,6 +13,8 @@ namespace exocet {
 
             EntityManager* eManager;
             std::string tag;
+
+            void addComponentEntityLua(sol::state* state, sol::table componentLua, Entity* make_entity, std::size_t indexEntity, std::size_t indexComponent);
         public:
             State(std::string tag = "noname_state") { 
                 this->tag = tag; 
@@ -53,10 +55,10 @@ namespace exocet {
                 states.emplace_back(std::move(uPtr));
             }
 
-            inline void restart() { setState(current); }
+            inline void restart() { eManager.destroyAllEntities(); getState()->loadState(); }
 
-            inline void nextState() { if(current < states.size() - 1) { current++; restart(); } }
-            inline void previousState() { if(current > 0) { current--; restart(); } }
+            inline void nextState() { if(current < states.size() - 1) setState(current + 1); }
+            inline void previousState() { if(current > 0) setState(current - 1); }
 
             inline State* getState() { return states[current].get(); }
             inline void setState(std::size_t state) { 

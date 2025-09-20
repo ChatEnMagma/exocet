@@ -1,25 +1,17 @@
+local entities = require("entities")
+
+local player = entities.Player:new()
+
+player:setUpdateScript(
+    function ()
+        print("state: debugState", player.entity._ptr)
+    end
+)
+
 state = {
-    tag = "menuState",
+    tag = "debugState",
     
     entities = {
-        {
-            tag = "player",
-            components = {
-                {
-                    tag = "player",
-                    position = {
-                        x = 67,
-                        y = 10
-                    },
-                    hitbox = {
-                        x = 0,
-                        y = 0,
-                        w = 64,
-                        h = 64
-                    }
-                }
-            }
-        },
         {
             tag = "wall",
             components = {
@@ -45,37 +37,19 @@ state = {
                 {
                     tag = "physic",
                     position = {
-                        x = -64,
-                        y = 500
+                        x = 100,
+                        y = 56
                     },
                     hitbox = {
                         x = 0,
                         y = 0,
-                        w = 720,
-                        h = -64
+                        w = 64,
+                        h = 450
                     },
                     masse = 999.9
                 }
             }
         },
-        {
-            tag = "ball",
-            components = {
-                {
-                    tag = "physic",
-                    position = {
-                        x = 100,
-                        y = 100
-                    },
-                    hitbox = {
-                        x = 0,
-                        y = 0,
-                        w = 32,
-                        h = 32
-                    },
-                    color = { 0x00, 0xff, 0xff }
-                }
-            }
-        },
+        player
     }
 }

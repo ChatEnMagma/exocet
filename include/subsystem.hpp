@@ -20,15 +20,35 @@ namespace exocet {
 
             bool running;
         public:
+            /**
+             * \brief Init the subsystem
+             * \param width the window width
+             * \param height the window height
+             * \param title the window title
+             */
             bool init(int width, int height, std::string title);
 
+            /**
+             * \brief Handle all events from SDL
+             */
             void handleEvents();
-
+            /**
+             * \brief Clean the subsystem
+             */
             void clean();
 
+            /**
+             * \brief Set window title
+             * \param title the title for window
+             */
             inline void setTitle(std::string title) { SDL_SetWindowTitle(win, title.c_str()); }
-
+            /**
+             * \brief Close the game, will exit the excucatable
+             */
             inline void close() { running = false; }
+            /**
+             * \return True if the subsystem run else false
+             */
             inline bool isRunning() { return running; }
 
             inline Graphic* getGraphic() { return gfx; }

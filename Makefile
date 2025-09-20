@@ -3,7 +3,7 @@ INCDIR = include
 OBJDIR = obj
 
 CXX = g++
-CXXFLAGS = -O3 -Wall -g -std=c++20 -I$(INCDIR) `sdl2-config --cflags` -m64
+CXXFLAGS = -O3 -Wall -g -std=c++20 -I$(INCDIR) `sdl2-config --cflags`
 CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf -llua5.4
 
 SRC = 	$(wildcard $(SRCDIR)/*.cpp) \

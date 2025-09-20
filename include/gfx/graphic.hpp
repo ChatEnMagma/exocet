@@ -33,26 +33,16 @@ namespace exocet {
                 SDL_RenderDrawRect(ren, &rect);
             }
 
-            void renderText(int x, int y, int w, int h, std::string text, TTF_Font* font) {
-                SDL_Color color = { 0xff, 0xff, 0xff };
-                SDL_Rect dest = { x, y, w, h };
+            void renderText(int x, int y, int w, int h, std::string text, TTF_Font* font);
 
-                SDL_Surface* text_s = TTF_RenderText_Solid(font, text.c_str(), color);
-
-                if(text_s == NULL) {
-                    std::cerr << "Failed to create a surface: " << TTF_GetError() << std::endl;
-                    return;
-                }
-                
-                SDL_Texture* texture = SDL_CreateTextureFromSurface(ren, text_s);
-
-                if(texture != NULL) {
-                    SDL_RenderCopy(ren, texture, NULL, &dest);
-                } else
-                    std::cerr << "Failed to create a texture: " << SDL_GetError() << std::endl;
-
-                SDL_FreeSurface(text_s);
-                SDL_DestroyTexture(texture);
+            inline void renderLine(const Vector2D<int> position1, const Vector2D<int> position2) {
+                SDL_RenderDrawLine(
+                    ren, 
+                    position1.x - camera.getPosition().x,
+                    position1.y - camera.getPosition().y,
+                    position2.x - camera.getPosition().x,
+                    position2.y - camera.getPosition().y
+                );
             }
 
             inline void setRenderColor(Uint8 red, Uint8 blue, Uint8 green, Uint8 alpha = 0xff) { SDL_SetRenderDrawColor(ren, red, blue, green, alpha); }

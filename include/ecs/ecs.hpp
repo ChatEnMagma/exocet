@@ -41,6 +41,9 @@ namespace exocet {
         return typeID;
     }
 
+    /**
+     * \brief Component has one rule and attach for an entity
+     */
     class Component {
         protected:
             Handler* handler;
@@ -100,6 +103,9 @@ namespace exocet {
             template <typename T> 
             inline bool hasComponent() const { return componentBitset[getComponentTypeID<T>()]; }
 
+            /**
+             * \brief Get the component
+             */
             template <typename T> 
             T& getComponent() const {
                 auto ptr(componentArray[getComponentTypeID<T>()]);
@@ -138,15 +144,35 @@ namespace exocet {
             inline void update() { for(auto& e: entities) e->update(); this->refresh(); }
             inline void render() { for(auto& e: entities) e->render(); }
 
+            /**
+             * \brief Refresh the entity and group array, and clear if the entity is not active
+             */
             void refresh();
 
+            /**
+             * \brief Add a new entity into entityManager
+             * \param tag the name of the entity
+             * \return The entity created
+             */
             Entity& addEntity(std::string tag);
 
-            inline void destroyAllEntities() { entities = std::vector<std::unique_ptr<Entity>>(); }
+            /**
+             * \brief Destroy all entities in the EntityManager
+             */
+            inline void destroyAllEntities() { for(auto& e: entities) e->destroy(); }
 
+            /**
+             * \brief Add the group into this entity
+             * \param entity the entity will group
+             * \param group the group
+             */
             inline void addToGroup(Entity* entity, Group group) { groupedEntities[group].emplace_back(entity); entity->addGroup(group); }
             inline std::vector<Entity*> getGroup(Group group) { return groupedEntities[group]; }
 
+            /**
+             * \return Return the size of entities
+             */
+            inline std::size_t getNumberEntities() { return entities.size(); }
             inline void setHandler(Handler* handler) { this->handler = handler; }
             inline Handler* getHandler() { return handler; }
     };

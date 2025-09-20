@@ -25,10 +25,12 @@ void PhysicComponent::init() {
 
 void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
     PhysicComponent* e_physic = &e->getComponent<PhysicComponent>();
-    Vector2D<float> vt1 = transform->vel;
-    Vector2D<float> ve1 = e_physic->transform->vel;
+    Vector2D<float> m_v1 = transform->vel;
+    Vector2D<float> e_v1 = e_physic->transform->vel;
+
+    Vector2D<float> m_v2, e_v2;
     
-    // Formular one-dimensional Newtonian
+    /*// Formular one-dimensional Newtonian
 
     // this-vel = (this->masse - e->masse) / (this->masse + e->masse) * this->vel + (2 * e->masse) / (this->masse + e->masse) * e->vel
     Vector2D<float> newVt = vt1.scalar((getMasse() - e_physic->getMasse()) / (getMasse() + e_physic->getMasse())) + 
@@ -37,15 +39,21 @@ void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
     // (2 * this->masse) / (this->masse + e->masse) * this->vel + (e->masse - this->masse) / (this->masse + e->masse) * e->vel
     Vector2D<float> newVe =  vt1.scalar((2 * getMasse()) / (getMasse() + e_physic->getMasse())) +
                                 ve1.scalar((e_physic->getMasse() - getMasse()) / (getMasse() + e_physic->getMasse()));
-    
-    if(hitbox->isCollideHorizontal(e_physic->getHitbox())) {
-        transform->vel.x = newVt.x;
-        e_physic->transform->vel.x = newVe.x;
-    }
-    if(hitbox->isCollideVertical(e_physic->getHitbox())) {
-        transform->vel.y = newVt.y;
-        e_physic->transform->vel.y = newVe.y;
-    } 
+    */
+
+    Vector2D<float> vCollide = e_physic->getVelocity() - getVelocity();
+    float distance = Vector2D<float>::twoVectorsMagnitude(getVelocity(), e_physic->getVelocity());
+    Vector2D<float> vCollideNorm = Vector2D<float>(vCollide.x / distance, vCollide.y / distance);
+
+    Vector2D<float> vRelativeVel = getVelocity() - e_physic->getVelocity();
+
+    float vSpeed = vRelativeVel.x * vCollideNorm.x + vRelativeVel.y * vCollideNorm.y;
+    float impulse = 2 * vSpeed / (getMasse() + e_physic->getMasse());
+
+    if(speed <= 0) return;
+
+    transform->vel -= vCollideNorm.scalar(impulse * e_physic->getMasse());
+    e_physic->transform->vel += vCollideNorm.scalar(impulse * getMasse());
 }
 
 void PhysicComponent::move() {
@@ -62,17 +70,8 @@ void PhysicComponent::move() {
     } else if(getVelocity().y < -maxSpeed) {
         transform->vel.y = -maxSpeed;
     }
-    vector<Entity*> entities = getCollideEntities();
-
-    // Calcul new vectors for each collisions
-    if(!entities.empty()) {
-        for(auto& e: entities) {
-            collisionWithPhysicEntity(e);
-        }
-    }
 
     setPosition(transform->move());
-
     setVelocity(getVelocity().scalar(friction));
 }
 
@@ -81,8 +80,9 @@ vector<Entity*> PhysicComponent::getCollideEntities() {
 
     for(auto& e: handler->getEntityManager()->getGroup(GROUP_COLLIDER)) {
         if(e == entity) continue;
-        if(hitbox->isCollide(&e->getComponent<HitboxComponent>())) // if this physicCompenent is well collid with the other entity grouped collide
+        if(hitbox->isCollide(&e->getComponent<HitboxComponent>())) { // if this physicCompenent is well collid with the other entity grouped collide
             entities.emplace_back(e);
+        }
     }
     return entities;
 }
@@ -92,5 +92,12 @@ void PhysicComponent::update() {
 }
 
 void PhysicComponent::render() {
+    Vector2D<float> norm = transform->vel.normalized();
+    float vSpeed = transform->vel.x * norm.x + transform->vel.y * norm.y;
 
+    if(!handler->isShowingHitbox()) return;
+    handler->getGraphic()->setRenderColor(0xff, 0xff, 0xff);
+    handler->getGraphic()->renderLine(
+        hitbox->getCenter(), 
+        hitbox->getCenter() + norm.scalar(vSpeed * hitbox->getWidth() / 4).convert<int>() );
 }

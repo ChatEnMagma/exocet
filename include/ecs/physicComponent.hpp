@@ -19,6 +19,10 @@ namespace exocet {
              */
             void move();
 
+            /**
+             * \brief Interact the collision with other entityPhysic
+             * \param e the entity in collide
+             */
             void collisionWithPhysicEntity(Entity* e);
         public:
             void init() override;
@@ -41,6 +45,8 @@ namespace exocet {
             // Getters from TransformComponent
             inline TransformComponent* getTransform() { return transform; }
             inline Vector2D<int> getPosition() const { return transform->getPosition(); }
+            inline int getPositionX() const { return transform->pos.x; }
+            inline int getPositionY() const { return transform->pos.y; }
             inline Vector2D<float> getVelocity() const { return transform->getVelocity(); }
 
             inline HitboxComponent* getHitbox() { return hitbox; }

@@ -1,25 +1,20 @@
+local entities = require("entities")
+local engine = require("engine")
+
+local player = entities.Player:new()
+player:setUpdateScript(
+    function ()
+        -- print("state: menuState ; player_ptr: ", player.entity._ptr, player.entity:getPosition(), engine.getWinWidth())
+        if engine.getKey(117) then
+            player.entity:setPosition(0, 0)
+        end
+    end
+)
+
 state = {
     tag = "menuState",
     
     entities = {
-        {
-            tag = "player",
-            components = {
-                {
-                    tag = "player",
-                    position = {
-                        x = 67,
-                        y = 10
-                    },
-                    hitbox = {
-                        x = 0,
-                        y = 0,
-                        w = 64,
-                        h = 64
-                    }
-                }
-            }
-        },
         {
             tag = "wall",
             components = {
@@ -39,23 +34,6 @@ state = {
                 }
             }
         },
-        {
-            tag = "ball",
-            components = {
-                {
-                    tag = "physic",
-                    position = {
-                        x = 100,
-                        y = 100
-                    },
-                    hitbox = {
-                        x = 0,
-                        y = 0,
-                        w = 32,
-                        h = 32
-                    }
-                }
-            }
-        },
+        player
     }
 }

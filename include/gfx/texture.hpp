@@ -20,6 +20,9 @@ namespace exocet {
         public:
             Texture(Handler* handler, SDL_Renderer* renderer, std::string path);
 
+            /**
+             * \brief Render the texture
+             */
             void render(Vector2D<int> postion, int width, int height);
 
             inline void setHandler(Handler* handler) { this->handler = handler; }

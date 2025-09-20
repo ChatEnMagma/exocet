@@ -15,11 +15,11 @@ void HitboxComponent::init() {
 }
 
 bool HitboxComponent::isCollide(HitboxComponent* hitbox) const {
-    return (
-        getRight() >= (float) hitbox->getLeft() &&
-        getLeft() <= (float) hitbox->getRight() &&
-        getTop() <= (float) hitbox->getBottom() &&
-        getBottom() >= (float) hitbox->getTop()
+    return !(
+        hitbox->getLeft() > getRight() ||
+        getMoveLeft() > hitbox->getRight() ||
+        hitbox->getTop() > getBottom() ||
+        getMoveTop() > hitbox->getBottom()
     );
 }
 
