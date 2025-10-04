@@ -18,7 +18,7 @@ namespace exocet {
             int w = 0;
             int h = 0;
         public:
-            Texture(Handler* handler, SDL_Renderer* renderer, std::string path);
+            Texture(Handler* handler, std::string path);
 
             /**
              * \brief Render the texture
@@ -27,5 +27,8 @@ namespace exocet {
 
             inline void setHandler(Handler* handler) { this->handler = handler; }
             inline void clean() { SDL_DestroyTexture(tex); }
+
+            inline int getWidth() { return w; }
+            inline int getHeight() { return h; }
     };
 }

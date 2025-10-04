@@ -59,6 +59,7 @@ void Subsystem::handleEvents() {
 
     if(e.type == SDL_QUIT)
         close();
+    // Keylistener methods
     if(e.type == SDL_KEYDOWN)
         keys.interactKey(e.key.keysym.sym, true);
     if(e.type == SDL_KEYUP)

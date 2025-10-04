@@ -76,11 +76,12 @@ void PhysicComponent::move() {
 }
 
 vector<Entity*> PhysicComponent::getCollideEntities() {
-    vector<Entity*> entities;
+    vector<Entity*> entities = {}; // empty vector
 
     for(auto& e: handler->getEntityManager()->getGroup(GROUP_COLLIDER)) {
         if(e == entity) continue;
-        if(hitbox->isCollide(&e->getComponent<HitboxComponent>())) { // if this physicCompenent is well collid with the other entity grouped collide
+        // if this physicCompenent is well collid with the other entity grouped collide
+        if(hitbox->isCollide(&e->getComponent<HitboxComponent>())) {
             entities.emplace_back(e);
         }
     }
@@ -92,12 +93,28 @@ void PhysicComponent::update() {
 }
 
 void PhysicComponent::render() {
-    Vector2D<float> norm = transform->vel.normalized();
-    float vSpeed = transform->vel.x * norm.x + transform->vel.y * norm.y;
+    // Render the hitbox
+    if(handler->getGame()->isShowingHitbox()) {
+        Vector2D<float> norm = transform->vel.normalized();
+        float vSpeed = transform->vel.x * norm.x + transform->vel.y * norm.y;
 
-    if(!handler->isShowingHitbox()) return;
-    handler->getGraphic()->setRenderColor(0xff, 0xff, 0xff);
-    handler->getGraphic()->renderLine(
-        hitbox->getCenter(), 
-        hitbox->getCenter() + norm.scalar(vSpeed * hitbox->getWidth() / 4).convert<int>() );
+        handler->getGraphic()->setRenderColor(0xff, 0xff, 0xff);
+        handler->getGraphic()->renderLine(
+            hitbox->getCenter(), 
+            hitbox->getCenter() + norm.scalar(vSpeed * hitbox->getWidth() / 4).convert<int>() );
+    }
+    // Render the pointer address
+    if(handler->getGame()->isShowingPointerEntities()) {
+        std::ostringstream text;
+        text << std::hex << (intptr_t) entity;
+
+        handler->getGraphic()->renderText(
+            hitbox->getCenter().x - hitbox->getWidth() - handler->getGraphic()->getCamera()->getPosition().x,
+            transform->getPosition().y - 32 - handler->getGraphic()->getCamera()->getPosition().y,
+            hitbox->getWidth() * 2,
+            32,
+            text.str(),
+            handler->getGraphic()->freeRoyalty
+        );
+    }
 }

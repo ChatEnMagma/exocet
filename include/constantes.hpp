@@ -14,16 +14,8 @@ namespace exocet { class Handler; }
 #define WIN_MIN_HEIGHT 480
 
 #define DIR_SCRIPT "script/"
+#define DIR_SCRIPT_PACKAGE_MODULES "script/exocet_package_modules.lua"
 #define DIR_SCRIPT_STATES "script/state/"
-#define DIR_SCRIPT_TOOLS "script/tools"
-
-#define SCRIPT_LIB_ENGINE "script/engine.lua"
-#define SCRIPT_LIB_ENTITIES "script/entities.lua"
-#define SCRIPT_LIB_VECTOR2D "script/tools/vector2D.lua"
-
-#define SCRIPT_MODULE_ENGINE "engine"
-#define SCRIPT_MODULE_ENTITIES "entities"
-#define SCRIPT_MODULE_VECTOR2D "vector2D"
 
 #define FPS 60
 #define FRAME_DELAY 1000/FPS

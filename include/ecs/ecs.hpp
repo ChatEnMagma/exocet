@@ -49,6 +49,9 @@ namespace exocet {
             Handler* handler;
             Entity* entity;
         public:
+            Component() {}
+            ~Component() {}
+            
             virtual void init() {}
             virtual void update() {}
             virtual void render() {}
@@ -132,6 +135,7 @@ namespace exocet {
                 c->init();
                 return *c;
             }
+            void addComponentsFromLua(sol::state* lua, sol::table component);
     };
 
     class EntityManager {
@@ -139,36 +143,43 @@ namespace exocet {
             Handler* handler;
 
             std::vector<std::unique_ptr<Entity>> entities;
+            std::vector<Entity*> entitiedAdd;
             std::array<std::vector<Entity*>, maxGroup> groupedEntities;
         public:
-            inline void update() { for(auto& e: entities) e->update(); this->refresh(); }
+            inline void update() { for(auto& e: entities) e->update(); }
             inline void render() { for(auto& e: entities) e->render(); }
 
             /**
              * \brief Refresh the entity and group array, and clear if the entity is not active
              */
             void refresh();
-
             /**
              * \brief Add a new entity into entityManager
              * \param tag the name of the entity
              * \return The entity created
              */
             Entity& addEntity(std::string tag);
-
+            /**
+             * \brief Add a new entity from lua into entityManager
+             * \param entity The entity from lua file
+             * \return The entity created
+             */
+            Entity& addEntityFromLua(sol::table entity);
             /**
              * \brief Destroy all entities in the EntityManager
              */
-            inline void destroyAllEntities() { for(auto& e: entities) e->destroy(); }
-
+            inline void destroyAllEntities() { for(auto& e: entities) e->destroy(); entitiedAdd.clear(); }
             /**
              * \brief Add the group into this entity
              * \param entity the entity will group
              * \param group the group
              */
             inline void addToGroup(Entity* entity, Group group) { groupedEntities[group].emplace_back(entity); entity->addGroup(group); }
+            /**
+             * \param group The group of entities
+             * \return All entities from this group
+             */
             inline std::vector<Entity*> getGroup(Group group) { return groupedEntities[group]; }
-
             /**
              * \return Return the size of entities
              */

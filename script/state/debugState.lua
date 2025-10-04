@@ -4,16 +4,21 @@ local player = entities.Player:new()
 
 player:setUpdateScript(
     function ()
-        print("state: debugState", player.entity._ptr)
+        player:update()
     end
 )
 
 state = {
     tag = "debugState",
     
+    init = function ()
+        print("debug state")    
+    end,
+
     entities = {
         {
-            tag = "wall",
+            entity = Entity:new("wall"),
+            
             components = {
                 {
                     tag = "physic",
@@ -28,11 +33,17 @@ state = {
                         h = 450
                     },
                     masse = 999.9
+                },
+                {
+                    tag = "sprite",
+                    path = "realexocet.png",
+                    fitSizeWithHitbox = true
                 }
             }
         },
         {
-            tag = "wall2",
+            entity = Entity:new("wall2"),
+            
             components = {
                 {
                     tag = "physic",
@@ -50,6 +61,7 @@ state = {
                 }
             }
         },
+        
         player
     }
 }

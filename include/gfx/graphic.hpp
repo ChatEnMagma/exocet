@@ -16,7 +16,6 @@ namespace exocet {
             void openFont(TTF_Font** font, std::string path);
         public:
             static TTF_Font* freeRoyalty;
-            static Texture* player;
 
             Graphic(SDL_Renderer* renderer) { ren = renderer; }
 

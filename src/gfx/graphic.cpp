@@ -3,8 +3,6 @@
 using namespace std;
 using namespace exocet;
 
-Texture* Graphic::player = nullptr;
-
 TTF_Font* Graphic::freeRoyalty = NULL;
 
 void Graphic::openFont(TTF_Font** font, string path) {
@@ -15,9 +13,6 @@ void Graphic::openFont(TTF_Font** font, string path) {
 }
 
 void Graphic::initTextures(Handler* handler) {
-    // All textures
-    Graphic::player = new Texture(handler, ren, "res/realexocet.png");
-
     // All fonts
     openFont(&Graphic::freeRoyalty, "res/FreeRoyalty.ttf");
 }
@@ -45,9 +40,6 @@ void Graphic::renderText(int x, int y, int w, int h, std::string text, TTF_Font*
 }
 
 void Graphic::clean() {
-    // All textures
-    player->clean();
-
     // All fonts
     TTF_CloseFont(Graphic::freeRoyalty);
 

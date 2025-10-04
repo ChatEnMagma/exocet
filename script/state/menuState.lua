@@ -1,13 +1,10 @@
 local entities = require("entities")
-local engine = require("engine")
 
+--- @class Player
 local player = entities.Player:new()
 player:setUpdateScript(
     function ()
-        -- print("state: menuState ; player_ptr: ", player.entity._ptr, player.entity:getPosition(), engine.getWinWidth())
-        if engine.getKey(117) then
-            player.entity:setPosition(0, 0)
-        end
+        player:update()
     end
 )
 
@@ -16,7 +13,8 @@ state = {
     
     entities = {
         {
-            tag = "wall",
+            entity = Entity:new("wall"),
+
             components = {
                 {
                     tag = "physic",

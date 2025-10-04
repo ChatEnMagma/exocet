@@ -5,7 +5,7 @@
 using namespace std;
 using namespace exocet;
 
-Texture::Texture(Handler* han, SDL_Renderer* ren, string path) {
+Texture::Texture(Handler* han, string path) {
     SDL_Surface* surface = IMG_Load(path.c_str());
     
     setHandler(han);
@@ -18,7 +18,7 @@ Texture::Texture(Handler* han, SDL_Renderer* ren, string path) {
     w = surface->w;
     h = surface->h;
 
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(ren, surface);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(handler->getSubsystem()->getRenderer(), surface);
     SDL_FreeSurface(surface);
 
     if(texture == NULL) {

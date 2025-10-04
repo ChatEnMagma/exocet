@@ -9,10 +9,11 @@ namespace exocet {
     class Game {
         private:
             Handler* handler = nullptr;
-
-            StateManager* sManager;
+            StateManager* sManager = nullptr;
 
             bool showingHitbox = false;
+            bool showingPointerEntities = false;
+
             sol::state lua;
 
             /**
@@ -37,6 +38,19 @@ namespace exocet {
              * \brief Unshow the hitbox all entities
              */
             inline void unshowHitbox() { showingHitbox = false; }
+
+            /**
+             * \return True if game show the all hitbox of entities
+             */
+            inline bool isShowingPointerEntities() const { return showingPointerEntities; }
+            /**
+             * \brief Show the hitbox all entities
+             */
+            inline void showPointerEntities() { showingPointerEntities = true; }
+            /**
+             * \brief Unshow the hitbox all entities
+             */
+            inline void unshowPointerEntities() { showingPointerEntities = false; }
 
             inline State* getState() { return sManager->getState(); }
             inline EntityManager* getEntityManager() { return sManager->getEntityManager(); }
