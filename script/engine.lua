@@ -7,7 +7,8 @@ engine = {
     _handler = nil,
     --- The current state
     --- @type integer
-    state = 0
+    state = 0,
+    mainEntities = {}
 }
 
 --- @private

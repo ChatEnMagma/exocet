@@ -32,6 +32,19 @@ function Entity:new(tag)
     return e
 end
 
+--- Get all entities are collide
+--- @return table
+function Entity:getCollideEntities()
+    return Entity.cGetCollideEntities(self._ptr)
+end
+
+--- Check if the entity is well collide
+--- @param entity any
+--- @return boolean
+function Entity:getCollideEntity(entity)
+    return Entity.cGetCollideEntity(self._ptr, entity.entity._ptr)
+end
+
 --- Kill the entity
 function Entity:destroy()
     self.cDestroy(self._ptr)

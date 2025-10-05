@@ -88,7 +88,38 @@ void Game::initLua() {
             e->getComponent<SpriteComponent>().fitSizeWithHitbox();
         } else { cout << "Warning /!\\ function `fitSizeWithHitbot` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl; }
     };
+    // **************** Methods from PhysicComponent ********************
+    lua["Entity"]["cGetCollideEntities"] = [](intptr_t entity_lua) {
+        Entity* entity = ((Entity*) entity_lua);
+        
+        vector<intptr_t> entities_ptr;
 
+        if(!entity->hasComponent<PhysicComponent>()) {
+            cout << "Warning: function `getCollideEntities` from: " << entity->getTag() << ". You must initiate the PhysicComponent" << endl;
+            return entities_ptr;
+        }
+
+        for(Entity* e: entity->getComponent<PhysicComponent>().getCollideEntities())
+            entities_ptr.emplace_back((intptr_t) e);
+
+        return entities_ptr;
+    };
+    // ****************** Methods from HitboxComponent ********************
+    lua["Entity"]["cGetCollideEntity"] = [](intptr_t entity1_lua, intptr_t entity2_lua) {
+        Entity* entity1 = ((Entity*) entity1_lua);
+        Entity* entity2 = ((Entity*) entity2_lua);
+        
+        if(!entity1->hasComponent<HitboxComponent>()) {
+            cout << "Warning: function `getCollideEntities` from: " << entity1->getTag() << ". You must initiate the HitboxComponent" << endl;
+            return false;
+        }
+        if(!entity2->hasComponent<HitboxComponent>()) {
+            cout << "Warning: function `getCollideEntities` from: " << entity2->getTag() << ". You must initiate the HitboxComponent" << endl;
+            return false;
+        }
+
+        return entity1->getComponent<HitboxComponent>().isCollide(&entity2->getComponent<HitboxComponent>());
+    };
     // ***************** Methods from TransfromComponent ******************
     lua["Entity"]["cGetPosition"] = [](intptr_t entity_lua) {
         Entity* e = ((Entity*) entity_lua);

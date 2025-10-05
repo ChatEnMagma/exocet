@@ -1,12 +1,16 @@
 local entities = require("entities")
 
-local player = entities.Player:new()
+local player = Player:new()
 
 player:setUpdateScript(
     function ()
         player:update()
     end
 )
+
+engine.mainEntities = {
+    player = player
+}
 
 state = {
     tag = "debugState",

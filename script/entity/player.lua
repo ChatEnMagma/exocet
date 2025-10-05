@@ -79,7 +79,12 @@ function Player:update()
     self:momentumCalculus()
 
     if self.nextCloud <= 0 then
-        local c = Cloud:new(self.entity:getPosition())
+        local cpos = Vector2D:new(
+            engine.getWinWidth(),
+            math.random(engine.getCameraPosition().y, engine.getCameraPosition().y + engine.getWinHeight())
+        )
+
+        local c = Cloud:new(cpos)
         
         c.components[2]["update"] = function ()
             c:update()
@@ -88,7 +93,7 @@ function Player:update()
         
         engine.addEntity(c)
         
-        self.nextCloud = math.random(10, 500)
+        self.nextCloud = math.random(10, 50)
     end
     self.nextCloud = self.nextCloud - 1
 end

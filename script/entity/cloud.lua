@@ -45,6 +45,12 @@ function Cloud:update()
     if self.entity:getPosition().x < engine.getCameraPosition().x - 64 then
         self.entity:destroy()
     end
+
+    if self.entity:getCollideEntity(engine.mainEntities.player) then
+        local pvec = engine.mainEntities.player.entity:getVelocity()
+        pvec = pvec + Vector2D:new(0, -10)
+        engine.mainEntities.player.entity:setVelocity(pvec)
+    end
 end
 
 return Cloud
