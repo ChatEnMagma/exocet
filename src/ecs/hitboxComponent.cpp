@@ -47,3 +47,14 @@ void HitboxComponent::render() {
     handler->getGraphic()->setRenderColor(color[0], color[1], color[2]);
     handler->getGraphic()->renderRect( transform->pos + Vector2D<int>(x, y), w, h);
 }
+
+bool HitboxComponent::isInsideMouse() const {
+    Vector2D<int> pos = handler->getMousePosition() + handler->getGraphic()->getCamera()->getPosition();
+    
+    return (
+        pos.x >= getLeft()  &&
+        pos.x <= getRight() &&
+        pos.y >= getTop()   &&
+        pos.y <= getBottom()
+    );
+}

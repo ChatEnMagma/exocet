@@ -44,7 +44,7 @@ void Game::initLua() {
     }
 
     // Load main lib and package
-    lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::math);
+    lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math);
     // Load all modules homemade
     lua["modules"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
         lua.require_file(
@@ -60,21 +60,78 @@ void Game::initLua() {
     // add handler function into engine.lua lib
     // ====================== engine class lua ===========================
 
-    lua["engine"]["cCenterOnEntity"] = [](intptr_t handler_lua, intptr_t entity_lua) { ((Handler*) handler_lua)->getGraphic()->centerOnEntity(((Entity*) entity_lua)); };
-    lua["engine"]["cCloseGame"] = [](intptr_t handler_lua) { ((Handler*) handler_lua)->closeGame(); };
-    lua["engine"]["cHandlerGetKey"] = [](intptr_t handler_lua, Uint32 scancode) { return ((Handler*) handler_lua)->getKey(scancode); };
-    lua["engine"]["cHandlerGetKeyCode"] = [](intptr_t handler_lua) { return ((Handler*) handler_lua)->getSubsystem()->getKeyListener()->getKeyCode(); };
-    lua["engine"]["cHandlerGetWinHeight"] = [](intptr_t handler_lua) { return ((Handler*) handler_lua)->getWinHeight(); };
-    lua["engine"]["cHandlerGetWinWidth"] = [](intptr_t handler_lua) { return ((Handler*) handler_lua)->getWinWidth(); };
-    lua["engine"]["cGetCameraPosition"] = [](intptr_t handler_lua) { 
-        Vector2D<int> pos = ((Handler*) handler_lua)->getGraphic()->getCamera()->getPosition();
-        return std::tuple<int, int>(pos.x, pos.y);
+    // ============ ALL SUBSYS METHODS ====
+    lua["engine"]["cHandlerGetWinHeight"] = [](intptr_t hLua) { return ((Handler*) hLua)->getWinHeight(); };
+    lua["engine"]["cHandlerGetWinWidth"] = [](intptr_t hLua) { return ((Handler*) hLua)->getWinWidth(); };
+    lua["engine"]["cCloseGame"] = [](intptr_t hLua) { ((Handler*) hLua)->closeGame(); };
+    
+    lua["engine"]["cHandlerGetKey"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getKey(scancode); };
+    lua["engine"]["cHandlerGetJustKey"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getJustKey(scancode); };
+    lua["engine"]["cHandlerGetKeyCode"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->getKeyListener()->getKeyCode(); };
+
+    lua["engine"]["cHandlerGetButton"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getButton(scancode); };
+    lua["engine"]["cHandlerGetJustButton"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getJustButton(scancode); };
+    lua["engine"]["cHandlerGetButtonCode"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->getMouseListener()->getButtonCode(); };
+    lua["engine"]["cGetMousePosition"] = [](intptr_t hLua) {
+        Vector2D<int> pos = ((Handler*) hLua)->getMousePosition();
+        return tuple<int, int>(pos.x, pos.y);
     };
+    
+    // ======== ALL STATES METHODS =====
+    lua["engine"]["cSetState"] = [](intptr_t hLua, size_t state) { ((Handler*) hLua)->getGame()->getStateManager()->setState(state); };
+    lua["engine"]["cGetCurrentState"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->getCurrentState(); };
+    lua["engine"]["cRestart"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
+    lua["engine"]["cNextState"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->nextState(); };
+    lua["engine"]["cPreviousState"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->previousState(); };
+    lua["engine"]["cRestart"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
+
+    // ========= ALL GFX METHODS
+    lua["engine"]["cSetColor"] = [](intptr_t hLua, int r, int g, int b, int a) { ((Handler*) hLua)->getGraphic()->setColor(r, g, b, a); };
+    lua["engine"]["cRenderRect"] = [](intptr_t hLua, int x, int y, int w, int h) { ((Handler*) hLua)->getGraphic()->renderRect(Vector2D<int>(x, y), w, h); };
+    lua["engine"]["cRenderFillRect"] = [](intptr_t hLua, int x, int y, int w, int h) { ((Handler*) hLua)->getGraphic()->renderFillRect(Vector2D<int>(x, y), w, h); };
+    lua["engine"]["cRenderAnchorRect"] = [](intptr_t hLua, int x, int y, int w, int h) { ((Handler*) hLua)->getGraphic()->renderAnchorRect(Vector2D<int>(x, y), w, h); };
+    lua["engine"]["cRenderAnchorFillRect"] = [](intptr_t hLua, int x, int y, int w, int h) { ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(Vector2D<int>(x, y), w, h); };
+    lua["engine"]["cCenterOnEntity"] = [](intptr_t hLua, intptr_t entity_lua) { ((Handler*) hLua)->getGraphic()->centerOnEntity(((Entity*) entity_lua)); };
+    lua["engine"]["cGetCameraPosition"] = [](intptr_t hLua) { 
+        Vector2D<int> pos = ((Handler*) hLua)->getGraphic()->getCamera()->getPosition();
+        return tuple<int, int>(pos.x, pos.y);
+    };
+    lua["engine"]["cRenderText"] = [](intptr_t hLua, int xpos, int ypos, int width, int height, string text) {
+        ((Handler*) hLua)->getGraphic()->renderText(
+            xpos,
+            ypos,
+            width,
+            height,
+            text,
+            ((Handler*) hLua)->getGraphic()->freeRoyalty
+        );
+    };
+    lua["engine"]["cGetBackgroundPosition"] = [](intptr_t hLua) {
+        const Vector2D<int> pos = ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->getPosition();
+        return tuple<int, int>(pos.x, pos.y);
+    };
+    lua["engine"]["cSetBackgroundPosition"] = [](intptr_t hLua, int xpos, int ypos) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(Vector2D<int>(xpos, ypos)); };
 
     // ===================== Entity class lua ============================
     // ****************** Methods from EntityManager *********************
-    lua["engine"]["cAddEntity"] = [](intptr_t handler_lua, sol::table entity_lua) { (((Handler*) handler_lua)->getEntityManager()->addEntityFromLua(entity_lua)); };
+    lua["engine"]["cAddEntity"] = [](intptr_t hLua, sol::table entity_lua) { (((Handler*) hLua)->getEntityManager()->addEntityFromLua(entity_lua)); };
     lua["Entity"]["cDestroy"] = [](intptr_t entity_lua) { ((Entity*) entity_lua)->destroy(); };
+    lua["Entity"]["cGetRect"] = [](intptr_t entity_lua) {
+        Entity* e = (Entity*) entity_lua;
+
+        if(!e->hasComponent<HitboxComponent>() || e->hasComponent<UIComponent>()) {
+            cout << "Warning /!\\ function getRect from: " << e->getTag() << ": You must initiate the HitboxComponent or UIComponent" << endl;
+            return tuple<int, int, int, int>(0, 0, 0, 0);
+        }
+
+        if(e->hasComponent<HitboxComponent>()) {
+            HitboxComponent& hitbox = e->getComponent<HitboxComponent>();
+            return tuple<int, int, int, int>(hitbox.getLeft(), hitbox.getTop(), hitbox.getWidth(), hitbox.getHeight());
+        }
+
+        UIComponent& ui = e->getComponent<UIComponent>();
+        return tuple<int, int, int, int>(ui.getPosition().x, ui.getPosition().y, ui.getWidth(), ui.getHeight());
+    };
     // *************** Methods from SpriteComponent **********************
     lua["Entity"]["cSetTexture"] = [](intptr_t entity_lua, string path) {
         Entity* e = ((Entity*) entity_lua);
@@ -110,48 +167,60 @@ void Game::initLua() {
         Entity* entity2 = ((Entity*) entity2_lua);
         
         if(!entity1->hasComponent<HitboxComponent>()) {
-            cout << "Warning: function `getCollideEntities` from: " << entity1->getTag() << ". You must initiate the HitboxComponent" << endl;
+            cout << "Warning: function `getCollideEntity` from: " << entity1->getTag() << ". You must initiate the HitboxComponent" << endl;
             return false;
         }
         if(!entity2->hasComponent<HitboxComponent>()) {
-            cout << "Warning: function `getCollideEntities` from: " << entity2->getTag() << ". You must initiate the HitboxComponent" << endl;
+            cout << "Warning: function `getCollideEntity` from: " << entity2->getTag() << ". You must initiate the HitboxComponent" << endl;
             return false;
         }
 
         return entity1->getComponent<HitboxComponent>().isCollide(&entity2->getComponent<HitboxComponent>());
     };
+    lua["Entity"]["cIsInsideMouse"] = [](intptr_t entity_lua) {
+        Entity* entity = ((Entity*) entity_lua);
+
+        if(entity->hasComponent<HitboxComponent>()) {
+            return entity->getComponent<HitboxComponent>().isInsideMouse();
+        } else {
+            cout << "Warning: function `isInsideMouse` from: " << entity->getTag() << ". You must initiate the HitboxComponent" << endl;
+            return false;
+        }
+    };
     // ***************** Methods from TransfromComponent ******************
     lua["Entity"]["cGetPosition"] = [](intptr_t entity_lua) {
         Entity* e = ((Entity*) entity_lua);
+
         if(e->hasComponent<TransformComponent>()) {
             Vector2D<int> pos = ((Entity*) entity_lua)->getComponent<TransformComponent>().getPosition();
-            std::tuple<int, int> res = { pos.x, pos.y };
-            return res;
+            return tuple<int, int>(pos.x, pos.y);
+        } else if(e->hasComponent<UIComponent>()) {
+            Vector2D<int> pos = ((Entity*) entity_lua)->getComponent<UIComponent>().getPosition();
+            return tuple<int, int>(pos.x, pos.y);
         } else {
-            cout << "Warning /!\\ function `getPosition` from: " << e->getTag() <<  ": You must inititate the TransfromComponent..." << endl;
+            cout << "Warning /!\\ function `getPosition` from: " << e->getTag() <<  ": You must inititate the TransfromComponent or UIComponents..." << endl;
 
-            std::tuple<int, int> res = { INT32_MIN, INT32_MIN };
-            return res;
+            return tuple<int, int> ( INT32_MIN, INT32_MIN);
         }
     };
     lua["Entity"]["cGetVelocity"] = [](intptr_t entity_lua) {
         Entity* e = ((Entity*) entity_lua);
         if(e->hasComponent<TransformComponent>()) {
             Vector2D<float> vel = ((Entity*) entity_lua)->getComponent<TransformComponent>().getVelocity();
-            std::tuple<float, float> res = { vel.x, vel.y };
-            return res;
+            return tuple<float, float>(vel.x, vel.y);
         } else {
             cout << "Warning /!\\ function `getVelocity` from: " << e->getTag() <<  ": You must inititate the TransfromComponent..." << endl;
 
-            std::tuple<float, float> res = { FLT_MIN, FLT_MIN };
-            return res;
+            return tuple<float, float>(FLT_MIN, FLT_MIN);
         }
     };
     lua["Entity"]["cSetPosition"] = [](intptr_t entity_lua, int x, int y) {
         Entity* e = ((Entity*) entity_lua);
         if(e->hasComponent<TransformComponent>()) {
             e->getComponent<TransformComponent>().setPointsPosition(x, y);
-        } else { cout << "Warning /!\\ function `setPosition` from: " << e->getTag() <<  ": You must inititate the TransfromComponent..." << endl; }
+        } else if(e->hasComponent<UIComponent>()) {
+            e->getComponent<UIComponent>().setPointsPosition(x, y);
+        } else { cout << "Warning /!\\ function `setPosition` from: " << e->getTag() <<  ": You must inititate the TransfromComponent or UIComponent..." << endl; }
     };
     lua["Entity"]["cSetVelocity"] = [](intptr_t entity_lua, float x, float y) {
         Entity* e = ((Entity*) entity_lua);
@@ -160,6 +229,17 @@ void Game::initLua() {
             ((Entity*) entity_lua)->getComponent<TransformComponent>().setPointsVelocity(x, y);
         } else { cout << "Warning /!\\ function `setVelocity` from: " << e->getTag() <<  ": You must inititate the TransfromComponent..." << endl; }
     };
+    // ======
+    lua["Entity"]["cIsDragging"] = [](intptr_t entity_lua) {
+        Entity* e = ((Entity*) entity_lua);
+
+        if(e->hasComponent<DragComponent>())
+            return e->getComponent<DragComponent>().isDragging();
+        else {
+            cout << "Warning /!\\ function `isDragging` from: " << e->getTag() <<  ": You must inititate the DragComponent..." << endl;
+            return false;
+        }
+    };
 }
 
 void Game::update() {
@@ -167,19 +247,22 @@ void Game::update() {
     #pragma GCC diagnostic warning "-Woverflow"
     #pragma GCC diagnostic error "-Woverflow"
     #pragma GCC diagnostic ignored "-Woverflow"
-
-    if(handler->getKey(SDLK_ESCAPE))
-        handler->closeGame();
-    if(handler->getKey(SDLK_F2))
-        sManager->previousState();
-    if(handler->getKey(SDLK_F3))
-        sManager->nextState();
-    if(handler->getKey(SDLK_F5))
-        sManager->restart();
-    if(handler->getKey(SDLK_F7))
-        sManager->getEntityManager()->destroyAllEntities();
     
     sManager->update();
+
+    handler->getSubsystem()->setTitle("Exocet state: " + to_string(sManager->getCurrentState()) + " | e: " + to_string(sManager->getEntityManager()->getNumberEntities()));
+    if(handler->getJustKey(SDLK_ESCAPE))
+        handler->closeGame();
+    if(handler->getJustKey(SDLK_F2))
+        sManager->previousState();
+    if(handler->getJustKey(SDLK_F3))
+        sManager->nextState();
+    if(handler->getJustKey(SDLK_F5)) {
+        sManager->restart();
+        cout << handler->getJustKey(SDLK_F5) << endl;
+    }
+    else if(handler->getJustKey(SDLK_F7))
+        sManager->getEntityManager()->destroyAllEntities();
 }
 
 void Game::render() {
@@ -188,10 +271,6 @@ void Game::render() {
 
     // render all game here
     sManager->render();
-
-    // render the text of the current state and number of entities
-    handler->getGraphic()->renderText(10, 10, handler->getWinWidth() / 4, 100, string("State: ") + to_string(sManager->getCurrentState()), handler->getGraphic()->freeRoyalty);
-    handler->getGraphic()->renderText(10, 10 + 100, handler->getWinWidth() / 4, 100, string("#entities: ") + to_string(sManager->getEntityManager()->getNumberEntities()), handler->getGraphic()->freeRoyalty);
 
     handler->getGraphic()->renderPresent();
 }

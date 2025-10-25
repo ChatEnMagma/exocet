@@ -53,6 +53,7 @@ namespace exocet {
             inline void unshowPointerEntities() { showingPointerEntities = false; }
 
             inline State* getState() { return sManager->getState(); }
+            inline StateManager* getStateManager() { return sManager; }
             inline EntityManager* getEntityManager() { return sManager->getEntityManager(); }
             inline void setState(std::size_t state) { sManager->setState(state); }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <climits>
-
 #include "ecs/hitboxComponent.hpp"
 
 namespace exocet {

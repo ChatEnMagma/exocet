@@ -14,23 +14,43 @@ namespace exocet {
             Camera camera;
 
             void openFont(TTF_Font** font, std::string path);
+
+            SDL_Color color;
         public:
             static TTF_Font* freeRoyalty;
 
-            Graphic(SDL_Renderer* renderer) { ren = renderer; }
+            inline void setColor(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 0xFF) {
+                color.r = red;
+                color.g = green;
+                color.b = blue;
+                color.a = alpha;
+
+                SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
+            }
+
+            Graphic(SDL_Renderer* renderer) { 
+                ren = renderer; 
+
+                color.r = 0x00;
+                color.g = 0x00;
+                color.b = 0x00;
+                color.a = 0xFF;
+            }
 
             void initTextures(Handler* handler);
             void clean();
 
-            inline void renderRect(Vector2D<int> position, int width, int height) {
-                SDL_Rect rect = { 
-                    position.x - camera.getPosition().x, 
-                    position.y - camera.getPosition().y, 
-                    width, 
-                    height 
-                };
+            inline void renderAnchorRect(Vector2D<int> position, int width, int height) {
+                SDL_Rect rect = { position.x, position.y, width, height };
                 SDL_RenderDrawRect(ren, &rect);
             }
+            inline void renderAnchorFillRect(Vector2D<int> position, int width, int height) {
+                SDL_Rect rect = { position.x, position.y, width, height };
+                SDL_RenderFillRect(ren, &rect);
+            }
+
+            inline void renderRect(Vector2D<int> position, int width, int height) { renderAnchorRect(position - camera.getPosition(), width, height); }
+            inline void renderFillRect(Vector2D<int> position, int width, int height) { renderAnchorFillRect(position - camera.getPosition(), width, height); }
 
             void renderText(int x, int y, int w, int h, std::string text, TTF_Font* font);
 

@@ -3,21 +3,24 @@ Cloud = {
     --- @type Entity
     entity = nil,
 
-    tag = "cloud",
-
     components = {
         {
             tag = "physic",
             hitbox = {
                 x = 0,
                 y = 0,
-                w = 64,
-                h = 64
+                w = 300,
+                h = 200
             }
         },
         {
             tag = "script",
             update = nil
+        },
+        {
+            tag = "sprite",
+            path = "nuage.png",
+            fitSizeWithHitbox = true
         }
     },
 }
@@ -40,7 +43,7 @@ function Cloud:new(vec)
 end
 
 function Cloud:update()
-    self.entity:setVelocity(Vector2D:new(-5, 0))
+    self.entity:setVelocity(Vector2D:new(mainState.vx, 0))
 
     if self.entity:getPosition().x < engine.getCameraPosition().x - 64 then
         self.entity:destroy()

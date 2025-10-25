@@ -29,10 +29,14 @@ Texture::Texture(Handler* han, string path) {
 }
 
 void Texture::render(Vector2D<int> pos, int w, int h) {
+    renderAnchor(pos - handler->getGraphic()->getCamera()->getPosition(), w, h);
+}
+
+void Texture::renderAnchor(Vector2D<int> pos, int w, int h) {
     SDL_Rect src = { x, y, this->w, this->h };
     SDL_Rect dest = { 
-        pos.x - handler->getGraphic()->getCamera()->getPosition().x, 
-        pos.y - handler->getGraphic()->getCamera()->getPosition().y, 
+        pos.x, 
+        pos.y, 
         w, h 
     };
 

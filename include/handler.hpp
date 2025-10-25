@@ -35,6 +35,28 @@ namespace exocet {
              * \return get true if the key is pressing else false
             */
             inline bool getKey(Uint16 scancode) { return subsys->getKeyListener()->getKey(scancode); }
+            /** 
+             * \brief Return if the key is just pressing
+             * \param scancode the scancode of the key with SDLK
+             * \return get true if the key is just pressing else false
+            */
+            inline bool getJustKey(Uint16 scancode) { return subsys->getKeyListener()->getJustKey(scancode); }
+            /** 
+             * \brief Return if the button is pressing
+             * \param scancode the scancode of the key with SDL
+             * \return get true if the button is pressing else false
+            */
+            inline bool getButton(Uint16 scancode) { return subsys->getMouseListener()->getButton(scancode); }
+            /** 
+             * \brief Return if the button is just pressing
+             * \param scancode the scancode of the key with SDL
+             * \return get true if the button is just pressing else false
+            */
+            inline bool getJustButton(Uint16 scancode) { return subsys->getMouseListener()->getJustButton(scancode); }
+            /**
+             * \return the position of the mouse in the game frame
+             */
+            inline Vector2D<int> getMousePosition() const { return subsys->getMouseListener()->getPosition(); }
             /**
              * \return Graphics class with all functions graphics
              */

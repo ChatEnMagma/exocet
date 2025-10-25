@@ -6,6 +6,7 @@
 #include "constantes.hpp"
 
 #include "input/keyListener.hpp"
+#include "input/mouseListener.hpp"
 #include "gfx/graphic.hpp"
 
 namespace exocet {
@@ -14,6 +15,7 @@ namespace exocet {
             SDL_Window* win = NULL;
             Graphic* gfx = nullptr;
             KeyListener keys;
+            MouseListener mouse;
 
             int w, h;
             std::string title;
@@ -53,6 +55,7 @@ namespace exocet {
 
             inline Graphic* getGraphic() { return gfx; }
             inline KeyListener* getKeyListener() { return &keys; }
+            inline MouseListener* getMouseListener() { return &mouse; }
             
             inline int getWinWidth() const { return w; }
             inline int getWinHeight() const { return h; }

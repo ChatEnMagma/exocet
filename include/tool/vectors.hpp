@@ -14,7 +14,7 @@ namespace exocet {
 
             static inline T twoVectorsMagnitude(const Vector2D& vector1, const Vector2D& vector2) { return abs(vector2.x - vector1.x) + abs(vector2.y - vector1.y); }
 
-            inline T magnitude() const { return abs(x) + abs(y); }
+            inline T magnitude() const { return sqrt(x * x + y * y); }
             inline Vector2D normalized() const { 
                 T mag = magnitude();
                 if(mag == 0) return Vector2D(0, 0);

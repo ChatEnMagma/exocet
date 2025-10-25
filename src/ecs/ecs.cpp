@@ -47,14 +47,12 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
         physic.setMasse(component["masse"]);
     if(component["color"] != sol::nil)
         physic.getHitbox()->setColor(component["color"][0], component["color"][1], component["color"][2]);
-    }
-    if(tag == "script") {
+    } else if(tag == "script") {
         addComponent<ScriptComponent>(component);
-    }
-    if(tag == "sprite") {
+    } else if(tag == "sprite") {
         SpriteComponent& sprite = addComponent<SpriteComponent>();
 
-        sprite.setTexture(string("res/") + component["path"].get<string>());
+        sprite.setTexture("res/" + component["path"].get<string>());
 
         if(component["size"] != sol::nil) {
             sprite.setSize(component["size"]["w"], component["size"]["h"]);
@@ -62,6 +60,27 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
         if(component["fitSizeWithHitbox"] != sol::nil) {
             sprite.fitSizeWithHitbox();
         }
+    }else if(tag == "drag") {
+        addComponent<DragComponent>();
+    } else if(tag == "ui") {
+        UIComponent& ui = addComponent<UIComponent>();
+
+        if(component["rect"] != sol::nil) {
+            ui.setRect(component["rect"]["x"], component["rect"]["y"], component["rect"]["w"], component["rect"]["h"]);
+        }
+    } else if(tag == "button") {
+        ButtonComponent& button = addComponent<ButtonComponent>();
+
+        if(component["func"] != sol::nil) {
+            button.setFunction(component["func"].get<function<void()>>());
+        }
+        if(component["rect"] != sol::nil) {
+            button.setRect(component["rect"]["x"], component["rect"]["y"], component["rect"]["w"], component["rect"]["h"]);
+        } else {
+            cout << "Warning from `" << getTag() << "` you should initiate the rect of ButtonComponent" << endl;
+        }
+    } else {
+        cout << "Warning: unknow component `" << tag << "`" << endl;
     }
 }
 
@@ -116,9 +135,13 @@ Entity& EntityManager::addEntityFromLua(sol::table e) {
     e["entity"]["setEntity"](e["entity"], (intptr_t) &entity);
 
     // Add all components for C-Entity
-    e["components"].get<sol::table>().for_each([&](sol::object const& keyComponent, sol::object const& valueComponent) {
-        entity.addComponentsFromLua(&lua, valueComponent.as<sol::table>());
-    });
+    if(e["components"] != sol::nil) {
+        e["components"].get<sol::table>().for_each([&](sol::object const& keyComponent, sol::object const& valueComponent) {
+            entity.addComponentsFromLua(&lua, valueComponent.as<sol::table>());
+        });
+    } else {
+        cout << "Warning /!\\ for " << entity.getTag() << " you should add components..." << endl;
+    }
 
     return entity;
 }

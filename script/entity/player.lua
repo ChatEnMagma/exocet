@@ -1,3 +1,5 @@
+local os = require("os")
+
 local engine = require("engine")
 local Vector2D = require("vector2D")
 
@@ -9,6 +11,12 @@ Player = {
 
     momentum = 0,
     nextCloud = 0,
+    nextDescOxy = 0,
+    nextOxy = 0,
+    oxygen = 100,
+    dieTime=0,
+    gameover = false,
+    beginGame = os.time(),
 
     components = {
         {
@@ -18,6 +26,10 @@ Player = {
                 y = 0,
                 w = 64,
                 h = 64
+            },
+            position = {
+                x = 0,
+                y = 100
             }
         },
         {
@@ -30,8 +42,10 @@ Player = {
         },
         {
             tag = "script",
-            update = nil
-        }
+            update = nil,
+            render = nil
+        },
+        { tag = "drag" }
     }
 }
 Player.__index = Player
@@ -40,6 +54,7 @@ function Player:new()
     local p = setmetatable({}, Player)
     
     p.entity = Entity:new("player")
+    p.nextDescOxy = os.time()
     
     return p
 end
@@ -50,6 +65,10 @@ end
 
 function Player:setUpdateScript(s_update)
     self.components[3]["update"] = s_update
+end
+
+function Player:setRenderScript(s_update)
+    self.components[3]["render"] = s_update
 end
 
 function Player:momentumCalculus()
@@ -71,31 +90,48 @@ function Player:momentumCalculus()
     end
 end
 
-function Player:update()
-    engine.centerOnEntity(self.entity)
-
-    self.entity:fitSizeWithHitbox()
-
+function Player:gamealive()
+    if self.entity:getPosition().y < 850 then
+        engine.centerOnEntity(self.entity)
+    end
+    
     self:momentumCalculus()
 
-    if self.nextCloud <= 0 then
-        local cpos = Vector2D:new(
-            engine.getWinWidth(),
-            math.random(engine.getCameraPosition().y, engine.getCameraPosition().y + engine.getWinHeight())
-        )
-
-        local c = Cloud:new(cpos)
-        
-        c.components[2]["update"] = function ()
-            c:update()
-        end
-
-        
-        engine.addEntity(c)
-        
-        self.nextCloud = math.random(10, 50)
+    if os.time() > self.nextDescOxy + 1 then
+        self.oxygen = self.oxygen - 10
+        self.nextDescOxy = os.time()
     end
-    self.nextCloud = self.nextCloud - 1
+
+    if self.oxygen <= 0 then
+        self.gameover = true
+    end
+    
+    if os.time() > self.beginGame + 1 then
+        mainState.score = mainState.score + 1
+        self.beginGame = os.time()
+    end
+end
+
+function Player:update()
+    self.entity:fitSizeWithHitbox()
+    
+    if self.entity:getPosition().y >= 1000 then
+        self.gameover = true;
+        self.entity:setVelocity(Vector2D:new(0, 0))
+    end
+
+    if self.gameover == false then
+        self:gamealive()
+    else
+        mainState.vx = 0
+        if self.dieTime == 0 then
+            self.dieTime = os.time()
+        end
+    end
+
+    if self.gameover and os.time() >= self.dieTime + 2 then
+        engine.restart()
+    end
 end
 
 function Player:__tostring()

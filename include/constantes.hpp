@@ -8,7 +8,8 @@
 
 namespace exocet { class Handler; }
 
-#define EXOCET_ENGIN_VERSION 1
+#define EXOCET_ENGIN_VERSION 0
+#define EXICET_ENGIN_MINOR_VERSION 1
 
 #define WIN_MIN_WIDTH 780
 #define WIN_MIN_HEIGHT 480

@@ -168,7 +168,10 @@ namespace exocet {
             /**
              * \brief Destroy all entities in the EntityManager
              */
-            inline void destroyAllEntities() { for(auto& e: entities) e->destroy(); entitiedAdd.clear(); }
+            inline void destroyAllEntities() { 
+                for(auto& e: entities) e->destroy();
+                for(auto& e: entitiedAdd) e->destroy();
+            }
             /**
              * \brief Add the group into this entity
              * \param entity the entity will group

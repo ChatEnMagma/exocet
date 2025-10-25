@@ -18,6 +18,8 @@ namespace exocet {
             bool isCollideHorizontal(HitboxComponent* hitbox) const;
             bool isCollideVertical(HitboxComponent* hitbox) const;
 
+            bool isInsideMouse() const;
+
             // ALL GETTERS POINT HITBOX
             inline Vector2D<int> getCenter() const { return Vector2D<int>(transform->getPosition().x + (x + w) / 2, transform->getPosition().y + (y + h) / 2); }
             inline int getLeft() const { return transform->getPosition().x + x; }
@@ -38,5 +40,8 @@ namespace exocet {
             inline void setSize(int width, int height) { w = width; h = height; }
             inline void setHitbox(int xoffset, int yoffset, int width, int height) { setOffset(xoffset, yoffset); setSize(width, height); }
             inline void setColor(Uint8 red, Uint8 green, Uint8 blue) { color[0] = red; color[1] = green; color[2] = blue; }
+
+            inline int getPositionX() const { return transform->getPosition().x; }
+            inline int getPositionY() const { return transform->getPosition().y; }
     };
 }

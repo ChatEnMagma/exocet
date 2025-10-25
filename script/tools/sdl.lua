@@ -33,6 +33,12 @@ SDL = {
     SDLK_X = 0x79,
     SDLK_Y = 0x7A,
     SDLK_Z = 0x7B,
+
+    SDL_BUTTON_LEFT = 1,
+    SDL_BUTTON_MIDDLE = 2,
+    SDL_BUTTON_RIGHT = 3,
+    SDL_BUTTON_X1 = 4,
+    SDL_BUTTON_X2 = 5
 }
 
 return SDL

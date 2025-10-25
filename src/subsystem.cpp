@@ -55,15 +55,26 @@ bool Subsystem::init(int w, int h, string title) {
 
 void Subsystem::handleEvents() {
     SDL_Event e;
-    SDL_PollEvent(&e);
+    while(SDL_PollEvent(&e)) {
+        if(e.type == SDL_QUIT)
+            close();
+        // Keylistener methods
+        if(e.type == SDL_KEYDOWN)
+            keys.interactKey(e.key.keysym.sym, true);
+        if(e.type == SDL_KEYUP)
+            keys.interactKey(e.key.keysym.sym, false);
 
-    if(e.type == SDL_QUIT)
-        close();
-    // Keylistener methods
-    if(e.type == SDL_KEYDOWN)
-        keys.interactKey(e.key.keysym.sym, true);
-    if(e.type == SDL_KEYUP)
-        keys.interactKey(e.key.keysym.sym, false);
+        // MouseListener methods
+        mouse.move(e.motion.x, e.motion.y);
+
+        if(e.type == SDL_MOUSEBUTTONDOWN)
+            mouse.interact(e.button.button, true);
+        if(e.type == SDL_MOUSEBUTTONUP)
+            mouse.interact(e.button.button, false);
+    }
+
+    keys.update();
+    mouse.update();
 }
 
 void Subsystem::clean() {

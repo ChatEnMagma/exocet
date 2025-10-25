@@ -3,16 +3,24 @@ INCDIR = include
 OBJDIR = obj
 
 CXX = g++
-CXXFLAGS = -O3 -Wall -g -std=c++20 -I$(INCDIR) `sdl2-config --cflags`
-CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf -llua5.4
+CXXFLAGS = -Wall -g -std=c++20 -I$(INCDIR) `sdl2-config --cflags`
+CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
+
+ifeq ($(OS),Windows_NT)
+	CXXLIBS = -L. -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -llua
+else
+	CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf -llua5.4
+endif
 
 SRC = 	$(wildcard $(SRCDIR)/*.cpp) \
 		$(wildcard $(SRCDIR)/ecs/*.cpp) \
+		$(wildcard $(SRCDIR)/ecs/ui/*.cpp) \
 		$(wildcard $(SRCDIR)/gfx/*.cpp) \
 		$(wildcard $(SRCDIR)/state/*.cpp)
 
 INC = 	$(wildcard $(INCDIR)/*.hpp) \
 		$(wildcard $(SRCDIR)/ecs/*.hpp) \
+		$(wildcard $(SRCDIR)/ecs/ui/*.hpp) \
 		$(wildcard $(INCDIR)/input/*.hpp) \
 		$(wildcard $(SRCDIR)/gfx/*.hpp) \
 		$(wildcard $(SRCDIR)/state/*.cpp)
@@ -32,6 +40,7 @@ $(EXE): $(OBJ)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INC)
 	@mkdir -p $(OBJDIR)
 	@mkdir -p $(OBJDIR)/ecs
+	@mkdir -p $(OBJDIR)/ecs/ui
 	@mkdir -p $(OBJDIR)/gfx
 	@mkdir -p $(OBJDIR)/state
 

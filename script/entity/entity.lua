@@ -32,12 +32,24 @@ function Entity:new(tag)
     return e
 end
 
+--- Check if the mouse is well interact with mouse
+--- @return boolean
+function Entity:isInsideMouse()
+    return Entity.cIsInsideMouse(self._ptr)
+end
+
 --- Get all entities are collide
 --- @return table
 function Entity:getCollideEntities()
     return Entity.cGetCollideEntities(self._ptr)
 end
 
+--- Get the rect of the entity
+--- @return table
+function Entity:getRect()
+    local x, y, w, h = Entity.cGetRect(self._ptr)
+    return { x = x, y = y, w = w, h = h }
+end
 --- Check if the entity is well collide
 --- @param entity any
 --- @return boolean
@@ -92,6 +104,12 @@ end
 --- @param vec Vector2D The new velocity in Vector2D with number
 function Entity:setVelocity(vec)
     self.cSetVelocity(self._ptr, vec.x, vec.y) -- call CFunction
+end
+
+--- Check if the entity is dragging
+--- @return boolean
+function Entity:isDragging()
+    return self.cIsDragging(self._ptr)
 end
 
 return Entity

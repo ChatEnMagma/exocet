@@ -1,10 +1,11 @@
 config = {
     init_state = 0,
+    
     showHitbox = true,
-    showPointerEntities = true,
+    showPointerEntities = false,
 
     states = {
         "menuState",
-        "debugState"
+        "mainState"
     }
 }
