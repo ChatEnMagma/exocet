@@ -4,24 +4,12 @@ Bird = {
     entity = nil,
 
     components = {
-        {
-            tag = "physic",
-            hitbox = {
-                x = 0,
-                y = 0,
-                w = 128,
-                h = 128
-            }
-        },
+        PhysicComponent:new({ x = 0, y = 0, w = 128, h = 128 }),
         {
             tag = "script",
             update = nil
         },
-        {
-            tag = "sprite",
-            path = "fou_de_bassan.png",
-            fitSizeWithHitbox = true
-        }
+        SpriteComponent:new("fou_de_bassan.png"),
     },
 }
 Bird.__index = Bird

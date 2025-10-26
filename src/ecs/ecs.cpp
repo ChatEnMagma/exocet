@@ -60,7 +60,42 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
         if(component["fitSizeWithHitbox"] != sol::nil) {
             sprite.fitSizeWithHitbox();
         }
-    }else if(tag == "drag") {
+    } else if(tag == "animation") {
+        AnimationComponent& animation = addComponent<AnimationComponent>();
+
+        if(component["fps"] != sol::nil) {
+            animation.setFPS(component["fps"].get<size_t>());
+        } else cout << "/!\\ Warning from `" << getTag() << "` you should set fps" << endl;
+
+        if(component["size"] != sol::nil) {
+            animation.setSize(component["size"]["w"], component["size"]["h"]);
+        }
+        
+        if(component["textures"] != sol::nil) {
+            vector<Texture*> texVec;
+
+            component["textures"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
+                sol::table tex = value.as<sol::table>();
+                if(component["path"] == sol::nil)
+                    texVec.push_back(new Texture(handler, "res/" + tex["path"].get<string>()));
+                else {
+                    string path = component["path"].get<string>();
+                    sol::table tex = value.as<sol::table>();
+
+                    texVec.push_back(new Texture(
+                        handler, 
+                        "res/" + path, 
+                        tex["x"], 
+                        tex["y"], 
+                        tex["w"], 
+                        tex["h"])
+                    );
+                }
+            });
+
+            animation.setTextures(texVec);
+        } else cout << "/!\\ Warning from `" << getTag() << "` you should add textures" << endl;
+    } else if(tag == "drag") {
         addComponent<DragComponent>();
     } else if(tag == "ui") {
         UIComponent& ui = addComponent<UIComponent>();

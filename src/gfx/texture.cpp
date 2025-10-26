@@ -28,6 +28,31 @@ Texture::Texture(Handler* han, string path) {
     tex = texture;
 }
 
+Texture::Texture(Handler* han, string path, int xpos, int ypos, int w, int h) {
+    SDL_Surface* surface = IMG_Load(path.c_str());
+    
+    setHandler(han);
+
+    if(surface == NULL) {
+        clog << "Failed to load the texture from `" << path << "`: " << IMG_GetError() << endl;
+        return;
+    }
+
+    this->x = xpos;
+    this->y = ypos;
+    this->w = w;
+    this->h = h;
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(handler->getSubsystem()->getRenderer(), surface);
+    SDL_FreeSurface(surface);
+
+    if(texture == NULL) {
+        clog << "Failed to create the texture from `" << path << "`: " << SDL_GetError() << endl;
+    }
+
+    tex = texture;
+}
+
 void Texture::render(Vector2D<int> pos, int w, int h) {
     renderAnchor(pos - handler->getGraphic()->getCamera()->getPosition(), w, h);
 }

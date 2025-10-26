@@ -3,6 +3,14 @@ modules = {
     { "engine", "engine" },
     { "vector2D", "tools/vector2D" },
     { "controller", "controller" },
+
+    -- All components
+
+    { "AnimationComponent", "component/AnimationComponent" },
+    { "PhysicComponent", "component/PhysicComponent" },
+    { "SpriteComponent", "component/SpriteComponent" },
+
+    -- All entities
     { "Entity", "entity/entity" },
     { "Cloud", "entity/cloud" },
     { "Wave", "entity/wave" },

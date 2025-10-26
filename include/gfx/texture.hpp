@@ -19,6 +19,8 @@ namespace exocet {
             int h = 0;
         public:
             Texture(Handler* handler, std::string path);
+            Texture(Handler* handler, std::string path, int xpos, int ypos, int width, int height);
+            
             ~Texture() { clean(); }
 
             /**

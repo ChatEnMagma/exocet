@@ -143,7 +143,9 @@ void Game::initLua() {
         Entity* e = ((Entity*) entity_lua);
         if(e->hasComponent<SpriteComponent>()) {
             e->getComponent<SpriteComponent>().fitSizeWithHitbox();
-        } else { cout << "Warning /!\\ function `fitSizeWithHitbot` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl; }
+        } else if(e->hasComponent<AnimationComponent>()) {
+            e->getComponent<AnimationComponent>().fitSizeWithHitbox();
+        } else { cout << "Warning /!\\ function `fitSizeWithHitbot` from: " << e->getTag() <<  ": You must inititate the SpriteComponent or AnimationComponent..." << endl; }
     };
     // **************** Methods from PhysicComponent ********************
     lua["Entity"]["cGetCollideEntities"] = [](intptr_t entity_lua) {

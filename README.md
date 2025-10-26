@@ -26,7 +26,9 @@ font - Free Royal: https://www.dafont.com/fr/free-royalty.font
 
 ## Updates
 
-### 1
+### 1.1
+- AnimationComponent
+### 1.0
 - Components
 - API lua
 - StateManager

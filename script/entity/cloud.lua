@@ -4,24 +4,12 @@ Cloud = {
     entity = nil,
 
     components = {
-        {
-            tag = "physic",
-            hitbox = {
-                x = 0,
-                y = 0,
-                w = 300,
-                h = 200
-            }
-        },
+        PhysicComponent:new( { x = 0, y = 0, w = 300, h = 200 }),
         {
             tag = "script",
             update = nil
         },
-        {
-            tag = "sprite",
-            path = "nuage.png",
-            fitSizeWithHitbox = true
-        }
+        SpriteComponent:new("nuage.png"),
     },
 }
 
