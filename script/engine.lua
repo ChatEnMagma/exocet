@@ -19,6 +19,9 @@ end
 
 --===================================== ALL SUBSYS METHDOS =====================================--
 
+--- @param path string
+function engine.playSong(path) end
+
 --- Get the window frame width
 ---@return integer
 function engine.getWinWidth()

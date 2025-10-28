@@ -2,14 +2,15 @@
 Oxygen = {
     --- @type Entity
     entity = nil,
-
+    rain = {},
     components = {
         PhysicComponent:new({ x = 0, y = 0, w = 300, h = 200}),
         {
             tag = "script",
-            update = nil
+            update = nil,
+            render = nil
         },
-        SpriteComponent:new("orage_nuage.jpg"),
+        SpriteComponent:new("orage.png"),
     },
 }
 Oxygen.__index = Oxygen
@@ -24,6 +25,13 @@ function Oxygen:new(vec)
     o.components[1].position = {
         x = vec.x,
         y = vec.y
+    }
+    o.rain = {
+        vec + Vector2D:new(10, 200),
+        vec + Vector2D:new(15, 200),
+        vec + Vector2D:new(30, 200),
+        vec + Vector2D:new(50, 200),
+        vec + Vector2D:new(60, 200),
     }
 
     return o
@@ -41,8 +49,18 @@ function Oxygen:update()
         if engine.mainEntities.player.oxygen > 100 then
             engine.mainEntities.player.oxygen = 100
         end
+    end
+end
 
-        self.entity:destroy()
+function Oxygen:render()
+    engine.setColor(0, 0, 0xff, 0xff)
+    for key,value in self.rain do
+        engine.renderRect(value, 16, 128)
+        value = value + Vector2D:new(mainState.vx, 1)
+
+        if(value.y >= self.entity:getPosition().y + 200) then
+            value.y = self.entity:getPosition().y
+        end
     end
 end
 

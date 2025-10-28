@@ -4,6 +4,7 @@
 #include "game.hpp"
 
 #include "tool/vectors.hpp"
+#include "tool/playSong.hpp"
 #include "handler.hpp"
 
 using namespace std;
@@ -75,6 +76,10 @@ void Game::initLua() {
     lua["engine"]["cGetMousePosition"] = [](intptr_t hLua) {
         Vector2D<int> pos = ((Handler*) hLua)->getMousePosition();
         return tuple<int, int>(pos.x, pos.y);
+    };
+
+    lua["engine"]["playSong"] = [](const string path) {
+        auto m = new PlaySong("res/" + path); m->play(); 
     };
     
     // ======== ALL STATES METHODS =====
@@ -245,26 +250,12 @@ void Game::initLua() {
 }
 
 void Game::update() {
-    // Handler some keys debug
-    #pragma GCC diagnostic warning "-Woverflow"
-    #pragma GCC diagnostic error "-Woverflow"
-    #pragma GCC diagnostic ignored "-Woverflow"
+    if(handler->getJustKey(SDLK_ESCAPE))
+        handler->closeGame();
     
     sManager->update();
 
     handler->getSubsystem()->setTitle("Exocet state: " + to_string(sManager->getCurrentState()) + " | e: " + to_string(sManager->getEntityManager()->getNumberEntities()));
-    if(handler->getJustKey(SDLK_ESCAPE))
-        handler->closeGame();
-    if(handler->getJustKey(SDLK_F2))
-        sManager->previousState();
-    if(handler->getJustKey(SDLK_F3))
-        sManager->nextState();
-    if(handler->getJustKey(SDLK_F5)) {
-        sManager->restart();
-        cout << handler->getJustKey(SDLK_F5) << endl;
-    }
-    else if(handler->getJustKey(SDLK_F7))
-        sManager->getEntityManager()->destroyAllEntities();
 }
 
 void Game::render() {

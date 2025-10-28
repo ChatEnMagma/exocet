@@ -9,11 +9,24 @@ bool Subsystem::init(int w, int h, string title) {
         cerr << "Fail to initiate SDL: " << SDL_GetError() << endl;
         return false;
     }
+    if(IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) == 0) {
+        cerr << "Fail to initiate IMG: " << IMG_GetError() << endl;
+        return false;
+    }
     // init the TTF
     if(TTF_Init() != 0) {
         cerr << "Fail to initiate TTF: " << TTF_GetError() << endl;
         return false;
     }
+    if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) != 0) {
+        cerr << "Fail to initiate Mixer: " << Mix_GetError() << endl;
+        return false;
+    }
+    if(Mix_AllocateChannels(4) < 0) {
+        cerr << "Unable to allocate mixing channels: %s" << Mix_GetError() << endl;
+        return false;
+    }
+
     // set the window size
     this->w = max(WIN_MIN_WIDTH, w);
     this->h = max(WIN_MIN_HEIGHT, h);
@@ -44,6 +57,13 @@ bool Subsystem::init(int w, int h, string title) {
     if(gfx->getRenderer() == NULL) {
         cerr << "Fail to initiate the renderer: " << SDL_GetError() << endl;
         return false;
+    }
+
+    icon = IMG_Load("res/icon.ico");
+    if(icon == NULL) {
+        cerr << "Failed to load icon: " << IMG_GetError() << endl;
+    } else {
+        SDL_SetWindowIcon(win, icon);
     }
 
     running = true;
@@ -79,11 +99,14 @@ void Subsystem::handleEvents() {
 
 void Subsystem::clean() {
     gfx->clean();
+    SDL_FreeSurface(icon);
 
     // All SDL clean
     SDL_DestroyWindow(win);
-    SDL_Quit();
+    IMG_Quit();
+    Mix_Quit();
     TTF_Quit();
+    SDL_Quit();
 
     cout << "The subsystem is well clean, bye..." << endl;
 }

@@ -17,6 +17,8 @@ namespace exocet {
             KeyListener keys;
             MouseListener mouse;
 
+            SDL_Surface* icon;
+
             int w, h;
             std::string title;
 

@@ -7,9 +7,17 @@ CXXFLAGS = -Wall -g -std=c++20 -I$(INCDIR) `sdl2-config --cflags`
 CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
 
 ifeq ($(OS),Windows_NT)
-	CXXLIBS = -L. -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -llua
+	EXE = exocet.exe
+
+	CXXLIBS = -L. -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -llua
+	BEGIN_COMPILE = exocet.res $(EXE)
+	END_COPILE = $(CXX) -o $(EXE) $^ $(CXXLIBS) exocet.res
 else
-	CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf -llua5.4
+	EXE = exocet
+
+	CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf -lSDL2_mixer -llua5.4
+	BEGIN_COMPILE = $(EXE)
+	END_COPILE = $(CXX) -o $(EXE) $^ $(CXXLIBS)
 endif
 
 SRC = 	$(wildcard $(SRCDIR)/*.cpp) \
@@ -27,16 +35,18 @@ INC = 	$(wildcard $(INCDIR)/*.hpp) \
 
 OBJ = $(SRC:$(SRCDIR)%.cpp=$(OBJDIR)%.o)
 
-EXE = exocet
-
 RM = rm -f
 
 .PHONY: all clean
 
-all: $(EXE)
+
+all: $(BEGIN_COMPILE)
+
+exocet.res: exocet.rc
+	windres exocet.rc -O coff -o exocet.res
 
 $(EXE): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ) $(CXXLIBS) -o $@
+	$(END_COPILE)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INC)
 	@mkdir -p $(OBJDIR)
 	@mkdir -p $(OBJDIR)/ecs
@@ -49,3 +59,4 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INC)
 clean:
 	$(RM) -r $(OBJDIR)
 	$(RM) $(EXE)
+	$(RM) exocet.res

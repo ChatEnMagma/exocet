@@ -41,6 +41,7 @@ function Cloud:update()
         local pvec = engine.mainEntities.player.entity:getVelocity()
         pvec = pvec + Vector2D:new(0, -10)
         engine.mainEntities.player.entity:setVelocity(pvec)
+        engine.mainEntities.player.momentum = engine.mainEntities.player.momentum + 1
     end
 end
 

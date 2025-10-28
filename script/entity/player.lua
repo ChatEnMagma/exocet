@@ -1,8 +1,5 @@
 local os = require("os")
 
-local engine = require("engine")
-local Vector2D = require("vector2D")
-
 --- Class Player has all methods for the player of the game
 --- @class Player
 Player = {
@@ -68,16 +65,14 @@ Player = {
 Player.__index = Player
 
 function Player:new()
+    --- @class Player
     local p = setmetatable({}, Player)
     
     p.entity = Entity:new("player")
     p.nextDescOxy = os.time()
+    p.oxygen = 100
     
     return p
-end
-
-function Player:setPointerEntity(pointer)
-    self["_ptr"] = pointer
 end
 
 function Player:setUpdateScript(s_update)
@@ -89,7 +84,7 @@ function Player:setRenderScript(s_update)
 end
 
 function Player:momentumCalculus()
-    if engine.getKey(SDL.SDLK_S) then
+    if engine.getKey(SDL.SDLK_S) or engine.getKey(SDL.SDLK_DOWN) then
         self.momentum = self.momentum + 1
         
         local vel = self.entity:getVelocity() + Vector2D:new(0, self.momentum )
@@ -132,9 +127,10 @@ end
 function Player:update()
     self.entity:fitSizeWithHitbox()
     
-    if self.entity:getPosition().y >= 1000 then
-        self.gameover = true;
+    if self.entity:getPosition().y >= 1000 and self.gameover == false then
+        self.gameover = true
         self.entity:setVelocity(Vector2D:new(0, 0))
+        engine.playSong("plouf.wav")
     end
 
     if self.gameover == false then
@@ -144,11 +140,13 @@ function Player:update()
         if self.dieTime == 0 then
             self.dieTime = os.time()
         end
+
+         if self.gameover and (os.time() >= (self.dieTime + 2)) then
+            engine.restart()
+        end
     end
 
-    if self.gameover and os.time() >= self.dieTime + 2 then
-        engine.restart()
-    end
+    -- print(self.entity:getPosition().y)
 end
 
 function Player:__tostring()

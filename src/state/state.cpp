@@ -34,10 +34,6 @@ void State::loadState() {
         }
     }
 
-    if(lua[getTag()]["vx"] != sol::nil) {
-        cout << lua[getTag()]["vx"].get<float>() << endl;
-    }
-
     // For each all entities from lua
     if(lua[getTag()]["entities"] != sol::nil) {
         lua[getTag()]["entities"].get<sol::table>().for_each([&](sol::object const& keyEntity, sol::object const& valueEntity) {

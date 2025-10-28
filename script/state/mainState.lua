@@ -22,30 +22,22 @@ function EntityGen:new()
     return e
 end
 
-function EntityGen:update() 
-    if engine.mainEntities.player.gameover then
-        return
-    end
-
-    if self.nextCloud <= 0 then
-        local pos = Vector2D:new(
-            engine.getWinWidth(),
-            math.min(
-                math.random(0, 800),
-                math.random(
-                    engine.getCameraPosition().y - engine.getWinHeight() / 2, 
-                    engine.getCameraPosition().y + engine.getWinHeight() + engine.getWinHeight() / 2
-                )
-            )
+--- @return Vector2D
+function EntityGen.getRandomPositionScreen()
+    return Vector2D:new(
+            engine.getWinWidth() + 20,
+            -engine.getCameraPosition().y + math.random(engine.getCameraPosition().y, engine.getCameraPosition().y + engine.getWinHeight())
         )
+end
 
-        local c = Cloud:new(pos)
+function EntityGen:genCloud()
+    if self.nextCloud <= 0 then
+        local c = Cloud:new(self.getRandomPositionScreen())
         
         c.components[2]["update"] = function ()
             c:update()
         end
 
-        
         engine.addEntity(c)
         
         if engine.mainEntities.player.entity:getPosition().y >= 850 then
@@ -55,36 +47,33 @@ function EntityGen:update()
         end
     end
 
+    self.nextCloud = self.nextCloud - 1
+end
+function  EntityGen:genOxy()
     if self.nextOxy <= 0 then
-        local pos = Vector2D:new(
-            engine.getWinWidth(),
-            math.min(
-                800,
-                math.random(engine.getCameraPosition().y, engine.getCameraPosition().y + engine.getWinHeight())
-            )
-        )
-
-        local o = Oxygen:new(pos)
+        local o = Oxygen:new(self.getRandomPositionScreen())
         
         o.components[2]["update"] = function ()
             o:update()
         end
+        o.components[2]["render"] = function ()
+            o:render()
+        end
         
         engine.addEntity(o)
-
-        self.nextOxy = math.random(1000, 5000)
+        local playerPos = engine.mainEntities.player.entity:getPosition()
+        if playerPos.y < -100 then
+            self.nextOxy = math.random(100, 300)
+        else
+            self.nextOxy = math.random(200, 400)
+        end
     end
-
+    
+    self.nextOxy = self.nextOxy - 1
+end
+function EntityGen:genBird()
     if (self.nextBird <= 0) and (engine.mainEntities.player.entity:getPosition().y <= 1000) then
-        local pos = Vector2D:new(
-            engine.getWinWidth(),
-            math.min(
-                800,
-                math.random(engine.getCameraPosition().y, engine.getCameraPosition().y + engine.getWinHeight())
-            )
-        )
-
-        local e = Bird:new(pos)
+        local e = Bird:new(self.getRandomPositionScreen())
         
         e.components[2]["update"] = function ()
             e:update()
@@ -95,6 +84,9 @@ function EntityGen:update()
         self.nextBird = math.random(110, 1000)
     end
 
+    self.nextBird = self.nextBird - 1
+end
+function EntityGen:genWave()
     if self.nextWave <= 0 then
         local pos = Vector2D:new(
             engine.getWinWidth(),
@@ -112,10 +104,18 @@ function EntityGen:update()
         self.nextWave = math.random(110, 300)
     end
 
-    self.nextCloud = self.nextCloud - 1
-    self.nextOxy = self.nextOxy - 1
-    self.nextBird = self.nextBird - 1
     self.nextWave = self.nextWave - 1
+end
+
+function EntityGen:update() 
+    if engine.mainEntities.player.gameover then
+        return
+    end
+
+    self:genCloud()
+    self:genOxy()
+    self:genBird()
+    self:genWave()
 
     if mainState.score >= mainState.nextPalier then
         mainState.vx = mainState.vx - 1
@@ -182,24 +182,8 @@ mainState.init = function ()
         {
             entity = Entity:new("limite"),
             components = {
-                {
-                    tag = "physic",
-                    position = {
-                        x = -engine.getWinWidth(),
-                        y = 1000
-                    },
-                    hitbox = {
-                        x = 0,
-                        y = 0,
-                        w = engine.getWinWidth() * 2,
-                        h = 1684
-                    }
-                },
-                {
-                    tag = "sprite",
-                    path = "mer.png",
-                    fitSizeWithHitbox = true
-                }
+                PhysicComponent:new({ x=0,y=0,w=engine.getWinWidth()*2,h=1684}, Vector2D:new(-engine.getWinWidth(), 1000)),
+                SpriteComponent:new("mer.png")
             }
         },
     }

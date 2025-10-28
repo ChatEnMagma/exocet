@@ -6,9 +6,9 @@ modules = {
 
     -- All components
 
-    { "AnimationComponent", "component/AnimationComponent" },
-    { "PhysicComponent", "component/PhysicComponent" },
-    { "SpriteComponent", "component/SpriteComponent" },
+    { "AnimationComponent", "component/animationComponent" },
+    { "PhysicComponent", "component/physicComponent" },
+    { "SpriteComponent", "component/spriteComponent" },
 
     -- All entities
     { "Entity", "entity/entity" },
