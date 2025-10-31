@@ -21,13 +21,13 @@ function Entity:__tostring()
     return "Entity: " .. string.format("%x",  self._ptr)
 end
 
---- @param tag string|nil
+--- @param tag string
 function Entity:new(tag)
-    local e = setmetatable({}, Entity)
+    local e = {}
     
-    if tag ~= nil then
-        e.tag = tag
-    end
+    setmetatable(e, Entity)
+    
+    e.tag = tag
 
     return e
 end
@@ -37,7 +37,15 @@ end
 function Entity:isInsideMouse()
     return Entity.cIsInsideMouse(self._ptr)
 end
-
+--- Check if the entity is outside of the screen
+--- @return boolean
+function Entity:isOutsideScreen()
+    return Entity.cIsOutsideScreen(self._ptr)
+end
+--- Destroy the entity if it is outside of the screen
+function Entity:destroyOutsideScreen()
+    Entity.cDestroyOutsideScreen(self._ptr)
+end
 --- Get all entities are collide
 --- @return table
 function Entity:getCollideEntities()

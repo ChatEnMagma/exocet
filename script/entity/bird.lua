@@ -3,14 +3,7 @@ Bird = {
     --- @type Entity
     entity = nil,
 
-    components = {
-        PhysicComponent:new({ x = 0, y = 0, w = 128, h = 128 }),
-        {
-            tag = "script",
-            update = nil
-        },
-        SpriteComponent:new("fou_de_bassan.png"),
-    },
+    components = {},
 }
 Bird.__index = Bird
 
@@ -21,9 +14,10 @@ function Bird:new(vec)
 
     c.entity = Entity:new("bird")
 
-    c.components[1].position = {
-        x = vec.x,
-        y = vec.y
+    c.components = {
+        PhysicComponent:new(Rect:new(128, 128), vec),
+        ScriptComponent:new(function () c:update() end),
+        SpriteComponent:new("fou_de_bassan.png")
     }
 
     return c
@@ -32,7 +26,7 @@ end
 function Bird:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx - 1.5, 0))
 
-    if self.entity:getPosition().x < engine.getCameraPosition().x - 64 then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
         self.entity:destroy()
     end
 

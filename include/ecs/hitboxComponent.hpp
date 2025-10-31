@@ -20,6 +20,9 @@ namespace exocet {
 
             bool isInsideMouse() const;
 
+            bool isOutsideScreen();
+            inline void destroyOutsideScreen() { if(isOutsideScreen()) entity->destroy(); }
+
             // ALL GETTERS POINT HITBOX
             inline Vector2D<int> getCenter() const { return Vector2D<int>(transform->getPosition().x + (x + w) / 2, transform->getPosition().y + (y + h) / 2); }
             inline int getLeft() const { return transform->getPosition().x + x; }

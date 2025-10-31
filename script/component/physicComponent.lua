@@ -1,19 +1,13 @@
 --- @class PhysicComponent
 PhysicComponent = {
     tag = "physic",
-    hitbox = {
-        x = 0,
-        y = 0,
-        w = 32,
-        h = 32
-    },
-    position = {
-        x = 0,
-        y = 0
-    }
+    --- @type Rect
+    hitbox = {},
+    --- @type Vector2D
+    position = Vector2D:new(0, 0)
 }
 
---- @param hitbox table
+--- @param hitbox Rect
 --- @param position Vector2D|nil
 function PhysicComponent:new(hitbox, position)
     local c = {}
@@ -21,14 +15,8 @@ function PhysicComponent:new(hitbox, position)
     setmetatable(c, PhysicComponent)
 
     c.tag = "physic"
+    
     c.hitbox = hitbox
-
-    if position == nil then
-        local position = {
-            x = 0,
-            y = 0
-        }
-    end
     c.position = position
 
     return c

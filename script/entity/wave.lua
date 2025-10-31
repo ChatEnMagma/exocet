@@ -3,14 +3,7 @@ Wave = {
     --- @type Entity
     entity = nil,
 
-    components = {
-        PhysicComponent:new({ x = 0, y = 0, w = 128, h = 128}),
-        {
-            tag = "script",
-            update = nil
-        },
-        SpriteComponent:new("vague.png")
-    },
+    components = {},
 }
 Wave.__index = Wave
 
@@ -21,9 +14,10 @@ function Wave:new(vec)
 
     e.entity = Entity:new("wave")
 
-    e.components[1].position = {
-        x = vec.x,
-        y = vec.y
+    e.components = {
+        PhysicComponent:new(Rect:new(128, 128), vec),
+        ScriptComponent:new(function () e:update() end),
+        SpriteComponent:new("vague.png")
     }
 
     return e
@@ -32,7 +26,7 @@ end
 function Wave:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx, 0))
 
-    if self.entity:getPosition().x < engine.getCameraPosition().x - 64 then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
         self.entity:destroy()
     end
 

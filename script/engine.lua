@@ -19,9 +19,41 @@ end
 
 --===================================== ALL SUBSYS METHDOS =====================================--
 
+--- Play a song with ticks during. You should initiate the song file before to play
 --- @param path string
-function engine.playSong(path) end
-
+--- @param ticks integer|nil
+function engine.playSong(path, ticks)
+    if ticks == nil then ticks = -1 end
+    engine.cPlaySong(engine._handler, path, ticks)
+end
+--- @param path string
+--- @return integer
+function engine.getVolume(path)
+    return engine.cGetVolume(engine._handler, path)
+end
+--- @param path string
+--- @param volume integer between 0 to 128
+function engine.setVolume(path, volume)
+    engine.cSetVolume(engine._handler, path, volume)
+end
+--- Check if the song is playing
+--- @param path string
+function engine.isPlayingSong(path)
+    return engine.cIsPlayingSong(engine._handler, path)
+end
+--- @param path string
+function engine.setSong(path)
+    engine.cSetSong(engine._handler, path)
+end
+function engine.mute()
+    engine.cMute(engine._handler)
+end
+function engine.unmute()
+    engine.cUnmute(engine._handler)
+end
+function engine.isMuting()
+    return engine.cIsMuting(engine._handler)
+end
 --- Get the window frame width
 ---@return integer
 function engine.getWinWidth()
@@ -40,6 +72,11 @@ end
 ---@return boolean
 function engine.getKey(scancode)
     return engine.cHandlerGetKey(engine._handler, scancode)
+end
+--- Get any key is pressing
+--- @return boolean
+function engine.getAnyKey()
+    return engine.cHandlerGetAnyKey(engine._handler)
 end
 --- Get boolean if the key is just pressing
 ---@return boolean

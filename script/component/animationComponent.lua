@@ -2,18 +2,17 @@
 AnimationComponent = {
     tag = "animation",
     isSheetTexture = false,
+    --- @type string|nil
     path = nil,
     textures = {},
     fps = 60,
-    size = {
-        w = 32,
-        h = 32
-    }
+    --- @type Rect
+    size = {}
 }
 AnimationComponent.__index = AnimationComponent
 
 --- @param fps integer
---- @param size table
+--- @param size Rect
 --- @param textures table
 --- @param path string|nil
 function AnimationComponent:new(fps, size, textures, path)
@@ -23,12 +22,9 @@ function AnimationComponent:new(fps, size, textures, path)
 
     c.tag = "animation"
 
-    if path ~= nil then
-        c.isSheetTexture = true
-        c.path = path
-    else
-        c.path = nil
-    end
+    c.isSheetTexture = (path ~= nil)
+    c.path = path
+
     c.fps = fps
     c.size = size
     c.textures = textures

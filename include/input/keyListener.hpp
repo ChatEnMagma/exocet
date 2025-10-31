@@ -12,6 +12,7 @@ namespace exocet {
             bool cantPress[SDL_NUM_SCANCODES];
 
             Uint16 scancode;
+            bool pressing;
         public:
             KeyListener() { 
                 memset(keys, false, SDL_NUM_SCANCODES * sizeof(bool)); 
@@ -35,10 +36,11 @@ namespace exocet {
             /**
              * \brief Set the key interact if it is pressing
              */
-            inline void interactKey(Uint16 scancode, bool isPressing) { this->scancode = scancode; keys[scancode] = isPressing; }
+            inline void interactKey(Uint16 scancode, bool isPressing) { pressing = isPressing; this->scancode = scancode; keys[scancode] = isPressing; }
 
             inline bool getKey(Uint16 scancode) const { return keys[scancode]; }
             inline bool getJustKey(Uint16 scancode) const { return justPress[scancode]; }
-            inline Uint16 getKeyCode() const { return scancode; }
+            inline Uint16 getKeyCode() const { return (pressing)? scancode: 0; }
+            inline bool isPressing() const { return pressing; }
     };
 }

@@ -1,7 +1,10 @@
 #include "subsystem.hpp"
+#include "tool/playSong.hpp"
 
 using namespace std;
 using namespace exocet;
+
+Uint8 PlaySong::volume[] = { 0, 0, 0, 0 };
 
 bool Subsystem::init(int w, int h, string title) {
     // init the SDL

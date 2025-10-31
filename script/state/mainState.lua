@@ -1,5 +1,4 @@
 local EntityGen = {
-    entity = Entity:new("cloud_gen"),
     components = {
         {
             tag = "script",
@@ -9,18 +8,11 @@ local EntityGen = {
     nextCloud = 0,
     nextOxy = 0,
     nextBird = 0,
-    nextWave = 0
+    nextWave = 0,
+    nextItem = 0,
+    step = 0
 }
 EntityGen.__index = EntityGen
-
-function EntityGen:new()
-    local e = {}
-    setmetatable(e, EntityGen)
-
-    e.entity = Entity:new("gen")
-
-    return e
-end
 
 --- @return Vector2D
 function EntityGen.getRandomPositionScreen()
@@ -34,16 +26,12 @@ function EntityGen:genCloud()
     if self.nextCloud <= 0 then
         local c = Cloud:new(self.getRandomPositionScreen())
         
-        c.components[2]["update"] = function ()
-            c:update()
-        end
-
         engine.addEntity(c)
         
-        if engine.mainEntities.player.entity:getPosition().y >= 850 then
+        if engine.mainEntities.player.entity:getPosition().y >= 500 then
             self.nextCloud = math.random(30, 100)
         else 
-            self.nextCloud = math.random(100, 250)
+            self.nextCloud = math.random(100 + self.step, 250 + self.step)
         end
     end
 
@@ -53,35 +41,29 @@ function  EntityGen:genOxy()
     if self.nextOxy <= 0 then
         local o = Oxygen:new(self.getRandomPositionScreen())
         
-        o.components[2]["update"] = function ()
-            o:update()
-        end
-        o.components[2]["render"] = function ()
-            o:render()
-        end
-        
         engine.addEntity(o)
         local playerPos = engine.mainEntities.player.entity:getPosition()
-        if playerPos.y < -100 then
-            self.nextOxy = math.random(100, 300)
+        if playerPos.y < 500 then
+            self.nextOxy = math.random(100 + self.step, 300 + self.step)
         else
-            self.nextOxy = math.random(200, 400)
+            self.nextOxy = math.random(400 + self.step, 1000 + self.step)
         end
     end
     
     self.nextOxy = self.nextOxy - 1
 end
 function EntityGen:genBird()
-    if (self.nextBird <= 0) and (engine.mainEntities.player.entity:getPosition().y <= 1000) then
+    local playerPos = engine.mainEntities.player.entity:getPosition()
+
+    if (mainState.score > 10) and (self.nextBird <= 0) and (playerPos.y <= 500) then
         local e = Bird:new(self.getRandomPositionScreen())
         
-        e.components[2]["update"] = function ()
-            e:update()
-        end
-        
         engine.addEntity(e)
-
-        self.nextBird = math.random(110, 1000)
+        if(playerPos.y <= 500) then
+            self.nextBird = math.random(110, 1000)
+        else
+            self.nextBird = math.random(50, 500)
+        end
     end
 
     self.nextBird = self.nextBird - 1
@@ -95,16 +77,24 @@ function EntityGen:genWave()
 
         local e = Wave:new(pos)
         
-        e.components[2]["update"] = function ()
-            e:update()
-        end
-        
         engine.addEntity(e)
 
-        self.nextWave = math.random(110, 300)
+        self.nextWave = math.random(300 + self.step, 1000 + self.step)
     end
 
     self.nextWave = self.nextWave - 1
+end
+
+function EntityGen:genItems()
+    if self.nextItem <= 0 then
+        local e = Items:new(EntityGen.getRandomPositionScreen())
+        
+        engine.addEntity(e)
+
+        self.nextItem = math.random(110 + self.step, 300 + self.step)
+    end
+
+    self.nextItem = self.nextItem - 1
 end
 
 function EntityGen:update() 
@@ -116,11 +106,14 @@ function EntityGen:update()
     self:genOxy()
     self:genBird()
     self:genWave()
+    self:genItems()
 
     if mainState.score >= mainState.nextPalier then
         mainState.vx = mainState.vx - 1
         mainState.nextPalier = mainState.nextPalier + 15
+        self.step = (mainState.score % mainState.nextPalier) * 2
     end
+
 
     engine.setBackgroundPosition(engine.getBackgroundPosition() + Vector2D:new(mainState.vx, 0))
 end
@@ -135,6 +128,22 @@ mainState = {
     vx = -5,
 
     init = nil,
+    update = function ()
+        EntityGen:update()
+        
+        if engine.mainEntities.player.entity:getPosition().y >= 0 then
+
+            local vol = (engine.mainEntities.player.entity:getPosition().y * 128) // 1000
+
+            if engine.isPlayingSong("sea_wave.wav") == false then
+                engine.playSong("sea_wave.wav")
+            end
+
+            engine.setVolume("sea_wave.wav", vol)
+        else
+            engine.setVolume("sea_wave.wav", 0)
+        end
+    end,
 
     background = {
         size = {
@@ -158,6 +167,13 @@ mainState = {
 }
 
 mainState.init = function ()
+    math.randomseed(os.time(), os.time() - 100)
+
+    engine.setSong("plouf.wav")
+    engine.setSong("whoosh0.wav")
+    engine.setSong("whoosh1.wav")
+    engine.setSong("sea_wave.wav")
+
     mainState.score = 1
     mainState.nextPalier = 10
     mainState.vx = -5
@@ -165,20 +181,11 @@ mainState.init = function ()
     mainState.background.textures[1].postion.y = -2000
 
     local player = Player:new()
-    player:setUpdateScript(function ()
-        player:update()
-    end)
 
     engine.mainEntities.player = player
 
-    local entitygen = EntityGen:new()
-    entitygen.components[1].update = function ()
-        entitygen:update()
-    end
-
     mainState.entities = {
         player,
-        entitygen,
         {
             entity = Entity:new("limite"),
             components = {
@@ -194,9 +201,7 @@ mainState.init = function ()
             {
                 tag = "ui",
             },
-            {
-                tag = "script",
-                render = function ()
+            ScriptComponent:new(nil, function ()
                     engine.setColor(0x77, 0x77, 0x77, 0xFF)
                     engine.renderAnchorFillRect(Vector2D:new(0, 0), engine.getWinWidth(), 80)
 
@@ -214,10 +219,25 @@ mainState.init = function ()
                         engine.renderText(0, 0, engine.getWinWidth(), 128, "GAME OVER")
                     end
                 end
-            }
+            ),
         }
     }
-    mainState.uis[1] = score
+    muteButton = {
+        entity = Entity:new("button_mute"),
+        components = {
+            ButtonComponent:new(Rect:new(500, 0, 32, 32), function () print("test") engine.mute() end),
+            ScriptComponent:new(nil, function ()
+                engine.setColor(0xff, 0xff, 0, 0xff)
+                engine.renderAnchorFillRect(muteButton.entity:getPosition(), 32, 32)
+                engine.setColor(0, 0, 0, 0xff)
+                engine.renderText(muteButton.entity:getPosition().x, muteButton.entity:getPosition().y, 32, 32, "MUTE")
+            end)
+        }
+    }
+    mainState.uis = {
+        score,
+        muteButton
+    }
 
     --mainState.entities[1]:setUpdateScript(function() mainState.entities[1]:update() end)
 end

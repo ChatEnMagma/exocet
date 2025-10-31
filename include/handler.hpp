@@ -41,6 +41,10 @@ namespace exocet {
              * \return get true if the key is just pressing else false
             */
             inline bool getJustKey(Uint16 scancode) { return subsys->getKeyListener()->getJustKey(scancode); }
+            /**
+             * \brief Tell is any key is pressing
+             */
+            inline bool getAnyKey() const { return subsys->getKeyListener()->isPressing(); }
             /** 
              * \brief Return if the button is pressing
              * \param scancode the scancode of the key with SDL

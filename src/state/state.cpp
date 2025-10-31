@@ -63,7 +63,9 @@ void StateManager::initStates() {
 
         State* state = new State(
             value.as<string>(), 
-            lua[value.as<string>()]["init"].get<sol::function>()
+            lua[value.as<string>()]["init"].get<sol::function>(),
+            lua[value.as<string>()]["update"].get<sol::function>(),
+            lua[value.as<string>()]["render"].get<sol::function>()
         );
         addState(state);
     });

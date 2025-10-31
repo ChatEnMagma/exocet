@@ -22,6 +22,8 @@ namespace exocet {
             int w, h;
             std::string title;
 
+            bool muting;
+
             bool running;
         public:
             /**
@@ -54,6 +56,15 @@ namespace exocet {
              * \return True if the subsystem run else false
              */
             inline bool isRunning() { return running; }
+            inline void mute() { 
+                muting = true;
+                Mix_Volume(-1, 0);
+            }
+            inline void unmute() { 
+                muting = false; 
+                Mix_Volume(-1, 128);
+            }
+            inline bool isMuting() const { return muting; }
 
             inline Graphic* getGraphic() { return gfx; }
             inline KeyListener* getKeyListener() { return &keys; }

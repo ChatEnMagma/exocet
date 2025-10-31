@@ -69,6 +69,7 @@ void Game::initLua() {
     lua["engine"]["cHandlerGetKey"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getKey(scancode); };
     lua["engine"]["cHandlerGetJustKey"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getJustKey(scancode); };
     lua["engine"]["cHandlerGetKeyCode"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->getKeyListener()->getKeyCode(); };
+    lua["engine"]["cHandlerGetAnyKey"] = [](intptr_t hLua) { return ((Handler*) hLua)->getAnyKey(); };
 
     lua["engine"]["cHandlerGetButton"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getButton(scancode); };
     lua["engine"]["cHandlerGetJustButton"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getJustButton(scancode); };
@@ -78,10 +79,21 @@ void Game::initLua() {
         return tuple<int, int>(pos.x, pos.y);
     };
 
-    lua["engine"]["playSong"] = [](const string path) {
-        auto m = new PlaySong("res/" + path); m->play(); 
+    lua["engine"]["cMute"] = [](intptr_t hLua) { ((Handler*) hLua)->getSubsystem()->mute(); };
+    lua["engine"]["cUnmute"] = [](intptr_t hLua) { ((Handler*) hLua)->getSubsystem()->unmute(); };
+    lua["engine"]["cIsMute"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->isMuting(); };
+    lua["engine"]["cGetVolume"] = [](intptr_t hLua, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->getVolume(); };
+    lua["engine"]["cSetVolume"] = [](intptr_t hLua, const string path, int volume) { 
+        if(!((Handler*) hLua)->getSubsystem()->isMuting())
+            ((Handler*) hLua)->getState()->getSong("res/" + path)->setVolume(volume); 
     };
-    
+    lua["engine"]["cPlaySong"] = [](intptr_t hLua, const string path, int ticks) { 
+        if(!((Handler*) hLua)->getSubsystem()->isMuting()) 
+            ((Handler*) hLua)->getState()->getSong("res/" + path)->play(ticks); 
+    };
+    lua["engine"]["cIsPlayingSong"] = [](intptr_t hLua, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->isPlaying(); };
+    lua["engine"]["cSetSong"] = [](intptr_t hLua, const string path) { ((Handler*) hLua)->getState()->setSong("res/" + path); };
+
     // ======== ALL STATES METHODS =====
     lua["engine"]["cSetState"] = [](intptr_t hLua, size_t state) { ((Handler*) hLua)->getGame()->getStateManager()->setState(state); };
     lua["engine"]["cGetCurrentState"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->getCurrentState(); };
@@ -169,6 +181,21 @@ void Game::initLua() {
         return entities_ptr;
     };
     // ****************** Methods from HitboxComponent ********************
+    lua["Entity"]["cIsOutsideScreen"] = [](intptr_t entity_lua) {
+        Entity* e = (Entity*) entity_lua;
+        if(e->hasComponent<HitboxComponent>())
+            return e->getComponent<HitboxComponent>().isOutsideScreen();
+        else
+            cout << "Warning: function `isOutsideScreen` from" << e << ". You must initiate the HitboxComponent" << endl;
+        return false;
+    };
+    lua["Entity"]["cDestroyOutsideScreen"] = [](intptr_t entity_lua) {
+        Entity* e = (Entity*) entity_lua;
+        if(e->hasComponent<HitboxComponent>())
+            e->getComponent<HitboxComponent>().destroyOutsideScreen();
+        else
+            cout << "Warning: function `destroyOutsideScreen` from" << e << ". You must initiate the HitboxComponent" << endl;
+    };
     lua["Entity"]["cGetCollideEntity"] = [](intptr_t entity1_lua, intptr_t entity2_lua) {
         Entity* entity1 = ((Entity*) entity1_lua);
         Entity* entity2 = ((Entity*) entity2_lua);

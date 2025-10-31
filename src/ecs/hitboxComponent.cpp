@@ -58,3 +58,13 @@ bool HitboxComponent::isInsideMouse() const {
         pos.y <= getBottom()
     );
 }
+
+bool HitboxComponent::isOutsideScreen() {
+    Vector2D<int> posCam = handler->getGraphic()->getCamera()->getPosition();
+    return (
+        (getRight() < posCam.x) ||
+        (getLeft() > posCam.x + handler->getWinWidth()) ||
+        (getBottom() > posCam.y + handler->getWinHeight()) ||
+        (getTop() < posCam.y)
+    );
+}

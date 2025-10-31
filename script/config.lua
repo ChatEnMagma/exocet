@@ -6,6 +6,7 @@ config = {
 
     states = {
         "menuState",
-        "mainState"
+        "mainState",
+        "debugState",
     }
 }

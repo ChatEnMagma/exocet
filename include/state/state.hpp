@@ -1,7 +1,11 @@
 #pragma once
 
+
+#include <string>
+#include <map>
 #include "ecs/components.hpp"
 #include "background.hpp"
+#include "tool/playSong.hpp"
 
 namespace exocet {
     class State {
@@ -13,19 +17,37 @@ namespace exocet {
             Background* background;
 
             sol::function initLua;
+            sol::function updateLua;
+            sol::function renderLua;
 
             std::string tag;
-
+            std::map<std::string, std::unique_ptr<PlaySong>> songs;
         public:
-            State(std::string tag = "noname_state", sol::function initLua = sol::nil) { 
+            State(std::string tag = "noname_state", sol::function initLua = sol::nil, sol::function updateLua = sol::nil, sol::function renderLua = sol::nil) { 
                 this->tag = tag; 
 
                 this->initLua = initLua;
+                this->updateLua = updateLua;
+                this->renderLua = renderLua;
             }
 
             void init() { if(initLua != sol::nil) initLua(); }
-            void update() { background->update(); eManager->update(); eManager->refresh(); uiManager->update(); uiManager->refresh(); }
-            void render() { background->render(); eManager->render(); uiManager->render(); }
+            void update() { 
+                if(updateLua != sol::nil) updateLua();
+                
+                background->update(); 
+                eManager->update(); 
+                eManager->refresh(); 
+                uiManager->update(); 
+                uiManager->refresh(); 
+            }
+            void render() {
+                if(renderLua != sol::nil) renderLua();
+
+                background->render(); 
+                eManager->render(); 
+                uiManager->render(); 
+            }
 
             void loadState();
 
@@ -36,6 +58,12 @@ namespace exocet {
             inline void setUIManager(EntityManager* uiManager) { this->uiManager = uiManager; }
             inline void setBackground(Background* background) { this->background = background; }
             inline void setHandler(Handler* handler) { this->handler = handler; }
+            inline PlaySong* getSong(const std::string path) { return songs[path].get(); }
+            inline void setSong(const std::string path) {
+                PlaySong* song = new PlaySong(path);
+                std::unique_ptr<PlaySong> uPtr { song };
+                songs[path] = std::move(uPtr); 
+            }
     };
 
     class StateManager {

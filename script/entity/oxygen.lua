@@ -3,15 +3,7 @@ Oxygen = {
     --- @type Entity
     entity = nil,
     rain = {},
-    components = {
-        PhysicComponent:new({ x = 0, y = 0, w = 300, h = 200}),
-        {
-            tag = "script",
-            update = nil,
-            render = nil
-        },
-        SpriteComponent:new("orage.png"),
-    },
+    components = {},
 }
 Oxygen.__index = Oxygen
 
@@ -22,10 +14,12 @@ function Oxygen:new(vec)
 
     o.entity = Entity:new("oxygen")
 
-    o.components[1].position = {
-        x = vec.x,
-        y = vec.y
+    o.components = {
+        PhysicComponent:new(Rect:new(300, 200), vec),
+        ScriptComponent:new(function () o:update() end),
+        SpriteComponent:new("orage.png")
     }
+    
     o.rain = {
         vec + Vector2D:new(10, 200),
         vec + Vector2D:new(15, 200),
@@ -40,7 +34,7 @@ end
 function Oxygen:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx, 0))
 
-    if self.entity:getPosition().x < engine.getCameraPosition().x - 64 then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
         self.entity:destroy()
     end
 

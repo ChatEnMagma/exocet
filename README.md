@@ -28,6 +28,7 @@ font - Free Royal: https://www.dafont.com/fr/free-royalty.font
 
 ### 1.1
 - AnimationComponent
+- SongManager
 ### 1.0
 - Components
 - API lua

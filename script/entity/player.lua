@@ -15,52 +15,7 @@ Player = {
     gameover = false,
     beginGame = os.time(),
 
-    components = {
-        PhysicComponent:new({ x = 0, y = 0, w = 64, h = 64 }, Vector2D:new(0, 100)),
-        AnimationComponent:new(10, { w = 64, h = 64 },  {
-            { x = 32 * 0, y = 0, w = 32, h = 32 },
-            { x = 32 * 0, y = 0, w = 32, h = 32 },
-            { x = 32 * 0, y = 0, w = 32, h = 32 },
-
-            { x = 32 * 1, y = 0, w = 32, h = 32 },
-            { x = 32 * 1, y = 0, w = 32, h = 32 },
-            { x = 32 * 1, y = 0, w = 32, h = 32 },
-
-            { x = 32 * 2, y = 0, w = 32, h = 32 },
-            { x = 32 * 2, y = 0, w = 32, h = 32 },
-            { x = 32 * 2, y = 0, w = 32, h = 32 },
-
-            { x = 32 * 3, y = 0, w = 32, h = 32 },
-            { x = 32 * 3, y = 0, w = 32, h = 32 },
-            { x = 32 * 3, y = 0, w = 32, h = 32 },
-
-            { x = 32 * 4, y = 0, w = 32, h = 32 },
-            { x = 32 * 4, y = 0, w = 32, h = 32 },
-            { x = 32 * 4, y = 0, w = 32, h = 32 },
-
-            { x = 32 * 3, y = 0, w = 32, h = 32 },
-            { x = 32 * 3, y = 0, w = 32, h = 32 },
-            { x = 32 * 3, y = 0, w = 32, h = 32 },
-
-            { x = 32 * 2, y = 0, w = 32, h = 32 },
-            { x = 32 * 2, y = 0, w = 32, h = 32 },
-            { x = 32 * 2, y = 0, w = 32, h = 32 },
-
-            { x = 32 * 1, y = 0, w = 32, h = 32 },
-            { x = 32 * 1, y = 0, w = 32, h = 32 },
-            { x = 32 * 1, y = 0, w = 32, h = 32 },
-
-            { x = 32 * 0, y = 0, w = 32, h = 32 },
-            { x = 32 * 0, y = 0, w = 32, h = 32 },
-            { x = 32 * 0, y = 0, w = 32, h = 32 },
-        }, "exocet_anim.png"),
-        {
-            tag = "script",
-            update = nil,
-            render = nil
-        },
-        { tag = "drag" }
-    }
+    components = {}
 }
 Player.__index = Player
 
@@ -69,22 +24,63 @@ function Player:new()
     local p = setmetatable({}, Player)
     
     p.entity = Entity:new("player")
+
+    p.components = {
+        PhysicComponent:new(Rect:new(64, 64), Vector2D:new(0, 100)),
+        ScriptComponent:new(function () p:update() end),
+        { tag = "drag" },
+        AnimationComponent:new(
+            10, 
+            Rect:new(64, 64),  
+            {
+                Rect:new(32 * 0, 0, 32, 32),
+                Rect:new(32 * 0, 0, 32, 32),
+                Rect:new(32 * 0, 0, 32, 32),
+
+                Rect:new(32 * 1, 0, 32, 32),
+                Rect:new(32 * 1, 0, 32, 32),
+                Rect:new(32 * 1, 0, 32, 32),
+
+                Rect:new(32 * 2, 0, 32, 32),
+                Rect:new(32 * 2, 0, 32, 32),
+                Rect:new(32 * 2, 0, 32, 32),
+
+                Rect:new(32 * 3, 0, 32, 32),
+                Rect:new(32 * 3, 0, 32, 32),
+                Rect:new(32 * 3, 0, 32, 32),
+
+                Rect:new(32 * 4, 0, 32, 32),
+                Rect:new(32 * 4, 0, 32, 32),
+                Rect:new(32 * 4, 0, 32, 32),
+
+                Rect:new(32 * 3, 0, 32, 32),
+                Rect:new(32 * 3, 0, 32, 32),
+                Rect:new(32 * 3, 0, 32, 32),
+
+                Rect:new(32 * 2, 0, 32, 32),
+                Rect:new(32 * 2, 0, 32, 32),
+                Rect:new(32 * 2, 0, 32, 32),
+
+                Rect:new(32 * 1, 0, 32, 32),
+                Rect:new(32 * 1, 0, 32, 32),
+                Rect:new(32 * 1, 0, 32, 32),
+
+                Rect:new(32 * 0, 0, 32, 32),
+                Rect:new(32 * 0, 0, 32, 32),
+                Rect:new(32 * 0, 0, 32, 32),
+            }, 
+            "exocet_anim.png"
+        )
+    }
+
     p.nextDescOxy = os.time()
     p.oxygen = 100
     
     return p
 end
 
-function Player:setUpdateScript(s_update)
-    self.components[3]["update"] = s_update
-end
-
-function Player:setRenderScript(s_update)
-    self.components[3]["render"] = s_update
-end
-
 function Player:momentumCalculus()
-    if engine.getKey(SDL.SDLK_S) or engine.getKey(SDL.SDLK_DOWN) then
+    if engine.getAnyKey() then
         self.momentum = self.momentum + 1
         
         local vel = self.entity:getVelocity() + Vector2D:new(0, self.momentum )
