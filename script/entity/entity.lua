@@ -1,6 +1,6 @@
 --- Class Entity has essential functions
 --- @class Entity
-Entity = { 
+Entity = {
     --- The C pointer from Entity
     --- @private
     --- @type integer

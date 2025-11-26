@@ -13,6 +13,9 @@ namespace exocet {
             void init() override;
             void update() override;
 
+            /**
+             * \return If the entity is dragging
+             */
             inline bool isDragging() const { return drag; }
     };
 }

@@ -49,12 +49,5 @@ namespace exocet {
             inline friend std::ostream& operator<<(std::ostream& os, const Vector2D<T>& vector) {
                 return os << "(" << vector.x << "," << vector.y << ")";
             }
-
-            /* 
-            inline T getX() { return x; }
-            inline T getY() { return y; }
-            inline void setX(T x) { this->x = x; }
-            inline void setY(T y) { this->y = y; } 
-            */
     };
 }

@@ -13,7 +13,7 @@ namespace exocet {
         public:
             Polygon() { vertices = {}; }
             /**
-             * \brief Make a sqare vertices
+             * \brief Make a rectangular shape
              */
             Polygon(int xpos, int ypos, int width, int height) {
                 vertices = {
@@ -23,7 +23,13 @@ namespace exocet {
                     Vector2D<int>(xpos, ypos + height)
                 };
             }
+            /**
+             * \brief Make a new polygon
+             */
             Polygon(std::vector<Vertex> vertices) { this->vertices.assign(vertices.begin(), vertices.end()); }
+            /**
+             * \brief Make a polygon with lua table like {{x: 0, y: 0}, {x: 0, y: 32}, ...}
+             */
             Polygon(sol::table vertices) {
                 vertices.for_each([&](sol::object const& key, sol::object const& value) {
                     this->vertices.push_back(Vector2D<int>(
@@ -34,10 +40,16 @@ namespace exocet {
             }
 
             /**
-             * \return Get a specific point
+             * \return Get a specific vertex
              */
             inline Vertex getVertex(std::size_t i) const { return vertices[i]; }
+            /**
+             * \return Get all vertices
+             */
             inline std::vector<Vertex> getVertices() const { return vertices; }
+            /**
+             * \return The number of vertices
+             */
             inline std::size_t length() const { return vertices.size(); }
             Vector2D<int> getEdge(std::size_t i) const {
                 return vertices[i] - vertices[(i + 1) % length()];
@@ -56,7 +68,10 @@ namespace exocet {
 
                 return axis;
             }
-
+            /**
+             * \brief Transpose the polygon
+             * \return The polygon transposed
+             */
             Polygon translate(Vector2D<int> position) const {
                 std::vector<Vertex> vrt = std::vector<Vertex>(length());
 
@@ -66,6 +81,10 @@ namespace exocet {
 
                 return Polygon(vrt);
             }
+            /**
+             * \brief Rotate the polygon
+             * \return The polygon rotated
+             */
             Polygon rotate(double angle) const {
                 Polygon poly(vertices);
 

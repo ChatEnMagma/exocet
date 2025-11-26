@@ -64,22 +64,26 @@ bool overlaps(double max1, double max2, double min1, double min2) {
 }
 
 bool HitboxComponent::isCollide(HitboxComponent* hitbox) const {
+    // Use the Separating Axis Theorem
+
     double max1, max2, min1, min2;
 
+    // Get the transpos of the hitbox
     Polygon p1 = polygons.translate(transform->getPosition());
     Polygon p2 = hitbox->getPolygon().translate(hitbox->getPosition());
 
     auto axes1 = p1.getAxes();
     auto axes2 = p2.getAxes();
 
+    // Check axis of p1
     for(const Vector2D<double>& p: axes1) {
         projection(p1, p, &max1, &min1);
         projection(p2, p, &max2, &min2);
 
         if(!overlaps(max1, max2, min1, min2)) return false;
     }
-
-     for(const Vector2D<double>& p: axes2) {
+    // Check acis of p2
+    for(const Vector2D<double>& p: axes2) {
         projection(p1, p, &max1, &min1);
         projection(p2, p, &max2, &min2);
 

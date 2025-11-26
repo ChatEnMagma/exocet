@@ -25,12 +25,23 @@ namespace exocet {
             bool isCollideHorizontal(HitboxComponent* hitbox) const;
             bool isCollideVertical(HitboxComponent* hitbox) const;
 
+            /**
+             * \return True if the mouse is inside the entity else false
+             */
             bool isInsideMouse() const;
-
+            /**
+             * \return True if the entity is ouside the screen (depend of the camera) else false
+             */
             bool isOutsideScreen();
+            /**
+             * \brief If the entity is outside the screen, then it destroyes
+             */
             inline void destroyOutsideScreen() { if(isOutsideScreen()) entity->destroy(); }
 
             // ALL GETTERS POINT HITBOX
+            /**
+             * \return The focal point of the entity
+             */
             inline Vector2D<int> getCenter() const { 
                 return Vector2D<int>(
                     transform->getPosition().x + (x + getWidth()) / 2, 
@@ -46,25 +57,28 @@ namespace exocet {
             inline float getMoveRight() const { return transform->getVelocity().x + (float) getRight(); }
             inline float getMoveTop() const { return transform->getVelocity().y + (float) getTop(); }
             inline float getMoveBottom() const { return transform->getVelocity().y + (float) getBottom(); }
-
-            inline Vector2D<int> getOffset() const { return Vector2D<int>(x, y); }
+            /**
+             * \return The width of the entity
+             */
             int getWidth() const {
                 int tmp = INT32_MIN;
                 for(Vector2D<int> p: polygons.getVertices()) {
                     tmp = std::max(tmp, p.x);
-                    //cout << p << endl;
                 }
                 return tmp;
             }
+            /**
+             * \return The height of the entity
+             */
             inline int getHeight() const {
                 int tmp = INT32_MIN;
                 for(Vector2D<int> p: polygons.getVertices())
                     tmp = std::max(tmp, p.y);
                 return tmp;
             }
-
-            inline void setOffset(int xoffset, int yoffset) { x = xoffset; y = yoffset; }
-            inline void setSize(int width, int height) { w = width; h = height; }
+            /**
+             * \brief Set a rectangular hitbox for the entity
+             */
             inline void setRect(int xpos, int ypos, int width, int height) {
                 polygons = Polygon(xpos, ypos, width, height); shape = RECTANGULAR_SHAPE; 
             }
@@ -78,6 +92,9 @@ namespace exocet {
 
             inline Uint8 getTypeShaped() const { return shape; }
             inline Polygon getPolygon() const { return polygons; }
+            /**
+             * \return The number of vertices
+             */
             inline std::size_t length() const { return polygons.length(); }
     };
 }
