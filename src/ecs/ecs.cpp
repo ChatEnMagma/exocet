@@ -25,83 +25,76 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
         auto& physic = addComponent<PhysicComponent>();
         if(component["position"] != sol::nil) {
             physic.setPointsPosition(
-                component["position"]["x"], 
-                component["position"]["y"]
+                component["position"]["x"].get<int>(), 
+                component["position"]["y"].get<int>()
             );
         }
         if(component["velocity"] != sol::nil) {
             physic.setPointsVelocity(
-                component["velocity"]["x"], 
-                component["velocity"]["y"]
+                component["velocity"]["x"].get<float>(), 
+                component["velocity"]["y"].get<float>()
             );
         }
         if(component["hitbox"] != sol::nil) {
-            physic.getHitbox()->setHitbox(
-                component["hitbox"]["x"], 
-                component["hitbox"]["y"], 
-                component["hitbox"]["w"], 
-                component["hitbox"]["h"]
-            );
+            if(component["hitbox"]["vertices"] == sol::nil) {
+                physic.getHitbox()->setRect(
+                    component["hitbox"]["x"].get<int>(),
+                    component["hitbox"]["y"].get<int>(),
+                    component["hitbox"]["w"].get<int>(),
+                    component["hitbox"]["h"].get<int>()
+                );
+            } else {
+                physic.getHitbox()->setPoly(Polygon(component["hitbox"]["vertices"].get<sol::table>()));
+            }
         }
+
     if(component["masse"] != sol::nil)
-        physic.setMasse(component["masse"]);
+        physic.setMasse(component["masse"].get<float>());
     if(component["color"] != sol::nil)
-        physic.getHitbox()->setColor(component["color"][0], component["color"][1], component["color"][2]);
+        physic.getHitbox()->setColor(
+            component["color"][0].get<Uint8>(),
+            component["color"][1].get<Uint8>(),
+            component["color"][2].get<Uint8>()
+        );
     } else if(tag == "script") {
         addComponent<ScriptComponent>(component);
     } else if(tag == "sprite") {
         SpriteComponent& sprite = addComponent<SpriteComponent>();
 
-        sprite.setTexture("res/" + component["path"].get<string>());
-
-        if(component["size"] != sol::nil) {
-            sprite.setSize(component["size"]["w"], component["size"]["h"]);
-        }
-        if(component["fitSizeWithHitbox"] != sol::nil) {
-            sprite.fitSizeWithHitbox();
-        }
-    } else if(tag == "animation") {
-        AnimationComponent& animation = addComponent<AnimationComponent>();
-
         if(component["fps"] != sol::nil) {
-            animation.setFPS(component["fps"].get<size_t>());
+            sprite.setFPS(component["fps"].get<size_t>());
         } else cout << "/!\\ Warning from `" << getTag() << "` you should set fps" << endl;
 
-        if(component["size"] != sol::nil) {
-            animation.setSize(component["size"]["w"], component["size"]["h"]);
+        if(component["size"] != sol::nil && component["nTextures"] != sol::nil && component["path"] != sol::nil) {
+            sprite.initFrameFromSheet(
+                "res/" + component["path"].get<string>(),
+                component["nTextures"].get<int>(),
+                component["size"]["x"].get<int>(),
+                component["size"]["y"].get<int>(),
+                component["size"]["w"].get<int>(),
+                component["size"]["h"].get<int>()
+            );
+        }else if(component["size"] == sol::nil) {
+            sprite.initFrameFromSheet("res/" + component["path"].get<string>());
+            sprite.fitSizeWithHitbox();
+        }
+
+        if(component["angle"] != sol::nil) {
+            sprite.setAngle(component["angle"].get<double>());
         }
         
-        if(component["textures"] != sol::nil) {
-            vector<Texture*> texVec;
-
-            component["textures"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
-                sol::table tex = value.as<sol::table>();
-                if(component["path"] == sol::nil)
-                    texVec.push_back(new Texture(handler, "res/" + tex["path"].get<string>()));
-                else {
-                    string path = component["path"].get<string>();
-                    sol::table tex = value.as<sol::table>();
-
-                    texVec.push_back(new Texture(
-                        handler, 
-                        "res/" + path, 
-                        tex["x"], 
-                        tex["y"], 
-                        tex["w"], 
-                        tex["h"])
-                    );
-                }
-            });
-
-            animation.setTextures(texVec);
-        } else cout << "/!\\ Warning from `" << getTag() << "` you should add textures" << endl;
     } else if(tag == "drag") {
         addComponent<DragComponent>();
     } else if(tag == "ui") {
         UIComponent& ui = addComponent<UIComponent>();
 
         if(component["rect"] != sol::nil) {
-            ui.setRect(component["rect"]["x"], component["rect"]["y"], component["rect"]["w"], component["rect"]["h"]);
+            ui.setRect(
+                component["rect"]["x"].get<int>(),
+                component["rect"]["y"].get<int>(),
+                component["rect"]["w"].get<int>(),
+                component["rect"]["h"].get<int>()
+            );
         }
     } else if(tag == "button") {
         ButtonComponent& button = addComponent<ButtonComponent>();
@@ -110,9 +103,31 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
             button.setFunction(component["func"].get<function<void()>>());
         }
         if(component["rect"] != sol::nil) {
-            button.setRect(component["rect"]["x"], component["rect"]["y"], component["rect"]["w"], component["rect"]["h"]);
+            button.setRect(
+                component["rect"]["x"].get<int>(),
+                component["rect"]["y"].get<int>(),
+                component["rect"]["w"].get<int>(),
+                component["rect"]["h"].get<int>()
+            );
         } else {
             cout << "Warning from `" << getTag() << "` you should initiate the rect of ButtonComponent" << endl;
+        }
+    } else if(tag == "particle") {
+        ParticleComponent& particle = addComponent<ParticleComponent>();
+
+        if(component["time"] != sol::nil)
+            particle.setTime(component["time"]);
+        if(component["position"] != sol::nil) {
+            particle.setPointsPosition(
+                component["position"]["x"].get<int>(),
+                component["position"]["y"].get<int>()
+            );
+        }
+        if(component["velocity"] != sol::nil) {
+            particle.setPointsVelocity(
+                component["velocity"]["x"].get<float>(),
+                component["velocity"]["y"].get<float>()
+            );
         }
     } else {
         cout << "Warning: unknow component `" << tag << "`" << endl;

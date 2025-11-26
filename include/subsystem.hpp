@@ -23,6 +23,7 @@ namespace exocet {
             std::string title;
 
             bool muting;
+            bool resizing;
 
             bool running;
         public:
@@ -65,6 +66,7 @@ namespace exocet {
                 Mix_Volume(-1, 128);
             }
             inline bool isMuting() const { return muting; }
+            inline bool isResizing() const { return resizing; }
 
             inline Graphic* getGraphic() { return gfx; }
             inline KeyListener* getKeyListener() { return &keys; }

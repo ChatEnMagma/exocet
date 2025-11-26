@@ -3,6 +3,8 @@ Cloud = {
     --- @type Entity
     entity = nil,
 
+    next = 0,
+
     components = {},
     oldWhooshPath = "whoosh" .. tostring(math.random(0, 1)) .. ".wav",
     newWhooshPath = ""
@@ -10,19 +12,35 @@ Cloud = {
 
 Cloud.__index = Cloud
 
+function Cloud:updateHatch(vec)
+    local player = engine.mainEntities.player
+
+    if self.next <= 0 and player.entity:getVelocity().y < 500 then
+        local e = Cloud:new(vec)
+
+        engine.addEntity(e)
+
+        if engine.mainEntities.player.entity:getPosition().y <= 8000 then
+            self.next = math.random(30, 100)
+        else
+            self.next = math.random(100 + mainState.step, 250 + mainState.step)
+        end
+    end
+    self.next = self.next - 1
+end
+
 --- @return Cloud
 --- @param vec Vector2D
 function Cloud:new(vec)
     local c = setmetatable({}, Cloud)
 
     c.entity = Entity:new("cloud")
-    
     c.components = {
         PhysicComponent:new(Rect:new(300, 200), vec),
         ScriptComponent:new(function () c:update() end),
         SpriteComponent:new("nuage.png")
     }
-
+    
     c.oldWhooshPath = "whoosh" .. tostring(math.random(0, 1)) .. ".wav"
 
     return c

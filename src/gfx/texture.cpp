@@ -59,11 +59,18 @@ void Texture::render(Vector2D<int> pos, int w, int h) {
 
 void Texture::renderAnchor(Vector2D<int> pos, int w, int h) {
     SDL_Rect src = { x, y, this->w, this->h };
-    SDL_Rect dest = { 
-        pos.x, 
-        pos.y, 
-        w, h 
-    };
+    SDL_Rect dest = { pos.x, pos.y, w, h };
 
     SDL_RenderCopy(handler->getSubsystem()->getRenderer(), tex, &src, &dest);
+}
+
+void Texture::renderAnchorAngle(Vector2D<int> pos, int w, int h, double a) {
+    SDL_Rect src = { x, y, this->w, this->h };
+    SDL_Rect dest = { pos.x, pos.y, w, h };
+
+    SDL_RenderCopyEx(handler->getSubsystem()->getRenderer(), tex, &src, &dest, a, NULL, SDL_FLIP_NONE);
+}
+
+void Texture::renderAngle(Vector2D<int> pos, int w, int h, double a) {
+    renderAnchorAngle(pos - handler->getGraphic()->getCamera()->getPosition(), w, h, a);
 }

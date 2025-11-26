@@ -2,33 +2,41 @@
 Oxygen = {
     --- @type Entity
     entity = nil,
-    rain = {},
+    next = 0,
     components = {},
 }
 Oxygen.__index = Oxygen
 
 --- @return Oxygen
---- @param vec Vector2D
-function Oxygen:new(vec)
+--- @param position Vector2D
+function Oxygen:new(position)
     local o = setmetatable({}, Oxygen)
 
     o.entity = Entity:new("oxygen")
 
     o.components = {
-        PhysicComponent:new(Rect:new(300, 200), vec),
+        PhysicComponent:new(Rect:new(300, 200), position),
         ScriptComponent:new(function () o:update() end),
         SpriteComponent:new("orage.png")
     }
-    
-    o.rain = {
-        vec + Vector2D:new(10, 200),
-        vec + Vector2D:new(15, 200),
-        vec + Vector2D:new(30, 200),
-        vec + Vector2D:new(50, 200),
-        vec + Vector2D:new(60, 200),
-    }
 
     return o
+end
+
+function Oxygen:updateHatch(vec)
+    if self.next <= 0 then
+        local e = Oxygen:new(vec)
+
+        engine.addEntity(e)
+
+        local playerPos = engine.mainEntities.player.entity:getPosition()
+        if playerPos.y < 500 then
+            self.next = math.random(100 + mainState.step, 300 + mainState.step)
+        else
+            self.next = math.random(400 + mainState.step, 1000 + mainState.step)
+        end
+    end
+    self.next = self.next - 1
 end
 
 function Oxygen:update()
@@ -44,18 +52,9 @@ function Oxygen:update()
             engine.mainEntities.player.oxygen = 100
         end
     end
-end
+    local rainPos = self.entity:getPosition() + Vector2D:new(math.random(0, self.entity:getRect().w), self.entity:getRect().h)
 
-function Oxygen:render()
-    engine.setColor(0, 0, 0xff, 0xff)
-    for key,value in self.rain do
-        engine.renderRect(value, 16, 128)
-        value = value + Vector2D:new(mainState.vx, 1)
-
-        if(value.y >= self.entity:getPosition().y + 200) then
-            value.y = self.entity:getPosition().y
-        end
-    end
+    engine.addEntity(Rain:new(self.entity:getPosition(), rainPos))
 end
 
 return Oxygen

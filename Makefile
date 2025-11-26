@@ -9,8 +9,13 @@ CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
 ifeq ($(OS),Windows_NT)
 	EXE = exocet.exe
 
-	CXXLIBS = -L. -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -llua
-	BEGIN_COMPILE = exocet.res $(EXE)
+	CXXLIBS = -static -static-libgcc -static-libstdc++ \
+				`pkg-config --libs --static SDL2` \
+				`pkg-config --libs --static SDL2_image` \
+				`pkg-config --libs --static SDL2_ttf` \
+				`pkg-config --libs --static SDL2_mixer` \
+				-llua
+	BEGIN_COMPILE = exocet.res | $(EXE)
 	END_COPILE = $(CXX) -o $(EXE) $^ $(CXXLIBS) exocet.res
 else
 	EXE = exocet

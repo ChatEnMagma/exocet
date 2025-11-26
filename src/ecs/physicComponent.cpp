@@ -25,8 +25,8 @@ void PhysicComponent::init() {
 
 void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
     PhysicComponent* e_physic = &e->getComponent<PhysicComponent>();
-    Vector2D<float> m_v1 = transform->vel;
-    Vector2D<float> e_v1 = e_physic->transform->vel;
+    //Vector2D<float> m_v1 = transform->vel;
+    //Vector2D<float> e_v1 = e_physic->transform->vel;
 
     Vector2D<float> m_v2, e_v2;
     

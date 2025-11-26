@@ -15,6 +15,5 @@ void DragComponent::init() {
 }
 
 void DragComponent::update() {
-    const Vector2D<int> pos = handler->getMousePosition();
     drag = handler->getButton(0) && hitbox->isInsideMouse();
 }

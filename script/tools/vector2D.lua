@@ -18,6 +18,12 @@ function Vector2D:new(x, y)
     return v
 end
 
+--- Get the angle of the Vector
+--- @return number
+function Vector2D:getAngle()
+    return math.atan(self.x, self.y)
+end
+
 --- @param vec2D Vector2D
 function Vector2D:__add(vec2D)
     return Vector2D:new(self.x + vec2D.x, self.y + vec2D.y)

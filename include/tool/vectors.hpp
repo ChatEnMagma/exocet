@@ -20,10 +20,12 @@ namespace exocet {
                 if(mag == 0) return Vector2D(0, 0);
                 return Vector2D(x / mag, y / mag); 
             }
+            inline Vector2D perpendicular() const { return Vector2D(-y, x); }
+            inline T dot(Vector2D<T> vec) { return x * vec.x + y * vec.y; }
             inline Vector2D scalar(const T alpha) const { return Vector2D(x * alpha, y * alpha); }
             inline Vector2D reflect() const { return Vector2D(-x, -y); }
             inline Vector2D rotate(double angle) const { return Vector2D(x * cos(angle) - y * sin(angle), x * sin(angle) + y * cos(angle)); }
-
+            inline double getAngle() const { return atan2(x, y); }
             inline void setPoints(T x, T y) { this->x = x; this->y = y; }
 
             inline void add(const Vector2D& vector) { x += vector.x; y += vector.y; }
@@ -42,7 +44,7 @@ namespace exocet {
             inline Vector2D operator/=(const Vector2D& vec) { div(vec); return *this; }
 
             template <typename U>
-            inline Vector2D<U> convert() { return Vector2D<U>((U) x, (U) y); }
+            inline Vector2D<U> convert() const { return Vector2D<U>((U) x, (U) y); }
 
             inline friend std::ostream& operator<<(std::ostream& os, const Vector2D<T>& vector) {
                 return os << "(" << vector.x << "," << vector.y << ")";

@@ -7,7 +7,7 @@ PhysicComponent = {
     position = Vector2D:new(0, 0)
 }
 
---- @param hitbox Rect
+--- @param hitbox Rect|Polygon
 --- @param position Vector2D|nil
 function PhysicComponent:new(hitbox, position)
     local c = {}

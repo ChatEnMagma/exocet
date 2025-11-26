@@ -25,7 +25,11 @@ sol.hpp: https://github.com/ThePhD/sol2
 font - Free Royal: https://www.dafont.com/fr/free-royalty.font
 
 ## Updates
-
+### 1.2
+- background
+- UFO
+- Liner
+- static compile
 ### 1.1
 - AnimationComponent
 - SongManager

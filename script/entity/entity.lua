@@ -1,7 +1,3 @@
-local engine = require("engine")
-local Vector2D = require("vector2D")
-local string = require("string")
-
 --- Class Entity has essential functions
 --- @class Entity
 Entity = { 
@@ -23,13 +19,31 @@ end
 
 --- @param tag string
 function Entity:new(tag)
-    local e = {}
-    
-    setmetatable(e, Entity)
-    
+    local e = setmetatable({}, Entity)
     e.tag = tag
 
     return e
+end
+
+--- @return integer
+function Entity:getFrameAnimation()
+    return Entity.cGetFrameAnimation(self._ptr)
+end
+---@param path string
+---@param size Rect|nil
+---@param frame integer|nil
+function Entity:setTexture(path, size, frame)
+    if frame == nil then
+        frame = -1
+    end
+    if size == nil then
+        size = Rect:new()
+    end
+    Entity.cSetTexture(self._ptr, path, size.x, size.y, size.w, size.h, frame)
+end
+--- @param angle number
+function Entity:setTextureAngle(angle)
+    Entity.cSetTextureAngle(self._ptr, angle)
 end
 
 --- Check if the mouse is well interact with mouse
@@ -51,12 +65,16 @@ end
 function Entity:getCollideEntities()
     return Entity.cGetCollideEntities(self._ptr)
 end
-
+--- Set the rectangle hitbox or rect for HitboxComponent and UIComponent
+--- @param rect Rect
+function Entity:setRect(rect)
+    Entity.cSetRect(self._ptr, rect.x, rect.y, rect.w, rect.h)
+end
 --- Get the rect of the entity
---- @return table
+--- @return Rect
 function Entity:getRect()
     local x, y, w, h = Entity.cGetRect(self._ptr)
-    return { x = x, y = y, w = w, h = h }
+    return Rect:new(x, y, w, h)
 end
 --- Check if the entity is well collide
 --- @param entity any
@@ -68,12 +86,6 @@ end
 --- Kill the entity
 function Entity:destroy()
     self.cDestroy(self._ptr)
-end
-
---- Set the texture to the Entity. You must add SpriteComponent
---- @param path string
-function Entity:setTexture(path)
-    engine.cSetTexture(self._ptr, path);
 end
 
 --- Fit the size of the sprite with hitbox
@@ -118,6 +130,12 @@ end
 --- @return boolean
 function Entity:isDragging()
     return self.cIsDragging(self._ptr)
+end
+
+--- Get the time before to die
+--- @return integer
+function Entity:getTime()
+    return Entity.cGetTime(self._ptr)
 end
 
 return Entity

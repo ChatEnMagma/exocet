@@ -3,9 +3,29 @@ Bird = {
     --- @type Entity
     entity = nil,
 
+    next = 0,
+
     components = {},
 }
 Bird.__index = Bird
+
+function Bird:updateHatch(vec)
+    local playerPos = engine.mainEntities.player.entity:getPosition()
+
+    if self.next <= 0 and (mainState.score > 10) and (playerPos.y <= 500) then
+
+        local e = Bird:new(vec)
+
+        engine.addEntity(e)
+
+        if(playerPos.y <= 500) then
+            self.next = math.random(110, 1000)
+        else
+            self.next = math.random(50, 500)
+        end
+    end
+    self.next = self.next - 1
+end
 
 --- @return Bird
 --- @param vec Vector2D

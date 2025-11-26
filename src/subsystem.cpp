@@ -36,19 +36,23 @@ bool Subsystem::init(int w, int h, string title) {
     // set the title window
     this->title = title;
 
+    this->resizing = false;
+
     win = SDL_CreateWindow(
         this->title.c_str(), 
         SDL_WINDOWPOS_CENTERED, 
         SDL_WINDOWPOS_CENTERED, 
         this->w, 
         this->h, 
-        0
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
     );
 
     if(win == NULL) {
         cerr << "Fail to initiate the window: " << SDL_GetError() << endl;
         return false; 
     }
+
+    SDL_SetWindowMinimumSize(win, WIN_MIN_WIDTH, WIN_MIN_HEIGHT);
 
     // create the renderer
     gfx = new Graphic(SDL_CreateRenderer(
@@ -79,21 +83,30 @@ bool Subsystem::init(int w, int h, string title) {
 void Subsystem::handleEvents() {
     SDL_Event e;
     while(SDL_PollEvent(&e)) {
-        if(e.type == SDL_QUIT)
-            close();
-        // Keylistener methods
-        if(e.type == SDL_KEYDOWN)
-            keys.interactKey(e.key.keysym.sym, true);
-        if(e.type == SDL_KEYUP)
-            keys.interactKey(e.key.keysym.sym, false);
+        switch(e.type) {
+            case SDL_QUIT:
+                close();
+            break;
+            case SDL_WINDOWEVENT:
+                if(e.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    w = e.window.data1;
+                    h = e.window.data2;
+
+                    resizing = true;
+                } else resizing = false;
+            break;
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+                keys.interactKey(e.key.keysym.sym, (e.type == SDL_KEYDOWN));
+            break;
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+                mouse.interact(e.button.button, (e.type == SDL_MOUSEBUTTONDOWN));
+            break;
+        }
 
         // MouseListener methods
         mouse.move(e.motion.x, e.motion.y);
-
-        if(e.type == SDL_MOUSEBUTTONDOWN)
-            mouse.interact(e.button.button, true);
-        if(e.type == SDL_MOUSEBUTTONUP)
-            mouse.interact(e.button.button, false);
     }
 
     keys.update();

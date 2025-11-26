@@ -28,6 +28,8 @@ namespace exocet {
              */
             void render(Vector2D<int> postion, int width, int height);
             void renderAnchor(Vector2D<int> position, int width, int height);
+            void renderAnchorAngle(Vector2D<int> position, int width, int height, double angle);
+            void renderAngle(Vector2D<int> position, int width, int height, double angle);
 
             inline void setHandler(Handler* handler) { this->handler = handler; }
             inline void clean() { SDL_DestroyTexture(tex); }

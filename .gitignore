@@ -1,6 +1,9 @@
 .vscode
+android-project
 obj
 exocet
 exocet.exe
+exocet.res
 versionzip
 tex_temp
+save.json

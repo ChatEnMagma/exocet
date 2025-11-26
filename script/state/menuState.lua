@@ -2,19 +2,30 @@
 menuState = {
     tag = "menuState",
 
+    highscore = 0,
+    
+    init = function ()
+        local file = io.open("save.json", "r")
+        if file == nil then
+            return
+        end
+        local content = file:read("*a")
+        file:close()
+        local config = json.decode(content)
+        menuState.highscore = config["highscore"]
+    end,
+
+    update = function ()
+        engine.setBackgroundSize(Rect:new(engine.getWinWidth(), engine.getWinHeight()))
+    end,
+
     background = {
-        size = {
-            w = engine.getWinWidth(),
-            h = engine.getWinHeight()
-        },
+        size = Rect:new(engine.getWinWidth(), engine.getWinHeight()),
         textures = {
             {
                 path = "plage_background.jpg",
                 zindex = 0,
-                postion = {
-                    x = 0,
-                    y = 0
-                }
+                postion = Vector2D:new()
             }
         }
     },
@@ -23,55 +34,54 @@ menuState = {
         {
             entity = Entity:new("player_button"),
             components = {
-                {
-                    tag = "button",
-                    rect = {
-                        x = engine.getWinWidth() // 2 - 128 // 2,
-                        y = engine.getWinHeight() // 2 - 64 // 2,
-                        w = 128,
-                        h = 64
-                    },
-                    func = function ()
-                        engine.setState(1)
-                    end
-                },
-                {
-                    tag = "script",
-                    render = function ()
-                        local pos = Vector2D:new(engine.getWinWidth() // 2 - 128 // 2, engine.getWinHeight() // 2 - 64 // 2)
+                ButtonComponent:new(
+                    Rect:new(
+                        engine.getWinWidth() // 2 - 128 // 2,
+                        engine.getWinHeight() // 2 - 64 // 2,
+                        128,
+                        64
+                    ),
+                    function () engine.setState(1) end
+                ),
+                ScriptComponent:new(
+                    function ()
+                        menuState.uis[1].entity:setRect(Rect:new( engine.getWinWidth() // 2 - 128 // 2, engine.getWinHeight() // 2 - 64 // 2, 128, 64))
+                    end,
+                    function ()
+                        local pos = menuState.uis[1].entity:getPosition()
                         engine.setColor(0, 0, 0, 0xFF)
                         engine.renderAnchorRect(pos, 128, 64)
+                        engine.renderText(0, 0, 259, 32, tostring(menuState.highscore))
                         engine.setColor(0xff, 0xff, 0xff, 0xff)
                         engine.renderText(pos.x, pos.y, 128, 64, "JOUER")
                     end
-                }
+                )
             }
         },
         {
             entity = Entity:new("quit_button"),
             components = {
-                {
-                    tag = "button",
-                    rect = {
-                        x = engine.getWinWidth() - 128,
-                        y = engine.getWinHeight() - 64,
-                        w = 128,
-                        h = 64
-                    },
-                    func = function ()
-                        engine.closeGame()
-                    end
-                },
-                {
-                    tag = "script",
-                    render = function ()
-                        local pos = Vector2D:new(engine.getWinWidth() - 128, engine.getWinHeight() - 64 )
+                ButtonComponent:new(
+                    Rect:new(
+                        engine.getWinWidth() - 128,
+                        engine.getWinHeight() - 64,
+                        128,
+                        64
+                    ),
+                    function () engine.closeGame() end
+                ),
+                ScriptComponent:new(
+                    function ()
+                        menuState.uis[2].entity:setRect(Rect:new(engine.getWinWidth() - 128, engine.getWinHeight() - 64, 128, 64))
+                    end,
+                    function ()
+                        local pos = menuState.uis[2].entity:getPosition()
                         engine.setColor(0, 0, 0, 0xFF)
                         engine.renderAnchorRect(pos, 128, 64)
                         engine.setColor(0xff, 0xff, 0xff, 0xff)
                         engine.renderText(pos.x, pos.y, 128, 64, "QUIT")
                     end
-                }
+                )
             }
         }
     }

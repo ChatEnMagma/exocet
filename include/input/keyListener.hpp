@@ -13,11 +13,17 @@ namespace exocet {
 
             Uint16 scancode;
             bool pressing;
+            bool justPressing;
+            bool cantPressing;
         public:
             KeyListener() { 
                 memset(keys, false, SDL_NUM_SCANCODES * sizeof(bool)); 
                 memset(justPress, false, SDL_NUM_SCANCODES * sizeof(bool)); 
-                memset(cantPress, false, SDL_NUM_SCANCODES * sizeof(bool)); 
+                memset(cantPress, false, SDL_NUM_SCANCODES * sizeof(bool));
+
+                pressing = false;
+                cantPressing = false;
+                justPressing = false;
             }
             
             void update() {
@@ -31,6 +37,14 @@ namespace exocet {
                         cantPress[i] = false;
                     }
                 }
+                if(pressing && !cantPressing) {
+                    cantPressing = true;
+                    justPressing = true;
+                } else if (pressing && cantPressing) {
+                    justPressing = false;
+                } else {
+                    cantPressing = false;
+                }
             }
 
             /**
@@ -42,5 +56,6 @@ namespace exocet {
             inline bool getJustKey(Uint16 scancode) const { return justPress[scancode]; }
             inline Uint16 getKeyCode() const { return (pressing)? scancode: 0; }
             inline bool isPressing() const { return pressing; }
+            inline bool isJustPressing() const { return justPressing; }
     };
 }

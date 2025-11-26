@@ -2,6 +2,7 @@
 
 #include "constantes.hpp"
 #include "tool/vectors.hpp"
+#include "tool/polygon.hpp"
 
 #include "gfx/camera.hpp"
 #include "gfx/texture.hpp"
@@ -54,19 +55,22 @@ namespace exocet {
 
             void renderText(int x, int y, int w, int h, std::string text, TTF_Font* font);
 
-            inline void renderLine(const Vector2D<int> position1, const Vector2D<int> position2) {
-                SDL_RenderDrawLine(
-                    ren, 
-                    position1.x - camera.getPosition().x,
-                    position1.y - camera.getPosition().y,
-                    position2.x - camera.getPosition().x,
-                    position2.y - camera.getPosition().y
-                );
-            }
-
             inline void setRenderColor(Uint8 red, Uint8 blue, Uint8 green, Uint8 alpha = 0xff) { SDL_SetRenderDrawColor(ren, red, blue, green, alpha); }
             inline void renderClear() { SDL_RenderClear(ren); }
             inline void renderPresent() { SDL_RenderPresent(ren); }
+
+            inline void renderAnchorLine(const Vector2D<int> pos1, const Vector2D<int> pos2) { SDL_RenderDrawLine(ren, pos1.x, pos1.y, pos2.x, pos2.y); }
+            inline void renderLine(const Vector2D<int> pos1, const Vector2D<int> pos2) {
+                renderAnchorLine(pos1 - camera.getPosition(), pos2 - camera.getPosition());
+            }
+
+            void renderAnchorPolygon(const Vector2D<int>& position, const Polygon& polygon) {
+                for(std::size_t i = 0; i < polygon.length(); i++) {
+                    int nxt = (i + 1) % polygon.length();
+                    renderAnchorLine(position + polygon[i], position + polygon[nxt]);
+                }
+            }
+            inline void renderPolygon(const Vector2D<int>& position, const Polygon& polygon) { renderAnchorPolygon(position - camera.getPosition(), polygon); }
 
             inline SDL_Renderer* getRenderer() { return ren; }
             inline void setRenderer(SDL_Renderer* renderer) { ren = renderer; }

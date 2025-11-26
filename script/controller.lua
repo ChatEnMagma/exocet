@@ -29,7 +29,7 @@ end
 function controller.getDirection(player)
     local dir = Vector2D:new(0, 0)
 
-    for key, val in controller.players do
+    for _, val in controller.players do
         if val.tag == "keyboard" then
             dir = controller.handleDirectionKeyboard(player)
         end

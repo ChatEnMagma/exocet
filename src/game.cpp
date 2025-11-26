@@ -44,14 +44,19 @@ void Game::initLua() {
         handler->closeGame();
     }
 
+    bool logOpenLuaFiles = (lua["modules"]["logOpenLuaFiles"] != sol::nil && lua["modules"]["logOpenLuaFiles"].get<bool>() == true)? true: false;
+
     // Load main lib and package
-    lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::os, sol::lib::math);
+    lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::io, sol::lib::string, sol::lib::os, sol::lib::math);
     // Load all modules homemade
     lua["modules"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
+        if(logOpenLuaFiles)
+            cout << "try to read file: " << DIR_SCRIPT + value.as<sol::table>()[2].get<string>() + ".lua" << endl;
         lua.require_file(
             value.as<sol::table>()[1].get<string>(),                        // Get the name of the module
-            DIR_SCRIPT + value.as<sol::table>()[2].get<string>() + ".lua"   // Get the path of lua file
+            DIR_SCRIPT + value.as<sol::table>()[2].get<string>() + ".lua"  // Get the path of lua file
         );
+
     });
     // set the handle for lua script
 
@@ -65,11 +70,13 @@ void Game::initLua() {
     lua["engine"]["cHandlerGetWinHeight"] = [](intptr_t hLua) { return ((Handler*) hLua)->getWinHeight(); };
     lua["engine"]["cHandlerGetWinWidth"] = [](intptr_t hLua) { return ((Handler*) hLua)->getWinWidth(); };
     lua["engine"]["cCloseGame"] = [](intptr_t hLua) { ((Handler*) hLua)->closeGame(); };
+    lua["engine"]["cIsResizing"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->isResizing(); };
     
     lua["engine"]["cHandlerGetKey"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getKey(scancode); };
     lua["engine"]["cHandlerGetJustKey"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getJustKey(scancode); };
     lua["engine"]["cHandlerGetKeyCode"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->getKeyListener()->getKeyCode(); };
     lua["engine"]["cHandlerGetAnyKey"] = [](intptr_t hLua) { return ((Handler*) hLua)->getAnyKey(); };
+    lua["engine"]["cHandlerGetJustAnyKey"] = [](intptr_t hLua) { return ((Handler*) hLua)->getJustAnyKey(); };
 
     lua["engine"]["cHandlerGetButton"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getButton(scancode); };
     lua["engine"]["cHandlerGetJustButton"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getJustButton(scancode); };
@@ -81,7 +88,7 @@ void Game::initLua() {
 
     lua["engine"]["cMute"] = [](intptr_t hLua) { ((Handler*) hLua)->getSubsystem()->mute(); };
     lua["engine"]["cUnmute"] = [](intptr_t hLua) { ((Handler*) hLua)->getSubsystem()->unmute(); };
-    lua["engine"]["cIsMute"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->isMuting(); };
+    lua["engine"]["cIsMuting"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->isMuting(); };
     lua["engine"]["cGetVolume"] = [](intptr_t hLua, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->getVolume(); };
     lua["engine"]["cSetVolume"] = [](intptr_t hLua, const string path, int volume) { 
         if(!((Handler*) hLua)->getSubsystem()->isMuting())
@@ -123,12 +130,15 @@ void Game::initLua() {
             ((Handler*) hLua)->getGraphic()->freeRoyalty
         );
     };
+    lua["engine"]["cRenderPolygon"] = [](intptr_t hLua, int xpos, int ypos, sol::table polygon) {
+        ((Handler*) hLua)->getGraphic()->renderPolygon(Vector2D<int>(xpos, ypos), Polygon(polygon));
+    };
     lua["engine"]["cGetBackgroundPosition"] = [](intptr_t hLua) {
         const Vector2D<int> pos = ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->getPosition();
         return tuple<int, int>(pos.x, pos.y);
     };
     lua["engine"]["cSetBackgroundPosition"] = [](intptr_t hLua, int xpos, int ypos) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(Vector2D<int>(xpos, ypos)); };
-
+    lua["engine"]["cSetBackgroundSize"] = [](intptr_t hLua, int w, int h) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setSize(w, h); };
     // ===================== Entity class lua ============================
     // ****************** Methods from EntityManager *********************
     lua["engine"]["cAddEntity"] = [](intptr_t hLua, sol::table entity_lua) { (((Handler*) hLua)->getEntityManager()->addEntityFromLua(entity_lua)); };
@@ -150,19 +160,42 @@ void Game::initLua() {
         return tuple<int, int, int, int>(ui.getPosition().x, ui.getPosition().y, ui.getWidth(), ui.getHeight());
     };
     // *************** Methods from SpriteComponent **********************
-    lua["Entity"]["cSetTexture"] = [](intptr_t entity_lua, string path) {
-        Entity* e = ((Entity*) entity_lua);
-        if(e->hasComponent<SpriteComponent>()) {
-            e->getComponent<SpriteComponent>().setTexture(string("res/") + path);
-        } else { cout << "Warning /!\\ function `setTexture` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl; }
-    };
     lua["Entity"]["cFitSizeWithHitbox"] = [](intptr_t entity_lua) {
         Entity* e = ((Entity*) entity_lua);
         if(e->hasComponent<SpriteComponent>()) {
             e->getComponent<SpriteComponent>().fitSizeWithHitbox();
-        } else if(e->hasComponent<AnimationComponent>()) {
-            e->getComponent<AnimationComponent>().fitSizeWithHitbox();
-        } else { cout << "Warning /!\\ function `fitSizeWithHitbot` from: " << e->getTag() <<  ": You must inititate the SpriteComponent or AnimationComponent..." << endl; }
+        } else { cout << "Warning /!\\ function `fitSizeWithHitbot` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl; }
+    };
+    lua["Entity"]["cSetTexture"] = [](intptr_t entity_lua, const string path, int x, int y, int w, int h, size_t nbFrames) {
+        Entity* e = (Entity*) entity_lua;
+        if(e->hasComponent<SpriteComponent>()) {
+            e->getComponent<SpriteComponent>().initFrameFromSheet("res/" + path, nbFrames, x, y, w, h);
+        } else
+            cout << "Warning /!\\ function `setTexture` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl;
+    };
+    lua["Entity"]["cSetTextureAngle"] = [](intptr_t entity_lua, const double angle) {
+        Entity* e = (Entity*) entity_lua;
+        if(e->hasComponent<SpriteComponent>()) {
+            e->getComponent<SpriteComponent>().setAngle(angle);
+        } else
+             cout << "Warning /!\\ function `setTextureAngle` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl;
+    };
+    lua["Entity"]["cGetFrameAnimation"] = [](intptr_t entity_lua) {
+        Entity* e = (Entity*) entity_lua;
+        if(e->hasComponent<SpriteComponent>()) {
+            return e->getComponent<SpriteComponent>().getFrame();
+        }
+        cout << "Warning /!\\ function `getFrameAnimation` from" << e->getTag() << ": You must initiate the SpriteComponent" << endl;
+        return  (size_t)0;
+    };
+    // ***************** Methods from ParticleComponent ****************
+    lua["Entity"]["cGetTime"] = [](intptr_t entity_lua) {
+        Entity* e = (Entity*) entity_lua;
+        if(e->hasComponent<ParticleComponent>()) {
+            return e->getComponent<ParticleComponent>().getTime();
+        }
+        cout << "Warning /!\\ function `getTime` from" << e->getTag() << ": You must initiate the ParticleComponent" << endl;
+        return 0;
     };
     // **************** Methods from PhysicComponent ********************
     lua["Entity"]["cGetCollideEntities"] = [](intptr_t entity_lua) {
@@ -186,8 +219,18 @@ void Game::initLua() {
         if(e->hasComponent<HitboxComponent>())
             return e->getComponent<HitboxComponent>().isOutsideScreen();
         else
-            cout << "Warning: function `isOutsideScreen` from" << e << ". You must initiate the HitboxComponent" << endl;
+            cout << "Warning: function `isOutsideScreen` from" << e->getTag() << ". You must initiate the HitboxComponent" << endl;
         return false;
+    };
+    lua["Entity"]["cSetRect"] = [](intptr_t entity_lua, int xpos, int ypos, int width, int height) {
+        Entity* e = (Entity*) entity_lua;
+
+        if(e->hasComponent<HitboxComponent>()) {
+            e->getComponent<HitboxComponent>().setRect(xpos, ypos, width, height);
+        } else if(e->hasComponent<UIComponent>()) {
+            e->getComponent<UIComponent>().setRect(xpos, ypos, width, height);
+        } else
+            cout << "Warning: function `setRect` from" << e->getTag() << ". You must initiate the HitboxComponent or UIComponent" << endl;
     };
     lua["Entity"]["cDestroyOutsideScreen"] = [](intptr_t entity_lua) {
         Entity* e = (Entity*) entity_lua;

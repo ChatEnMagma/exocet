@@ -51,6 +51,7 @@ end
 function engine.unmute()
     engine.cUnmute(engine._handler)
 end
+--- @return boolean
 function engine.isMuting()
     return engine.cIsMuting(engine._handler)
 end
@@ -63,6 +64,11 @@ end
 ---@return integer
 function engine.getWinHeight()
     return engine.cHandlerGetWinHeight(engine._handler)
+end
+--- Get if the window is resizing
+--- @return boolean
+function engine.isResizing()
+    return engine.cIsResizing(engine._handler)
 end
 --- Close the window game
 function engine.closeGame()
@@ -77,6 +83,10 @@ end
 --- @return boolean
 function engine.getAnyKey()
     return engine.cHandlerGetAnyKey(engine._handler)
+end
+--- @return boolean
+function engine.getJustAnyKey()
+    return engine.cHandlerGetJustAnyKey(engine._handler)
 end
 --- Get boolean if the key is just pressing
 ---@return boolean
@@ -182,7 +192,11 @@ end
 function engine.renderText(xpos, ypos, width, height, text)
     engine.cRenderText(engine._handler, xpos, ypos, width, height, text)
 end
-
+--- @param position Vector2D
+--- @param polygon Polygon
+function engine.renderPolygon(position, polygon)
+    engine.cRenderPolygon(engine._handler, position.x, position.y, polygon.polygons)
+end
 
 --=================================== ALL CAMERA METHODS =====================================--
 
@@ -208,8 +222,13 @@ function engine.getBackgroundPosition()
 end
 --- Set the position of the background state
 --- @param postion Vector2D The new postion
-function engine.setBackgroundPosition(postion) 
-    engine.cSetBackgroundPosition(engine._handler, postion.x, postion.y)
+function engine.setBackgroundPosition(postion)
+    engine.cSetBackgroundPosition(engine._handler, math.tointeger(postion.x), math.tointeger(postion.y))
+end
+--- Set the size of the background
+--- @param rect Rect
+function engine.setBackgroundSize(rect)
+    engine.cSetBackgroundSize(engine._handler, rect.w, rect.h)
 end
 
 --=================================== ALL ENTITY METHODS =====================================--
