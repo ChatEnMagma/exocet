@@ -1,44 +1,13 @@
-#include <climits>
-#include <cfloat>
-
-#include "game.hpp"
-
-#include "tool/vectors.hpp"
-#include "tool/playSong.hpp"
+#include "luasystem.hpp"
 #include "handler.hpp"
 
-#include "luasystem.hpp"
+#define lua (*this)
 
-using namespace std;
 using namespace exocet;
+using namespace std;
 
-Game::Game(Subsystem* subsys) {
-    handler = new Handler(this, subsys);
-
-    // set handler graphics parts
-    handler->getGraphic()->initTextures(handler);
-    handler->getGraphic()->getCamera()->setHandler(handler);
-
-    // Init all modules and function lua
-    lua = new LuaSystem(handler);
-
-    // init StateManager
-    sManager = new StateManager();
-    sManager->setHandler(handler);
-    sManager->initStates();
-
-    // set the state, and try to fetch the config file lua
-    if((*lua)["config"]["init_state"] != sol::nil)
-        setState((size_t) (*lua)["config"]["init_state"]);
-    else setState(0);
-
-    // All debug functions pre-define bu config lua file
-    if((*lua)["config"]["showHitbox"] != sol::nil && (bool) (*lua)["config"]["showHitbox"]) showHitbox();
-    if((*lua)["config"]["showPointerEntities"] != sol::nil && (bool) (*lua)["config"]["showPointerEntities"]) showPointerEntities();
-}
-
-void Game::initLua() {
-    /*lua.script_file(DIR_SCRIPT_PACKAGE_MODULES);
+LuaSystem::LuaSystem(Handler* handler) {
+    lua.script_file(DIR_SCRIPT_PACKAGE_MODULES);
 
     // Check if the module field exists in the config
     if(lua["modules"] == sol::nil) {
@@ -65,9 +34,11 @@ void Game::initLua() {
     // set the handler pointeur in engine.lua lib
     lua["engine"]["setHandler"]((intptr_t) handler);
 
-    // add handler function into engine.lua lib
-    // ====================== engine class lua ===========================
+    initEngine();
+    initEntity();
+}
 
+void LuaSystem::initEngine() {
     // ============ ALL SUBSYS METHODS ====
     lua["engine"]["cHandlerGetWinHeight"] = [](intptr_t hLua) { return ((Handler*) hLua)->getWinHeight(); };
     lua["engine"]["cHandlerGetWinWidth"] = [](intptr_t hLua) { return ((Handler*) hLua)->getWinWidth(); };
@@ -141,8 +112,9 @@ void Game::initLua() {
     };
     lua["engine"]["cSetBackgroundPosition"] = [](intptr_t hLua, int xpos, int ypos) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(Vector2D<int>(xpos, ypos)); };
     lua["engine"]["cSetBackgroundSize"] = [](intptr_t hLua, int w, int h) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setSize(w, h); };
-    // ===================== Entity class lua ============================
-    // ****************** Methods from EntityManager *********************
+}
+
+void LuaSystem::initEntity() {
     lua["engine"]["cAddEntity"] = [](intptr_t hLua, sol::table entity_lua) { (((Handler*) hLua)->getEntityManager()->addEntityFromLua(entity_lua)); };
     lua["Entity"]["cDestroy"] = [](intptr_t entity_lua) { ((Entity*) entity_lua)->destroy(); };
     lua["Entity"]["cGetRect"] = [](intptr_t entity_lua) {
@@ -318,24 +290,5 @@ void Game::initLua() {
             cout << "Warning /!\\ function `isDragging` from: " << e->getTag() <<  ": You must inititate the DragComponent..." << endl;
             return false;
         }
-    };*/
-}
-
-void Game::update() {
-    if(handler->getJustKey(SDLK_ESCAPE))
-        handler->closeGame();
-    
-    sManager->update();
-
-    handler->getSubsystem()->setTitle("Exocet state: " + to_string(sManager->getCurrentState()) + " | e: " + to_string(sManager->getEntityManager()->getNumberEntities()));
-}
-
-void Game::render() {
-    handler->getGraphic()->setRenderColor(0x00, 0x00, 0x00);
-    handler->getGraphic()->renderClear();
-
-    // render all game here
-    sManager->render();
-
-    handler->getGraphic()->renderPresent();
+    };
 }

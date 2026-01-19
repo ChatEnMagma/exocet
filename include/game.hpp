@@ -2,6 +2,7 @@
 
 #include "constantes.hpp"
 #include "subsystem.hpp"
+#include "luasystem.hpp"
 
 #include "state/state.hpp"
 
@@ -14,7 +15,7 @@ namespace exocet {
             bool showingHitbox = false;
             bool showingPointerEntities = false;
 
-            sol::state lua;
+            LuaSystem* lua;
 
             /**
              * \brief Init lua with lib and functions
@@ -61,6 +62,6 @@ namespace exocet {
             /** 
              * \return Get the lua with all libs and functions
              */
-            inline sol::state* getLua() { return &lua; }
+            inline LuaSystem* getLua() { return lua; }
     };
 }
