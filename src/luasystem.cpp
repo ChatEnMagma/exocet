@@ -1,41 +1,43 @@
 #include "luasystem.hpp"
 #include "handler.hpp"
 
+#define SOL_ALL_SAFETIES_ON 1
+
 #define lua (*this)
 
 using namespace exocet;
 using namespace std;
 
 LuaSystem::LuaSystem(Handler* handler) {
-    lua.script_file(DIR_SCRIPT_PACKAGE_MODULES);
-
-    // Check if the module field exists in the config
-    if(lua["modules"] == sol::nil) {
-        cerr << "You must have `modules`..." << endl;
-        handler->closeGame();
-    }
-
-    bool logOpenLuaFiles = (lua["modules"]["logOpenLuaFiles"] != sol::nil && lua["modules"]["logOpenLuaFiles"].get<bool>() == true)? true: false;
+    this->handler = handler;
 
     // Load main lib and package
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::io, sol::lib::string, sol::lib::os, sol::lib::math);
-    // Load all modules homemade
-    lua["modules"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
-        if(logOpenLuaFiles)
-            cout << "try to read file: " << DIR_SCRIPT + value.as<sol::table>()[2].get<string>() + ".lua" << endl;
-        lua.require_file(
-            value.as<sol::table>()[1].get<string>(),                        // Get the name of the module
-            DIR_SCRIPT + value.as<sol::table>()[2].get<string>() + ".lua"  // Get the path of lua file
-        );
 
-    });
-    // set the handle for lua script
+    preloadPackages((string) DIR_SCRIPT + "lib/", "lib");
+    preloadPackages(DIR_SCRIPT, "module");
 
     // set the handler pointeur in engine.lua lib
     lua["engine"]["setHandler"]((intptr_t) handler);
 
     initEngine();
     initEntity();
+
+}
+
+void LuaSystem::preloadPackages(const std::string pathDir, const std::string name) {
+    lua.script_file(pathDir + name + ".lua");
+
+    // Check if the module field exists in the config
+    if(lua[name] == sol::nil) {
+        cerr << "You must have `" << name << "`..." << endl;
+        handler->closeGame();
+    }
+
+    // Load all modules homemade
+    lua[name].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
+        lua.script_file(pathDir + value.as<string>() + ".lua");
+    });
 }
 
 void LuaSystem::initEngine() {

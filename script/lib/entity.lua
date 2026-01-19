@@ -137,5 +137,3 @@ end
 function Entity:getTime()
     return Entity.cGetTime(self._ptr)
 end
-
-return Entity
