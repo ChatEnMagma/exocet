@@ -16,7 +16,7 @@ function Bird:updateHatch(vec)
 
         local e = Bird:new(vec)
 
-        engine.addEntity(e)
+        engine:addEntity(e)
 
         if(playerPos.y <= 500) then
             self.next = math.random(110, 1000)
@@ -46,7 +46,7 @@ end
 function Bird:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx - 1.5, 0))
 
-    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine:getCameraPosition().x then
         self.entity:destroy()
     end
 

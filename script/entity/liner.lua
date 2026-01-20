@@ -13,7 +13,7 @@ function Liner:updateHatch()
         --- @type Liner
         --local e = Liner:new(engine.mainEntities.player.entity:getPosition())
 
-        engine.addEntity(e)
+        engine:addEntity(e)
 
         --self.next = math.random(1000 - mainState.step, 5000 - mainState.step)
         self.next = 10
@@ -46,7 +46,7 @@ end
 
 function Liner:update()
     self.entity:setVelocity(Vector2D:new(-mainState.vx - 2 , 0))
-    if self.entity:isOutsideScreen() and self.entity:getPosition().x > engine.getCameraPosition().x +  engine.getWinWidth() then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x > engine:getCameraPosition().x +  engine:getWinWidth() then
         self.entity:destroy()
     end
 

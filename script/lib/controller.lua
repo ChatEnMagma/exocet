@@ -18,7 +18,7 @@ function controller.handleDirectionKeyboard(player)
     local dx = 0
     local dy = 0
 
-    if engine.getKey(controller.players[player].keyboard.down) then
+    if engine:getKey(controller.players[player].keyboard.down) then
             dx = 1
     end
     return Vector2D(math.cos(dx), math.sin(dy))

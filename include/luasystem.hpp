@@ -5,6 +5,11 @@
 #include "constantes.hpp"
 
 namespace exocet {
+    struct luaVector2D {
+        public:
+            sol::object x, y;
+    };
+
     class LuaSystem: public sol::state {
         private:
             Handler* handler;

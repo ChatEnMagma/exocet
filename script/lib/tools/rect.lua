@@ -7,8 +7,8 @@ Rect = {
 }
 Rect.__index = Rect
 
---- @overload fun(): Rect
---- @overload fun(h, w:integer, h:integer): Rect
+--- @overload fun(Rect): Rect
+--- @overload fun(Rect, w:integer, h:integer): Rect
 --- @param x integer
 --- @param y integer
 --- @param w integer

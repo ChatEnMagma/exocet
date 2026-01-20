@@ -45,15 +45,6 @@ function Player:new()
     p.oxygen = 100
     p.tagPower = "normal"
 
-    local io = Polygon:new({
-        Vector2D:new(0, 0),
-        Vector2D:new(1, 1),
-        Vector2D:new(2, 2)
-    })
-
-    print(io)
-    print(io[3])
-
     return p
 end
 
@@ -75,10 +66,10 @@ function Player:updatePower()
 end
 
 function Player:momentumCalculus()
-    if engine.getJustAnyKey() then
+    if engine:getJustAnyKey() then
         self.momentum = self.momentum // 2
     end
-    if engine.getAnyKey() then
+    if engine:getAnyKey() then
         self.momentum = self.momentum + 1
 
         local vel = self.entity:getVelocity() + Vector2D:new(0, self.momentum * 2)
@@ -102,7 +93,7 @@ end
 
 function Player:gamealive()
     if self.entity:getPosition().y < 850 then
-        engine.centerOnEntity(self.entity)
+        engine:centerOnEntity(self.entity)
     end
 
     self:momentumCalculus()
@@ -137,7 +128,7 @@ function Player:update()
     if self.entity:getPosition().y >= mainState.seaLevel and self.gameover == false then
         self.gameover = true
         self.entity:setVelocity(Vector2D:new(0, 0))
-        engine.playSong("plouf.wav")
+        engine:playSong("plouf.wav")
     end
 
     if self.gameover == false then
@@ -149,11 +140,11 @@ function Player:update()
         end
 
          if self.gameover and (os.time() >= (self.dieTime + 2)) then
-            engine.restart()
+            engine:restart()
         end
     end
 
-    if engine.getKey(SDL.SDLK_U) then
+    if engine:getKey(SDL.SDLK_U) then
         local e = {
             entity = Entity:new("particle"),
             components = {
@@ -162,7 +153,7 @@ function Player:update()
             }
         }
 
-        engine.addEntity(e)
+        engine:addEntity(e)
     end
 end
 

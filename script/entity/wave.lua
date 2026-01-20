@@ -11,12 +11,12 @@ Wave.__index = Wave
 function Wave:updateHatch()
     if self.next <= 0 then
         local pos = Vector2D:new(
-            engine.getWinWidth(),
+            engine:getWinWidth(),
             1000 - 120
         )
         local e = Wave:new(pos)
 
-        engine.addEntity(e)
+        engine:addEntity(e)
 
         self.next = math.random(256 + mainState.step, 500 + mainState.step)
     end
@@ -42,7 +42,7 @@ end
 function Wave:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx, 0))
 
-    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine:getCameraPosition().x then
         self.entity:destroy()
     end
 

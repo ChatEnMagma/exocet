@@ -13,7 +13,7 @@ function Ufo:updateHatch(vec)
     if self.next <= 0 and playerPos.y <= -700 then
         local e = Ufo:new(vec)
 
-        engine.addEntity(e)
+        engine:addEntity(e)
 
         self.next = math.random(1000 - mainState.step, 1500 - mainState.step)
     end
@@ -38,7 +38,7 @@ end
 function Ufo:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx - 1.5, 0))
 
-    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine:getCameraPosition().x then
         self.entity:destroy()
     end
 

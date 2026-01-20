@@ -16,11 +16,6 @@ namespace exocet {
             bool showingPointerEntities = false;
 
             LuaSystem* lua;
-
-            /**
-             * \brief Init lua with lib and functions
-             */
-            void initLua();
         public:
             Game(Subsystem* subsystem);
 

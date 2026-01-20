@@ -18,7 +18,7 @@ function Cloud:updateHatch(vec)
     if self.next <= 0 and player.entity:getVelocity().y < 500 then
         local e = Cloud:new(vec)
 
-        engine.addEntity(e)
+        engine:addEntity(e)
 
         if engine.mainEntities.player.entity:getPosition().y <= 8000 then
             self.next = math.random(30, 100)
@@ -40,7 +40,7 @@ function Cloud:new(vec)
         ScriptComponent:new(function () c:update() end),
         SpriteComponent:new("nuage.png")
     }
-    
+
     c.oldWhooshPath = "whoosh" .. tostring(math.random(0, 1)) .. ".wav"
 
     return c
@@ -49,7 +49,7 @@ end
 function Cloud:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx, 0))
 
-    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine:getCameraPosition().x then
         self.entity:destroy()
     end
 
@@ -59,9 +59,9 @@ function Cloud:update()
         engine.mainEntities.player.entity:setVelocity(pvec)
         engine.mainEntities.player.momentum = engine.mainEntities.player.momentum + 1
         
-        if engine.isPlayingSong(self.oldWhooshPath) == false then
+        if engine:isPlayingSong(self.oldWhooshPath) == false then
             self.newWhooshPath = "whoosh" .. tostring(math.random(0, 1)) .. ".wav"
-            engine.playSong(self.newWhooshPath)
+            engine:playSong(self.newWhooshPath)
             self.oldWhooshPath = self.newWhooshPath
         end
     end

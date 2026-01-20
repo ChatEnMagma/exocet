@@ -15,14 +15,11 @@ LuaSystem::LuaSystem(Handler* handler) {
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::io, sol::lib::string, sol::lib::os, sol::lib::math);
 
     preloadPackages((string) DIR_SCRIPT + "lib/", "lib");
-    preloadPackages(DIR_SCRIPT, "module");
-
-    // set the handler pointeur in engine.lua lib
-    lua["engine"]["setHandler"]((intptr_t) handler);
-
+    
     initEngine();
     initEntity();
 
+    preloadPackages(DIR_SCRIPT, "module");
 }
 
 void LuaSystem::preloadPackages(const std::string pathDir, const std::string name) {
@@ -41,83 +38,104 @@ void LuaSystem::preloadPackages(const std::string pathDir, const std::string nam
 }
 
 void LuaSystem::initEngine() {
-    // ============ ALL SUBSYS METHODS ====
-    lua["engine"]["cHandlerGetWinHeight"] = [](intptr_t hLua) { return ((Handler*) hLua)->getWinHeight(); };
-    lua["engine"]["cHandlerGetWinWidth"] = [](intptr_t hLua) { return ((Handler*) hLua)->getWinWidth(); };
-    lua["engine"]["cCloseGame"] = [](intptr_t hLua) { ((Handler*) hLua)->closeGame(); };
-    lua["engine"]["cIsResizing"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->isResizing(); };
-    
-    lua["engine"]["cHandlerGetKey"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getKey(scancode); };
-    lua["engine"]["cHandlerGetJustKey"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getJustKey(scancode); };
-    lua["engine"]["cHandlerGetKeyCode"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->getKeyListener()->getKeyCode(); };
-    lua["engine"]["cHandlerGetAnyKey"] = [](intptr_t hLua) { return ((Handler*) hLua)->getAnyKey(); };
-    lua["engine"]["cHandlerGetJustAnyKey"] = [](intptr_t hLua) { return ((Handler*) hLua)->getJustAnyKey(); };
+    // set the handler pointeur in engine.lua lib
+    lua["engine"]["_handler"] = (intptr_t) handler;
 
-    lua["engine"]["cHandlerGetButton"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getButton(scancode); };
-    lua["engine"]["cHandlerGetJustButton"] = [](intptr_t hLua, Uint16 scancode) { return ((Handler*) hLua)->getJustButton(scancode); };
-    lua["engine"]["cHandlerGetButtonCode"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->getMouseListener()->getButtonCode(); };
-    lua["engine"]["cGetMousePosition"] = [](intptr_t hLua) {
+    #define hLua self.get<intptr_t>("_handler")
+
+    // ============ ALL SUBSYS METHODS ====
+    lua["engine"]["getWinHeight"] = [](sol::table self) { return ((Handler*) hLua)->getWinHeight(); };
+    lua["engine"]["getWinWidth"] = [](sol::table self) { return ((Handler*) hLua)->getWinWidth(); };
+    lua["engine"]["closeGame"] = [](sol::table self) { ((Handler*) hLua)->closeGame(); };
+    lua["engine"]["isResizing"] = [](sol::table self) { return ((Handler*) hLua)->getSubsystem()->isResizing(); };
+    
+    lua["engine"]["getKey"] = [](sol::table self, Uint16 scancode) { return ((Handler*) hLua)->getKey(scancode); };
+    lua["engine"]["getJustKey"] = [](sol::table self, Uint16 scancode) { return ((Handler*) hLua)->getJustKey(scancode); };
+    lua["engine"]["getKeyCode"] = [](sol::table self) { return ((Handler*) hLua)->getSubsystem()->getKeyListener()->getKeyCode(); };
+    lua["engine"]["getAnyKey"] = [](sol::table self) { return ((Handler*) hLua)->getAnyKey(); };
+    lua["engine"]["getJustAnyKey"] = [](sol::table self) { return ((Handler*) hLua)->getJustAnyKey(); };
+
+    lua["engine"]["getButton"] = [](sol::table self, Uint16 scancode) { return ((Handler*) hLua)->getButton(scancode); };
+    lua["engine"]["getJustButton"] = [](sol::table self, Uint16 scancode) { return ((Handler*) hLua)->getJustButton(scancode); };
+    lua["engine"]["getButtonCode"] = [](sol::table self) { return ((Handler*) hLua)->getSubsystem()->getMouseListener()->getButtonCode(); };
+    lua["engine"]["cGetMousePosition"] = [](sol::table self) {
         Vector2D<int> pos = ((Handler*) hLua)->getMousePosition();
         return tuple<int, int>(pos.x, pos.y);
     };
 
-    lua["engine"]["cMute"] = [](intptr_t hLua) { ((Handler*) hLua)->getSubsystem()->mute(); };
-    lua["engine"]["cUnmute"] = [](intptr_t hLua) { ((Handler*) hLua)->getSubsystem()->unmute(); };
-    lua["engine"]["cIsMuting"] = [](intptr_t hLua) { return ((Handler*) hLua)->getSubsystem()->isMuting(); };
-    lua["engine"]["cGetVolume"] = [](intptr_t hLua, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->getVolume(); };
-    lua["engine"]["cSetVolume"] = [](intptr_t hLua, const string path, int volume) { 
-        if(!((Handler*) hLua)->getSubsystem()->isMuting())
-            ((Handler*) hLua)->getState()->getSong("res/" + path)->setVolume(volume); 
+    lua["engine"]["mute"] = [](sol::table self) { ((Handler*) hLua)->getSubsystem()->mute(); };
+    lua["engine"]["unmute"] = [](sol::table self) { ((Handler*) hLua)->getSubsystem()->unmute(); };
+    lua["engine"]["isMuting"] = [](sol::table self) { return ((Handler*) hLua)->getSubsystem()->isMuting(); };
+    lua["engine"]["getVolume"] = [](sol::table self, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->getVolume(); };
+    lua["engine"]["setVolume"] = [](sol::table self, const string path, int volume) {
+        Handler* handler = (Handler*) hLua;
+        if(!handler->getSubsystem()->isMuting())
+            handler->getState()->getSong("res/" + path)->setVolume(volume); 
     };
-    lua["engine"]["cPlaySong"] = [](intptr_t hLua, const string path, int ticks) { 
-        if(!((Handler*) hLua)->getSubsystem()->isMuting()) 
-            ((Handler*) hLua)->getState()->getSong("res/" + path)->play(ticks); 
+    lua["engine"]["playSong"] = [](sol::table self, const string path, sol::object ticksObject) {
+        Handler* handler = (Handler*) hLua;
+        int ticks = (ticksObject == sol::nil)? -1: ticksObject.as<int>();
+        
+        if(!handler->getSubsystem()->isMuting()) 
+            handler->getState()->getSong("res/" + path)->play(ticks); 
     };
-    lua["engine"]["cIsPlayingSong"] = [](intptr_t hLua, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->isPlaying(); };
-    lua["engine"]["cSetSong"] = [](intptr_t hLua, const string path) { ((Handler*) hLua)->getState()->setSong("res/" + path); };
+    lua["engine"]["isPlayingSong"] = [](sol::table self, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->isPlaying(); };
+    lua["engine"]["setSong"] = [](sol::table self, const string path) { ((Handler*) hLua)->getState()->setSong("res/" + path); };
 
     // ======== ALL STATES METHODS =====
-    lua["engine"]["cSetState"] = [](intptr_t hLua, size_t state) { ((Handler*) hLua)->getGame()->getStateManager()->setState(state); };
-    lua["engine"]["cGetCurrentState"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->getCurrentState(); };
-    lua["engine"]["cRestart"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
-    lua["engine"]["cNextState"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->nextState(); };
-    lua["engine"]["cPreviousState"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->previousState(); };
-    lua["engine"]["cRestart"] = [](intptr_t hLua) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
+    lua["engine"]["setState"] = [](sol::table self, size_t state) { ((Handler*) hLua)->getGame()->getStateManager()->setState(state); };
+    lua["engine"]["getCurrentState"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->getCurrentState(); };
+    lua["engine"]["restart"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
+    lua["engine"]["nextState"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->nextState(); };
+    lua["engine"]["previousState"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->previousState(); };
+    lua["engine"]["restart"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
 
     // ========= ALL GFX METHODS
-    lua["engine"]["cSetColor"] = [](intptr_t hLua, int r, int g, int b, int a) { ((Handler*) hLua)->getGraphic()->setColor(r, g, b, a); };
-    lua["engine"]["cRenderRect"] = [](intptr_t hLua, int x, int y, int w, int h) { ((Handler*) hLua)->getGraphic()->renderRect(Vector2D<int>(x, y), w, h); };
-    lua["engine"]["cRenderFillRect"] = [](intptr_t hLua, int x, int y, int w, int h) { ((Handler*) hLua)->getGraphic()->renderFillRect(Vector2D<int>(x, y), w, h); };
-    lua["engine"]["cRenderAnchorRect"] = [](intptr_t hLua, int x, int y, int w, int h) { ((Handler*) hLua)->getGraphic()->renderAnchorRect(Vector2D<int>(x, y), w, h); };
-    lua["engine"]["cRenderAnchorFillRect"] = [](intptr_t hLua, int x, int y, int w, int h) { ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(Vector2D<int>(x, y), w, h); };
-    lua["engine"]["cCenterOnEntity"] = [](intptr_t hLua, intptr_t entity_lua) { ((Handler*) hLua)->getGraphic()->centerOnEntity(((Entity*) entity_lua)); };
-    lua["engine"]["cGetCameraPosition"] = [](intptr_t hLua) { 
+    lua["engine"]["setColor"] = [](sol::table self, int r, int g, int b, int a) {
+        ((Handler*) hLua)->getGraphic()->setColor(r, g, b, a);
+    };
+    lua["engine"]["renderRect"] = [](sol::table self, sol::table position, int w, int h) {
+        ((Handler*) hLua)->getGraphic()->renderRect(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), w, h);
+    };
+    lua["engine"]["renderFillRect"] = [](sol::table self, sol::table position, int w, int h) {
+        ((Handler*) hLua)->getGraphic()->renderFillRect(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), w, h);
+    };
+    lua["engine"]["renderAnchorRect"] = [](sol::table self, sol::table position, int w, int h) {
+        ((Handler*) hLua)->getGraphic()->renderAnchorRect(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), w, h);
+    };
+    lua["engine"]["renderAnchorFillRect"] = [](sol::table self, sol::table position, int w, int h) {
+        ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), w, h);
+    };
+    lua["engine"]["centerOnEntity"] = [](sol::table self, sol::table entity) {
+        ((Handler*) hLua)->getGraphic()->centerOnEntity(((Entity*) entity.get<intptr_t>("_ptr")));
+    };
+    lua["engine"]["cGetCameraPosition"] = [](sol::table self) { 
         Vector2D<int> pos = ((Handler*) hLua)->getGraphic()->getCamera()->getPosition();
         return tuple<int, int>(pos.x, pos.y);
     };
-    lua["engine"]["cRenderText"] = [](intptr_t hLua, int xpos, int ypos, int width, int height, string text) {
+    lua["engine"]["renderText"] = [](sol::table self, sol::table position, int width, int height, string text) {
         ((Handler*) hLua)->getGraphic()->renderText(
-            xpos,
-            ypos,
+            position.get<int>("x"),
+            position.get<int>("y"),
             width,
             height,
             text,
             ((Handler*) hLua)->getGraphic()->freeRoyalty
         );
     };
-    lua["engine"]["cRenderPolygon"] = [](intptr_t hLua, int xpos, int ypos, sol::table polygon) {
-        ((Handler*) hLua)->getGraphic()->renderPolygon(Vector2D<int>(xpos, ypos), Polygon(polygon));
+    lua["engine"]["renderPolygon"] = [](sol::table self, sol::table position, sol::table polygon) {
+        ((Handler*) hLua)->getGraphic()->renderPolygon(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), Polygon(polygon.get<sol::table>("polygon")));
     };
-    lua["engine"]["cGetBackgroundPosition"] = [](intptr_t hLua) {
+    lua["engine"]["cGetBackgroundPosition"] = [](sol::table self, sol::this_main_state s) {
         const Vector2D<int> pos = ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->getPosition();
         return tuple<int, int>(pos.x, pos.y);
     };
-    lua["engine"]["cSetBackgroundPosition"] = [](intptr_t hLua, int xpos, int ypos) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(Vector2D<int>(xpos, ypos)); };
-    lua["engine"]["cSetBackgroundSize"] = [](intptr_t hLua, int w, int h) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setSize(w, h); };
+    lua["engine"]["setBackgroundPosition"] = [](sol::table self, int xpos, int ypos) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(Vector2D<int>(xpos, ypos)); };
+    lua["engine"]["setBackgroundSize"] = [](sol::table self, int w, int h) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setSize(w, h); };
+    lua["engine"]["addEntity"] = [](sol::table self, sol::table entity_lua) { (((Handler*) hLua)->getEntityManager()->addEntityFromLua(entity_lua)); };
 }
 
 void LuaSystem::initEntity() {
-    lua["engine"]["cAddEntity"] = [](intptr_t hLua, sol::table entity_lua) { (((Handler*) hLua)->getEntityManager()->addEntityFromLua(entity_lua)); };
     lua["Entity"]["cDestroy"] = [](intptr_t entity_lua) { ((Entity*) entity_lua)->destroy(); };
     lua["Entity"]["cGetRect"] = [](intptr_t entity_lua) {
         Entity* e = (Entity*) entity_lua;

@@ -34,7 +34,7 @@ function Items:updateHatch(vec)
     if self.next <= 0 then
         local e = Items:new(vec)
 
-        engine.addEntity(e)
+        engine:addEntity(e)
 
         self.next = math.random(110 + mainState.step, 300 + mainState.step)
     end
@@ -44,7 +44,7 @@ end
 function Items:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx, 0))
 
-    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine:getCameraPosition().x then
         self.entity:destroy()
     end
 

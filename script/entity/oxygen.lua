@@ -27,7 +27,7 @@ function Oxygen:updateHatch(vec)
     if self.next <= 0 then
         local e = Oxygen:new(vec)
 
-        engine.addEntity(e)
+        engine:addEntity(e)
 
         local playerPos = engine.mainEntities.player.entity:getPosition()
         if playerPos.y < 500 then
@@ -42,7 +42,7 @@ end
 function Oxygen:update()
     self.entity:setVelocity(Vector2D:new(mainState.vx, 0))
 
-    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine.getCameraPosition().x then
+    if self.entity:isOutsideScreen() and self.entity:getPosition().x < engine:getCameraPosition().x then
         self.entity:destroy()
     end
 
@@ -54,7 +54,7 @@ function Oxygen:update()
     end
     local rainPos = self.entity:getPosition() + Vector2D:new(math.random(0, self.entity:getRect().w), self.entity:getRect().h)
 
-    engine.addEntity(Rain:new(self.entity:getPosition(), rainPos))
+    engine:addEntity(Rain:new(self.entity:getPosition(), rainPos))
 end
 
 return Oxygen
