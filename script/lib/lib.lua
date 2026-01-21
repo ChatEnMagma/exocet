@@ -2,7 +2,6 @@ lib = {
     "tools/sdl",
     "engine",
     "tools/rect",
-    "tools/vector2D",
     "tools/polygon",
     "controller",
     "tools/json",

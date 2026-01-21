@@ -20,7 +20,7 @@ function engine:playSong(path, ticks) end
 
 --- Get the main volume
 --- @param path string
---- @return integer
+--- @return integer ...
 --- @nodiscard
 function engine:getVolume(path) end
 
@@ -30,7 +30,7 @@ function engine:setVolume(path, volume) end
 
 --- Check if the song is playing
 --- @param path string
---- @return boolean
+--- @return boolean ...
 --- @nodiscard
 function engine:isPlayingSong(path) end
 
@@ -39,7 +39,7 @@ function engine:isPlayingSong(path) end
 function engine:setSong(path) end
 
 --- Tell if the game is muting
---- @return boolean
+--- @return boolean ...
 --- @nodiscard
 function engine:isMuting() end
 
@@ -50,17 +50,17 @@ function engine:mute() end
 function engine:unmute() end
 
 --- Get the window frame width
----@return integer
+---@return integer ...
 ---@nodiscard
 function engine:getWinWidth() end
 
 --- Get the window frame height
----@return integer
+---@return integer ...
 ---@nodiscard
 function engine:getWinHeight() end
 
 --- Get if the window is resizing
---- @return boolean
+--- @return boolean ...
 --- @nodiscard
 function engine:isResizing() end
 
@@ -68,46 +68,46 @@ function engine:isResizing() end
 function engine:closeGame() end
 
 --- Get boolean if the key is pressing
----@return boolean
+---@return boolean ...
 ---@nodiscard
 function engine:getKey(scancode) end
 
 --- Get any key is pressing
---- @return boolean
+--- @return boolean ...
 --- @nodiscard
 function engine:getAnyKey() end
 
---- @return boolean
+--- @return boolean ...
 --- @nodiscard
 function engine:getJustAnyKey() end
 
 --- Get boolean if the key is just pressing
----@return boolean
+---@return boolean ...
 ---@nodiscard
 function engine:getJustKey(scancode) end
 
 --- Get the scancode is pressing
----@return integer
+---@return integer ...
 ---@nodiscard
 function engine:getKeyCode() end
 
 --- Get boolean if the button is pressing
----@return boolean
+---@return boolean ...
 ---@nodiscard
 function engine:getButton(scancode) end
 
 --- Get boolean if the button is just pressing
----@return boolean
+---@return boolean ...
 ---@nodiscard
 function engine:getJustButton(scancode) end
 
 --- Get the scancode is pressing
----@return integer
+---@return integer ...
 ---@nodiscard
 function engine:getButtonCode() end
 
 --- Get the position of the mouse in the game window
---- @return Vector2D
+--- @return Vector2D ...
 function engine.getMousePosition()
     local x, y = engine:cGetMoustPosition(engine._handler)
     return Vector2D:new(x, y)
@@ -120,7 +120,7 @@ end
 function engine:setState(state) end
 
 --- Get the current state
---- @return integer
+--- @return integer ...
 --- @nodiscard
 function engine:getCurrentState() end
 

@@ -14,12 +14,55 @@ LuaSystem::LuaSystem(Handler* handler) {
     // Load main lib and package
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::io, sol::lib::string, sol::lib::os, sol::lib::math);
 
-    preloadPackages((string) DIR_SCRIPT + "lib/", "lib");
+    initUserdateLuaVector2D();
     
+    preloadPackages((string) DIR_SCRIPT + "lib/", "lib");
+
     initEngine();
     initEntity();
 
     preloadPackages(DIR_SCRIPT, "module");
+}
+
+void LuaSystem::initUserdateLuaVector2D() {
+    lua.new_usertype<LuaVector2D>(USERDATA_LUAVECTOR2D,
+        sol::meta_function::construct, sol::factories(
+            [](sol::object, sol::this_main_state s) {
+                return std::make_shared<LuaVector2D>(sol::make_object(s.lua_state(), 0), sol::make_object(s.lua_state(), 0));
+            },
+
+            [](sol::object, const sol::object x, const sol::object y) {
+                return std::make_shared<LuaVector2D>(x, y);
+            }
+        ),
+        sol::meta_function::to_string, [](LuaVector2D self) {
+            double x = self.x.as<double>();
+            double y = self.y.as<double>();
+
+            return string("(" + std::to_string(x) + ", " + std::to_string(y) + ")");
+        },
+        sol::meta_function::addition, [](LuaVector2D self, LuaVector2D vec, sol::this_main_state s) {
+            sol::object x = sol::make_object(s.lua_state(), self.x.as<lua_Number>() + vec.x.as<lua_Number>());
+            sol::object y = sol::make_object(s.lua_state(), self.y.as<lua_Number>() + vec.y.as<lua_Number>());
+
+            return std::make_shared<LuaVector2D>(LuaVector2D(x, y));
+        },
+        sol::meta_function::subtraction, [](LuaVector2D self, LuaVector2D vec, sol::this_main_state s) {
+            sol::object x = sol::make_object(s.lua_state(), self.x.as<lua_Number>() - vec.x.as<lua_Number>());
+            sol::object y = sol::make_object(s.lua_state(), self.y.as<lua_Number>() - vec.y.as<lua_Number>());
+
+            return std::make_shared<LuaVector2D>(LuaVector2D(x, y));
+        },
+        sol::meta_function::multiplication, [](LuaVector2D self, LuaVector2D vec, sol::this_main_state s) {
+            sol::object x = sol::make_object(s.lua_state(), self.x.as<lua_Number>() * vec.x.as<lua_Number>());
+            sol::object y = sol::make_object(s.lua_state(), self.y.as<lua_Number>() * vec.y.as<lua_Number>());
+
+            return std::make_shared<LuaVector2D>(LuaVector2D(x, y));
+        },
+        "getAngle", [](LuaVector2D self) { return atan2(self.x.as<lua_Number>(), self.y.as<lua_Number>()); },
+        "x", &LuaVector2D::x,
+        "y", &LuaVector2D::y
+    );
 }
 
 void LuaSystem::preloadPackages(const std::string pathDir, const std::string name) {

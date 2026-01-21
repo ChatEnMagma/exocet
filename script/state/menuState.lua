@@ -4,20 +4,15 @@ menuState = {
 
     highscore = 0,
 
-    init = function ()
-        local file = io.open("save.json", "r")
-        if file == nil then
-            return
-        end
-        local content = file:read("*a")
-        file:close()
-        local config = json.decode(content)
-        menuState.highscore = config["highscore"]
-
-    end,
+    init = function () end,
 
     update = function ()
         engine:setBackgroundSize(engine:getWinWidth(), engine:getWinHeight())
+
+        local test = Vector2Dtest:new(10, 20)
+        local test2 = Vector2Dtest:new(20, 30)
+        print(test, test2)
+        print(test + test2)
     end,
 
     background = {

@@ -3,6 +3,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "constantes.hpp"
+
 namespace exocet {
     template <typename T>
     class Vector2D {
@@ -47,7 +49,14 @@ namespace exocet {
             inline Vector2D<U> convert() const { return Vector2D<U>((U) x, (U) y); }
 
             inline friend std::ostream& operator<<(std::ostream& os, const Vector2D<T>& vector) {
-                return os << "(" << vector.x << "," << vector.y << ")";
+                if constexpr(std::is_same_v<std::decay_t<T>, sol::object>) {
+                    sol::object xO = static_cast<sol::object>(vector.x);
+                    sol::object yO = static_cast<sol::object>(vector.y);
+
+                    return os << "(" << xO.as<double>() << "," << yO.as<double>() << ")";
+                } else {
+                    return os << "(" << vector.x << "," << vector.y << ")";
+                }
             }
     };
 }

@@ -3,16 +3,22 @@
 #include <string>
 
 #include "constantes.hpp"
+#include "tool/vectors.hpp"
+
+#define USERDATA_LUAVECTOR2D "Vector2D"
 
 namespace exocet {
-    struct luaVector2D {
-        public:
-            sol::object x, y;
+    using LuaVector2D = Vector2D<sol::object>;
+
+    struct LuaPolugon {
+        LuaVector2D vertex;
     };
 
     class LuaSystem: public sol::state {
         private:
             Handler* handler;
+
+            void initUserdateLuaVector2D();
 
             void initEngine();
             void initEntity();
