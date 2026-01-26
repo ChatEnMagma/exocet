@@ -1,6 +1,5 @@
 lib = {
     "tools/sdl",
-    "engine",
     "tools/rect",
     "tools/polygon",
     "controller",

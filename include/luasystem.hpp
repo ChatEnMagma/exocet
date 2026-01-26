@@ -8,13 +8,7 @@
 #define USERDATA_LUAVECTOR2D "Vector2D"
 
 namespace exocet {
-    using LuaVector2D = Vector2D<sol::object>;
-
-    struct LuaPolugon {
-        LuaVector2D vertex;
-    };
-
-    class LuaSystem: public sol::state {
+        class LuaSystem: public sol::state {
         private:
             Handler* handler;
 

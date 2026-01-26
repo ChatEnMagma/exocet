@@ -24,16 +24,10 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
     if(tag == "physic") {
         auto& physic = addComponent<PhysicComponent>();
         if(component["position"] != sol::nil) {
-            physic.setPointsPosition(
-                component["position"]["x"].get<int>(), 
-                component["position"]["y"].get<int>()
-            );
+            physic.setPosition(component["position"].get<LuaVector2D>().convert<int>());
         }
         if(component["velocity"] != sol::nil) {
-            physic.setPointsVelocity(
-                component["velocity"]["x"].get<float>(), 
-                component["velocity"]["y"].get<float>()
-            );
+            physic.setVelocity(component["velocity"].get<LuaVector2D>().convert<float>());
         }
         if(component["hitbox"] != sol::nil) {
             if(component["hitbox"]["vertices"] == sol::nil) {
@@ -118,16 +112,10 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
         if(component["time"] != sol::nil)
             particle.setTime(component["time"]);
         if(component["position"] != sol::nil) {
-            particle.setPointsPosition(
-                component["position"]["x"].get<int>(),
-                component["position"]["y"].get<int>()
-            );
+            particle.setPosition(component["position"].get<LuaVector2D>().convert<int>());
         }
         if(component["velocity"] != sol::nil) {
-            particle.setPointsVelocity(
-                component["velocity"]["x"].get<float>(),
-                component["velocity"]["y"].get<float>()
-            );
+            particle.setVelocity(component["velocity"].get<LuaVector2D>().convert<float>());
         }
     } else {
         cout << "Warning: unknow component `" << tag << "`" << endl;

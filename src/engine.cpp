@@ -13,6 +13,8 @@ bool Engine::init(int w, int h, std::string title) {
 }
 
 void Engine::run() {
+    cout << "Start the game..." << endl;
+
     Uint32 frameStart, frameTime;
     // main loop
     while(subsys->isRunning()) {

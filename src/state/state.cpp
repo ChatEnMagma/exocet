@@ -17,10 +17,7 @@ void State::loadState() {
             );
             // Set the position of the backgrounds
             if(value.as<sol::table>()["postion"] != sol::nil) {
-                background->setPosition(Vector2D<int>(
-                    value.as<sol::table>()["postion"]["x"].get<int>(),
-                    value.as<sol::table>()["postion"]["y"].get<int>()
-                ));
+                background->setPosition(value.as<sol::table>()["postion"].get<LuaVector2D>().convert<int>());
             } else background->setPosition(Vector2D<int>());
         });
 
@@ -59,7 +56,12 @@ void StateManager::initStates() {
     // For each all states
     lua["config"]["states"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
         // Make a new state with the tag from config
-        lua.require_file(value.as<string>(), DIR_SCRIPT_STATES + value.as<string>() + ".lua");
+        sol::optional<sol::error> maybeErr = lua.safe_script_file(DIR_SCRIPT_STATES + value.as<string>() + ".lua");
+
+        if(maybeErr) {
+            cerr << maybeErr->what() << endl;
+            handler->closeGame();
+        }
 
         State* state = new State(
             value.as<string>(), 
@@ -85,4 +87,6 @@ void StateManager::setState(std::size_t state) {
 
     getState()->init();
     getState()->loadState();
+
+    cout << "Finish initiate the state" << endl;
 }

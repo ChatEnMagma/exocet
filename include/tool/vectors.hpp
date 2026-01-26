@@ -49,14 +49,11 @@ namespace exocet {
             inline Vector2D<U> convert() const { return Vector2D<U>((U) x, (U) y); }
 
             inline friend std::ostream& operator<<(std::ostream& os, const Vector2D<T>& vector) {
-                if constexpr(std::is_same_v<std::decay_t<T>, sol::object>) {
-                    sol::object xO = static_cast<sol::object>(vector.x);
-                    sol::object yO = static_cast<sol::object>(vector.y);
-
-                    return os << "(" << xO.as<double>() << "," << yO.as<double>() << ")";
-                } else {
-                    return os << "(" << vector.x << "," << vector.y << ")";
-                }
+                return os << "(" << vector.x << "," << vector.y << ")";
             }
     };
+
+    using IntVector2D = Vector2D<int>;
+    using LuaVector2D = Vector2D<lua_Number>;
+    using FloatVector2D = Vector2D<float>;
 }

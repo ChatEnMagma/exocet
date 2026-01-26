@@ -5,7 +5,7 @@
 #include "tool/vectors.hpp"
 
 namespace exocet {
-    using Vertex = Vector2D<int>;
+    using Vertex = IntVector2D;
 
     class Polygon {
         private:
@@ -32,10 +32,7 @@ namespace exocet {
              */
             Polygon(sol::table vertices) {
                 vertices.for_each([&](sol::object const& key, sol::object const& value) {
-                    this->vertices.push_back(Vector2D<int>(
-                        value.as<sol::table>()["x"].get<int>(),
-                        value.as<sol::table>()["y"].get<int>()
-                    ));
+                    this->vertices.push_back(value.as<LuaVector2D>().convert<int>());
                 });
             }
 

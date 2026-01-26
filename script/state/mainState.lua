@@ -125,6 +125,8 @@ mainState.init = function ()
         score,
         muteButton
     }
+
+    print("Success to initiate MainState")
 end
 
 --- @return Vector2D

@@ -15,58 +15,53 @@ LuaSystem::LuaSystem(Handler* handler) {
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::io, sol::lib::string, sol::lib::os, sol::lib::math);
 
     initUserdateLuaVector2D();
+
+    cout << "Success to initiate all usertypes" << endl;
     
     preloadPackages((string) DIR_SCRIPT + "lib/", "lib");
+
+    cout << "Success to initiate all libs' package" << endl;
 
     initEngine();
     initEntity();
 
+    cout << "Success to initiate all specific methods" << endl;
+
     preloadPackages(DIR_SCRIPT, "module");
+
+    cout << "Success to initiate all modules' package" << endl;
 }
 
 void LuaSystem::initUserdateLuaVector2D() {
     lua.new_usertype<LuaVector2D>(USERDATA_LUAVECTOR2D,
-        sol::meta_function::construct, sol::factories(
-            [](sol::object, sol::this_main_state s) {
-                return std::make_shared<LuaVector2D>(sol::make_object(s.lua_state(), 0), sol::make_object(s.lua_state(), 0));
+        sol::meta_function::construct, 
+        sol::factories(
+            [](sol::object) {
+                return make_shared<LuaVector2D>(0.f, 0.f);
             },
 
-            [](sol::object, const sol::object x, const sol::object y) {
-                return std::make_shared<LuaVector2D>(x, y);
+            [](sol::object, const lua_Number& x, const lua_Number& y) {
+                return make_shared<LuaVector2D>(x, y);
             }
         ),
-        sol::meta_function::to_string, [](LuaVector2D self) {
-            double x = self.x.as<double>();
-            double y = self.y.as<double>();
 
-            return string("(" + std::to_string(x) + ", " + std::to_string(y) + ")");
-        },
-        sol::meta_function::addition, [](LuaVector2D self, LuaVector2D vec, sol::this_main_state s) {
-            sol::object x = sol::make_object(s.lua_state(), self.x.as<lua_Number>() + vec.x.as<lua_Number>());
-            sol::object y = sol::make_object(s.lua_state(), self.y.as<lua_Number>() + vec.y.as<lua_Number>());
-
-            return std::make_shared<LuaVector2D>(LuaVector2D(x, y));
-        },
-        sol::meta_function::subtraction, [](LuaVector2D self, LuaVector2D vec, sol::this_main_state s) {
-            sol::object x = sol::make_object(s.lua_state(), self.x.as<lua_Number>() - vec.x.as<lua_Number>());
-            sol::object y = sol::make_object(s.lua_state(), self.y.as<lua_Number>() - vec.y.as<lua_Number>());
-
-            return std::make_shared<LuaVector2D>(LuaVector2D(x, y));
-        },
-        sol::meta_function::multiplication, [](LuaVector2D self, LuaVector2D vec, sol::this_main_state s) {
-            sol::object x = sol::make_object(s.lua_state(), self.x.as<lua_Number>() * vec.x.as<lua_Number>());
-            sol::object y = sol::make_object(s.lua_state(), self.y.as<lua_Number>() * vec.y.as<lua_Number>());
-
-            return std::make_shared<LuaVector2D>(LuaVector2D(x, y));
-        },
-        "getAngle", [](LuaVector2D self) { return atan2(self.x.as<lua_Number>(), self.y.as<lua_Number>()); },
+        sol::meta_function::addition, &LuaVector2D::operator+,
+        sol::meta_function::subtraction, &LuaVector2D::operator-,
+        sol::meta_function::multiplication, &LuaVector2D::operator*,
+        
+        "getAngle", &LuaVector2D::getAngle,
         "x", &LuaVector2D::x,
         "y", &LuaVector2D::y
     );
 }
 
 void LuaSystem::preloadPackages(const std::string pathDir, const std::string name) {
-    lua.script_file(pathDir + name + ".lua");
+    sol::optional<sol::error> res = lua.safe_script_file(pathDir + name + ".lua");
+
+    if(res) {
+        cerr << res->what() << endl;
+        handler->closeGame();
+    }
 
     // Check if the module field exists in the config
     if(lua[name] == sol::nil) {
@@ -76,11 +71,17 @@ void LuaSystem::preloadPackages(const std::string pathDir, const std::string nam
 
     // Load all modules homemade
     lua[name].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
-        lua.script_file(pathDir + value.as<string>() + ".lua");
+        sol::optional<sol::error> maybeErr = lua.safe_script_file(pathDir + value.as<string>() + ".lua");
+
+        if(maybeErr) {
+            cerr << "File: " << pathDir << value.as<string>() + ".lua has an err:" << endl << maybeErr->what() << endl;
+            handler->closeGame();
+        }
     });
 }
 
 void LuaSystem::initEngine() {
+    lua.script(R"(engine = {mainEntities={}})");
     // set the handler pointeur in engine.lua lib
     lua["engine"]["_handler"] = (intptr_t) handler;
 
@@ -101,9 +102,9 @@ void LuaSystem::initEngine() {
     lua["engine"]["getButton"] = [](sol::table self, Uint16 scancode) { return ((Handler*) hLua)->getButton(scancode); };
     lua["engine"]["getJustButton"] = [](sol::table self, Uint16 scancode) { return ((Handler*) hLua)->getJustButton(scancode); };
     lua["engine"]["getButtonCode"] = [](sol::table self) { return ((Handler*) hLua)->getSubsystem()->getMouseListener()->getButtonCode(); };
-    lua["engine"]["cGetMousePosition"] = [](sol::table self) {
-        Vector2D<int> pos = ((Handler*) hLua)->getMousePosition();
-        return tuple<int, int>(pos.x, pos.y);
+    lua["engine"]["getMousePosition"] = [](sol::table self) {
+        auto vec = ((Handler*) hLua)->getMousePosition();
+        return make_shared<LuaVector2D>(vec.x, vec.y);
     };
 
     lua["engine"]["mute"] = [](sol::table self) { ((Handler*) hLua)->getSubsystem()->mute(); };
@@ -137,43 +138,45 @@ void LuaSystem::initEngine() {
     lua["engine"]["setColor"] = [](sol::table self, int r, int g, int b, int a) {
         ((Handler*) hLua)->getGraphic()->setColor(r, g, b, a);
     };
-    lua["engine"]["renderRect"] = [](sol::table self, sol::table position, int w, int h) {
-        ((Handler*) hLua)->getGraphic()->renderRect(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), w, h);
+    lua["engine"]["renderRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
+        ((Handler*) hLua)->getGraphic()->renderRect(position.convert<int>(), w, h);
     };
-    lua["engine"]["renderFillRect"] = [](sol::table self, sol::table position, int w, int h) {
-        ((Handler*) hLua)->getGraphic()->renderFillRect(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), w, h);
+    lua["engine"]["renderFillRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
+        ((Handler*) hLua)->getGraphic()->renderFillRect(position.convert<int>(), w, h);
     };
-    lua["engine"]["renderAnchorRect"] = [](sol::table self, sol::table position, int w, int h) {
-        ((Handler*) hLua)->getGraphic()->renderAnchorRect(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), w, h);
+    lua["engine"]["renderAnchorRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
+        ((Handler*) hLua)->getGraphic()->renderAnchorRect(position.convert<int>(), w, h);
     };
-    lua["engine"]["renderAnchorFillRect"] = [](sol::table self, sol::table position, int w, int h) {
-        ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), w, h);
+    lua["engine"]["renderAnchorFillRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
+        ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(position.convert<int>(), w, h);
     };
     lua["engine"]["centerOnEntity"] = [](sol::table self, sol::table entity) {
         ((Handler*) hLua)->getGraphic()->centerOnEntity(((Entity*) entity.get<intptr_t>("_ptr")));
     };
-    lua["engine"]["cGetCameraPosition"] = [](sol::table self) { 
-        Vector2D<int> pos = ((Handler*) hLua)->getGraphic()->getCamera()->getPosition();
-        return tuple<int, int>(pos.x, pos.y);
+    lua["engine"]["getCameraPosition"] = [](sol::table self) { 
+        auto vec = ((Handler*) hLua)->getGraphic()->getCamera()->getPosition();
+        return make_shared<LuaVector2D>(static_cast<lua_Number>(vec.x), static_cast<lua_Number>(vec.y));
     };
-    lua["engine"]["renderText"] = [](sol::table self, sol::table position, int width, int height, string text) {
+    lua["engine"]["renderText"] = [](sol::table self, LuaVector2D position, int width, int height, string text) {
         ((Handler*) hLua)->getGraphic()->renderText(
-            position.get<int>("x"),
-            position.get<int>("y"),
+            static_cast<int>(position.x),
+            static_cast<int>(position.y),
             width,
             height,
             text,
             ((Handler*) hLua)->getGraphic()->freeRoyalty
         );
     };
-    lua["engine"]["renderPolygon"] = [](sol::table self, sol::table position, sol::table polygon) {
-        ((Handler*) hLua)->getGraphic()->renderPolygon(Vector2D<int>(position.get<int>("x"), position.get<int>("y")), Polygon(polygon.get<sol::table>("polygon")));
+    lua["engine"]["renderPolygon"] = [](sol::table self, LuaVector2D position, sol::table polygon) {
+        ((Handler*) hLua)->getGraphic()->renderPolygon(position.convert<int>(), Polygon(polygon.get<sol::table>("polygon")));
     };
-    lua["engine"]["cGetBackgroundPosition"] = [](sol::table self, sol::this_main_state s) {
-        const Vector2D<int> pos = ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->getPosition();
-        return tuple<int, int>(pos.x, pos.y);
+    lua["engine"]["getBackgroundPosition"] = [](sol::table self) {
+        auto vec = ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->getPosition(); 
+        return make_shared<LuaVector2D>(static_cast<lua_Number>(vec.x), static_cast<lua_Number>(vec.y));
     };
-    lua["engine"]["setBackgroundPosition"] = [](sol::table self, int xpos, int ypos) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(Vector2D<int>(xpos, ypos)); };
+    lua["engine"]["setBackgroundPosition"] = [](sol::table self, LuaVector2D position) {
+        ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(position.convert<int>()); 
+    };
     lua["engine"]["setBackgroundSize"] = [](sol::table self, int w, int h) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setSize(w, h); };
     lua["engine"]["addEntity"] = [](sol::table self, sol::table entity_lua) { (((Handler*) hLua)->getEntityManager()->addEntityFromLua(entity_lua)); };
 }

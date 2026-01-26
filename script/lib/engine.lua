@@ -108,10 +108,7 @@ function engine:getButtonCode() end
 
 --- Get the position of the mouse in the game window
 --- @return Vector2D ...
-function engine.getMousePosition()
-    local x, y = engine:cGetMoustPosition(engine._handler)
-    return Vector2D:new(x, y)
-end
+function engine.getMousePosition() end
 
 --===================================== ALL STATE METHODS ====================================--
 
@@ -180,11 +177,8 @@ function engine:renderPolygon(position, polygon) end
 --=================================== ALL CAMERA METHODS =====================================--
 
 --- Get the position of the camera, i.e the offset
---- @return Vector2D
-function engine:getCameraPosition()
-    local x, y = engine:cGetCameraPosition(self._handler)
-    return Vector2D:new(x, y)
-end
+--- @return Vector2D ...
+function engine:getCameraPosition() end
 --- Set the camera on the entity
 --- @param entity Entity The entity will center
 function engine:centerOnEntity(entity) end
@@ -192,11 +186,8 @@ function engine:centerOnEntity(entity) end
 --================================= ALL BACKGROUND METHODS ===================================--
 
 --- Get the position of the state background
---- @return Vector2D
-function engine:getBackgroundPosition()
-    local x, y = engine:cGetBackgroundPosition(self._handler)
-    return Vector2D:new(x, y)
-end
+--- @return Vector2D ...
+function engine:getBackgroundPosition() end
 --- Set the position of the background state
 --- @param postion Vector2D The new postion
 function engine:setBackgroundPosition(postion) end

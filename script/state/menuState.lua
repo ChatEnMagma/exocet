@@ -8,11 +8,6 @@ menuState = {
 
     update = function ()
         engine:setBackgroundSize(engine:getWinWidth(), engine:getWinHeight())
-
-        local test = Vector2Dtest:new(10, 20)
-        local test2 = Vector2Dtest:new(20, 30)
-        print(test, test2)
-        print(test + test2)
     end,
 
     background = {

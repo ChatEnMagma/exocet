@@ -21,20 +21,27 @@ Game::Game(Subsystem* subsys) {
 
     // Init all modules and function lua
     lua = new LuaSystem(handler);
+    cout << "Success to initiate the luaSystem" << endl;
 
     // init StateManager
     sManager = new StateManager();
     sManager->setHandler(handler);
     sManager->initStates();
 
+    cout << "Success to initiate all states" << endl;
+
     // set the state, and try to fetch the config file lua
     if((*lua)["config"]["init_state"] != sol::nil)
-        setState((size_t) (*lua)["config"]["init_state"]);
+        setState((*lua)["config"]["init_state"].get<size_t>());
     else setState(0);
 
+    cout << (*lua)["config"]["init_state"].get<int>() << endl;
+
     // All debug functions pre-define bu config lua file
-    if((*lua)["config"]["showHitbox"] != sol::nil && (bool) (*lua)["config"]["showHitbox"]) showHitbox();
-    if((*lua)["config"]["showPointerEntities"] != sol::nil && (bool) (*lua)["config"]["showPointerEntities"]) showPointerEntities();
+    if((*lua)["config"]["showHitbox"] != sol::nil && (*lua)["config"]["showHitbox"].get<bool>()) showHitbox();
+    if((*lua)["config"]["showPointerEntities"] != sol::nil && (*lua)["config"]["showPointerEntities"].get<bool>()) showPointerEntities();
+
+    cout << "Success to config the game" << endl;
 }
 
 void Game::update() {
