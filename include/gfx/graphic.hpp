@@ -65,9 +65,9 @@ namespace exocet {
             }
 
             void renderAnchorPolygon(const Vector2D<int>& position, const Polygon& polygon) {
-                for(std::size_t i = 0; i < polygon.length(); i++) {
-                    int nxt = (i + 1) % polygon.length();
-                    renderAnchorLine(position + polygon[i], position + polygon[nxt]);
+                for(std::size_t i = 0; i < polygon.size(); i++) {
+                    int nxt = (i + 1) % polygon.size();
+                    renderAnchorLine(position + polygon[i].convert<int>(), position + polygon[nxt].convert<int>());
                 }
             }
             inline void renderPolygon(const Vector2D<int>& position, const Polygon& polygon) { renderAnchorPolygon(position - camera.getPosition(), polygon); }

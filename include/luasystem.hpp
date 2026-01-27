@@ -4,15 +4,18 @@
 
 #include "constantes.hpp"
 #include "tool/vectors.hpp"
+#include "tool/polygon.hpp"
 
-#define USERDATA_LUAVECTOR2D "Vector2D"
+#define USERTYPE_LUAVECTOR2D "Vector2D"
+#define USERTYPE_POLYGON "Polygon"
 
 namespace exocet {
         class LuaSystem: public sol::state {
         private:
             Handler* handler;
 
-            void initUserdateLuaVector2D();
+            void initUsertypeLuaVector2D();
+            void initUsertypePolygon();
 
             void initEngine();
             void initEntity();

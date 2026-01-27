@@ -60,29 +60,18 @@ namespace exocet {
             /**
              * \return The width of the entity
              */
-            int getWidth() const {
-                int tmp = INT32_MIN;
-                for(Vector2D<int> p: polygons.getVertices()) {
-                    tmp = std::max(tmp, p.x);
-                }
-                return tmp;
-            }
+            int getWidth() const { return polygons.getWidth(); }
             /**
              * \return The height of the entity
              */
-            inline int getHeight() const {
-                int tmp = INT32_MIN;
-                for(Vector2D<int> p: polygons.getVertices())
-                    tmp = std::max(tmp, p.y);
-                return tmp;
-            }
+            int getHeight() const { return polygons.getHeight(); }
             /**
              * \brief Set a rectangular hitbox for the entity
              */
             inline void setRect(int xpos, int ypos, int width, int height) {
                 polygons = Polygon(xpos, ypos, width, height); shape = RECTANGULAR_SHAPE; 
             }
-            inline void setPoly(Polygon polygon) { this->polygons = polygon; }
+            inline void setPolygon(Polygon polygon) { this->polygons = polygon; }
             inline void setHitbox(Polygon polygon) { polygons = polygon; }
             inline void setColor(Uint8 red, Uint8 green, Uint8 blue) { color[0] = red; color[1] = green; color[2] = blue; }
 
@@ -92,9 +81,5 @@ namespace exocet {
 
             inline Uint8 getTypeShaped() const { return shape; }
             inline Polygon getPolygon() const { return polygons; }
-            /**
-             * \return The number of vertices
-             */
-            inline std::size_t length() const { return polygons.length(); }
     };
 }

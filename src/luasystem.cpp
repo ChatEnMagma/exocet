@@ -14,7 +14,8 @@ LuaSystem::LuaSystem(Handler* handler) {
     // Load main lib and package
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::io, sol::lib::string, sol::lib::os, sol::lib::math);
 
-    initUserdateLuaVector2D();
+    initUsertypeLuaVector2D();
+    initUsertypePolygon();
 
     cout << "Success to initiate all usertypes" << endl;
     
@@ -32,8 +33,8 @@ LuaSystem::LuaSystem(Handler* handler) {
     cout << "Success to initiate all modules' package" << endl;
 }
 
-void LuaSystem::initUserdateLuaVector2D() {
-    lua.new_usertype<LuaVector2D>(USERDATA_LUAVECTOR2D,
+void LuaSystem::initUsertypeLuaVector2D() {
+    lua.new_usertype<LuaVector2D>(USERTYPE_LUAVECTOR2D,
         sol::meta_function::construct, 
         sol::factories(
             [](sol::object) {
@@ -52,6 +53,21 @@ void LuaSystem::initUserdateLuaVector2D() {
         "getAngle", &LuaVector2D::getAngle,
         "x", &LuaVector2D::x,
         "y", &LuaVector2D::y
+    );
+}
+
+void LuaSystem::initUsertypePolygon() {
+    lua.new_usertype<Polygon>(USERTYPE_POLYGON,
+        sol::meta_function::construct,
+        sol::factories(
+            [](sol::object) {
+                return make_shared<Polygon>();
+            },
+            [](sol::object, sol::table vertices) {
+                return make_shared<Polygon>(vertices);
+            }
+        ),
+        sol::meta_function::index, &Polygon::getVertex
     );
 }
 

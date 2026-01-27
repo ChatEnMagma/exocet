@@ -30,7 +30,7 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
             physic.setVelocity(component["velocity"].get<LuaVector2D>().convert<float>());
         }
         if(component["hitbox"] != sol::nil) {
-            if(component["hitbox"]["vertices"] == sol::nil) {
+            if(!component["hitbox"].is<Polygon&>()) {
                 physic.getHitbox()->setRect(
                     component["hitbox"]["x"].get<int>(),
                     component["hitbox"]["y"].get<int>(),
@@ -38,7 +38,7 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
                     component["hitbox"]["h"].get<int>()
                 );
             } else {
-                physic.getHitbox()->setPoly(Polygon(component["hitbox"]["vertices"].get<sol::table>()));
+                physic.getHitbox()->setPolygon(component["hitbox"].get<Polygon&>());
             }
         }
 

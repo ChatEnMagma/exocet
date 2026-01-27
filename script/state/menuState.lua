@@ -4,7 +4,17 @@ menuState = {
 
     highscore = 0,
 
-    init = function () end,
+    init = function ()
+        local poly = Polytest:new()
+        local poly2 = Polytest:new({Vector2D:new(1, 1), Vector2D:new(2, 1), Vector2D:new(2, 2), Vector2D:new(1, 2)})
+
+        print(poly, poly2)
+        print(#poly, #poly2)
+
+        local vec = poly2[0]
+        local vec2 = vec + Vector2D:new(10, 20)
+        print(vec, vec2)
+    end,
 
     update = function ()
         engine:setBackgroundSize(engine:getWinWidth(), engine:getWinHeight())

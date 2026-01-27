@@ -20,28 +20,28 @@ void HitboxComponent::init() {
 }
 
 int HitboxComponent::getRight() const {
-    int tmp = INT32_MIN;
+    double tmp = -MAXFLOAT;
     for(Vertex p: polygons.getVertices()) {
         tmp = std::max(tmp, p.x);
     }
     return tmp;
 }
 int HitboxComponent::getLeft() const {
-    int tmp = INT32_MAX;
+    double tmp = MAXFLOAT;
     for(Vertex p: polygons.getVertices()) {
         tmp = std::min(tmp, p.x);
     }
     return tmp;
 }
 int HitboxComponent::getTop() const {
-    int tmp = INT32_MAX;
+    double tmp = MAXFLOAT;
     for(Vertex p: polygons.getVertices()) {
         tmp = std::min(tmp, p.y);
     }
     return tmp;
 }
 int HitboxComponent::getBottom() const {
-    int tmp = INT32_MIN;
+    double tmp = -MAXFLOAT;
     for(Vertex p: polygons.getVertices()) {
         tmp = std::max(tmp, p.y);
     }
@@ -50,10 +50,10 @@ int HitboxComponent::getBottom() const {
 
 
 void projection(const Polygon& poly, const Vector2D<double> axis, double* max, double* min) {
-    *max = *min = poly[0].convert<double>().dot(axis);
+    *max = *min = poly[0].dot(axis);
 
-    for(size_t i = 1; i < poly.length(); i++) {
-        double proj = poly[i].convert<double>().dot(axis);
+    for(size_t i = 1; i < poly.size(); i++) {
+        double proj = poly[i].dot(axis);
         *min = std::min(*min, proj);
         *max = std::max(*max, proj);
     }
@@ -69,8 +69,8 @@ bool HitboxComponent::isCollide(HitboxComponent* hitbox) const {
     double max1, max2, min1, min2;
 
     // Get the transpos of the hitbox
-    Polygon p1 = polygons.translate(transform->getPosition());
-    Polygon p2 = hitbox->getPolygon().translate(hitbox->getPosition());
+    Polygon p1 = polygons.translate(transform->getPosition().convert<double>());
+    Polygon p2 = hitbox->getPolygon().translate(hitbox->getPosition().convert<double>());
 
     auto axes1 = p1.getAxes();
     auto axes2 = p2.getAxes();
