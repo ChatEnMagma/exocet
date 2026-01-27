@@ -14,6 +14,8 @@ LuaSystem::LuaSystem(Handler* handler) {
     // Load main lib and package
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::io, sol::lib::string, sol::lib::os, sol::lib::math);
 
+    initRectClass();
+
     initUsertypeLuaVector2D();
     initUsertypePolygon();
 
@@ -54,6 +56,21 @@ void LuaSystem::initUsertypeLuaVector2D() {
         "x", &LuaVector2D::x,
         "y", &LuaVector2D::y
     );
+}
+
+void LuaSystem::initRectClass() {
+    lua.script(R"a(Rect = {x = 0,y = 0,w = 0,h = 0}
+Rect.__index = Rect
+function Rect:new(x, y, w, h)
+    local r = {}
+    setmetatable(r, Rect)
+    if (w == nil) and (h == nil) then
+        w = x;h = y;x = 0;y = 0;
+    end
+    r.x = x;r.y = y;r.w = w;r.h = h;
+    return r
+end
+function Rect:__tostring()return "(x: " .. self.x .." ; y: " .. self.y .. " ; w: " .. self.w .." ; h: " .. self.h ..")"end)a");
 }
 
 void LuaSystem::initUsertypePolygon() {

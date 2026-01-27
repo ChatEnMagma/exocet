@@ -14,6 +14,8 @@ namespace exocet {
         private:
             Handler* handler;
 
+            void initRectClass();
+
             void initUsertypeLuaVector2D();
             void initUsertypePolygon();
 

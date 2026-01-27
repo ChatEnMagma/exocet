@@ -1,7 +1,5 @@
 lib = {
     "tools/sdl",
-    "tools/rect",
-    --"tools/polygon",
     "controller",
     "tools/json",
 
