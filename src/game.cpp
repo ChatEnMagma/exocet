@@ -31,15 +31,11 @@ Game::Game(Subsystem* subsys) {
     cout << "Success to initiate all states" << endl;
 
     // set the state, and try to fetch the config file lua
-    if((*lua)["config"]["init_state"] != sol::nil)
-        setState((*lua)["config"]["init_state"].get<size_t>());
-    else setState(0);
-
-    cout << (*lua)["config"]["init_state"].get<int>() << endl;
+    setState((*lua)["config"]["init_state"].get_or<size_t>(0));
 
     // All debug functions pre-define bu config lua file
-    if((*lua)["config"]["showHitbox"] != sol::nil && (*lua)["config"]["showHitbox"].get<bool>()) showHitbox();
-    if((*lua)["config"]["showPointerEntities"] != sol::nil && (*lua)["config"]["showPointerEntities"].get<bool>()) showPointerEntities();
+    if((*lua)["config"]["showHitbox"].get_or<bool>(0)) showHitbox();
+    if((*lua)["config"]["showPointerEntities"].get_or<bool>(0)) showPointerEntities();
 
     cout << "Success to config the game" << endl;
 }

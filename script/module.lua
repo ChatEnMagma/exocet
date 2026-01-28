@@ -1,4 +1,6 @@
 module = {
+    "config",
+
     -- All particles
     "entity/particle/rain",
 
@@ -11,5 +13,4 @@ module = {
     "entity/items",
     "entity/ufo",
     "entity/player",
-    "config",
 }

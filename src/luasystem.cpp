@@ -104,10 +104,15 @@ void LuaSystem::preloadPackages(const std::string pathDir, const std::string nam
 
     // Load all modules homemade
     lua[name].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
-        sol::optional<sol::error> maybeErr = lua.safe_script_file(pathDir + value.as<string>() + ".lua");
+        string file = pathDir + value.as<string>() + ".lua";
+
+        if(lua["config"]["logOpenLuaFiles"].get_or<bool>(0))
+            cout << "open the file: " << file << endl;
+
+        sol::optional<sol::error> maybeErr = lua.safe_script_file(file);
 
         if(maybeErr) {
-            cerr << "File: " << pathDir << value.as<string>() + ".lua has an err:" << endl << maybeErr->what() << endl;
+            cerr << "File: " << file << " has an err:" << endl << maybeErr->what() << endl;
             handler->closeGame();
         }
     });

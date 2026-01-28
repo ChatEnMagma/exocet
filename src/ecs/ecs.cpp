@@ -23,12 +23,10 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
 
     if(tag == "physic") {
         auto& physic = addComponent<PhysicComponent>();
-        if(component["position"] != sol::nil) {
-            physic.setPosition(component["position"].get<LuaVector2D>().convert<int>());
-        }
-        if(component["velocity"] != sol::nil) {
-            physic.setVelocity(component["velocity"].get<LuaVector2D>().convert<float>());
-        }
+        
+        physic.setPosition(component["position"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<int>());
+        physic.setVelocity(component["velocity"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<float>());
+
         if(component["hitbox"] != sol::nil) {
             if(!component["hitbox"].is<Polygon&>()) {
                 physic.getHitbox()->setRect(
@@ -42,13 +40,13 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
             }
         }
 
-    if(component["masse"] != sol::nil)
-        physic.setMasse(component["masse"].get<float>());
-    if(component["color"] != sol::nil)
+
+        physic.setMasse(component["masse"].get_or<float>(0));
+
         physic.getHitbox()->setColor(
-            component["color"][0].get<Uint8>(),
-            component["color"][1].get<Uint8>(),
-            component["color"][2].get<Uint8>()
+            component["color"][0].get_or<Uint8>(0xFF),
+            component["color"][1].get_or<Uint8>(0x00),
+            component["color"][2].get_or<Uint8>(0x00)
         );
     } else if(tag == "script") {
         addComponent<ScriptComponent>(component);
@@ -73,10 +71,7 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
             sprite.fitSizeWithHitbox();
         }
 
-        if(component["angle"] != sol::nil) {
-            sprite.setAngle(component["angle"].get<double>());
-        }
-        
+        sprite.setAngle(component["angle"].get_or<double>(0));
     } else if(tag == "drag") {
         addComponent<DragComponent>();
     } else if(tag == "ui") {
@@ -109,14 +104,10 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
     } else if(tag == "particle") {
         ParticleComponent& particle = addComponent<ParticleComponent>();
 
-        if(component["time"] != sol::nil)
-            particle.setTime(component["time"]);
-        if(component["position"] != sol::nil) {
-            particle.setPosition(component["position"].get<LuaVector2D>().convert<int>());
-        }
-        if(component["velocity"] != sol::nil) {
-            particle.setVelocity(component["velocity"].get<LuaVector2D>().convert<float>());
-        }
+        particle.setTime(component["time"].get_or<>(0));
+
+        particle.setPosition(component["position"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<int>());
+        particle.setVelocity(component["velocity"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<float>());
     } else {
         cout << "Warning: unknow component `" << tag << "`" << endl;
     }

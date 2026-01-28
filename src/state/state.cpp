@@ -15,10 +15,9 @@ void State::loadState() {
                 value.as<sol::table>()["zindex"].get<size_t>(),
                 new Texture(handler, "res/" + value.as<sol::table>()["path"].get<string>())
             );
+            
             // Set the position of the backgrounds
-            if(value.as<sol::table>()["postion"] != sol::nil) {
-                background->setPosition(value.as<sol::table>()["postion"].get<LuaVector2D>().convert<int>());
-            } else background->setPosition(Vector2D<int>());
+            background->setPosition(value.as<sol::table>()["postion"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<int>());
         });
 
         background->setSize(
