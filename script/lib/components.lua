@@ -8,3 +8,5 @@ require("component.particleComponent")
 require("component.physicComponent")
 require("component.scriptComponent")
 require("component.spriteComponent")
+
+---@alias Components ButtonComponent|ParticleComponent|PhysicComponent|SpriteComponent|SpriteComponent

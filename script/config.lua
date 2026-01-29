@@ -6,8 +6,6 @@ config = {
     logOpenLuaFiles = true,
 
     states = {
-        "menuState",
-        "mainState",
         "debugState",
     }
 }

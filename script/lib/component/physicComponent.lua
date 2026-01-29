@@ -1,25 +1,18 @@
 --- @class PhysicComponent
-PhysicComponent = {
-    tag = "physic",
-    --- @type Rect
-    hitbox = {},
-    --- @type Vector2D
-    position = Vector2D:new(0, 0)
-}
+--- @field tag string the tag of Component
+--- @field hitbox Rect
+--- @field position Vector2D
+PhysicComponent = {}
 
---- @param hitbox Rect|Polygon
---- @param position Vector2D|nil
+--- @param hitbox Rect
+--- @param position Vector2D?
 function PhysicComponent:new(hitbox, position)
-    local c = {}
-
-    setmetatable(c, PhysicComponent)
+    local c = setmetatable({}, PhysicComponent)
 
     c.tag = "physic"
-    
+
     c.hitbox = hitbox
-    c.position = position
+    c.position = position or Vector2D:new()
 
     return c
 end
-
-return PhysicComponent

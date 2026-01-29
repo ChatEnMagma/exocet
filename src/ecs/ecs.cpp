@@ -40,7 +40,6 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
             }
         }
 
-
         physic.setMasse(component["masse"].get_or<float>(0));
 
         physic.getHitbox()->setColor(
@@ -152,25 +151,21 @@ Entity& EntityManager::addEntityFromLua(sol::table e) {
     sol::state& lua = *handler->getLua();
 
     // Check if the entity have entity in the field
-    if(e["entity"] == sol::nil) {
+    /*if(e["entity"] == sol::nil) {
         cerr << "Error, you are trying add an entity from lua file without entity in the field" << endl;
         handler->closeGame();   // Close the game
         return addEntity("Err");
-    }
+    }*/
     
     // Make C-Entity
-    Entity& entity = addEntity(e["entity"]["tag"].get<string>());
+    Entity& entity = addEntity(e["tag"].get<string>());
     // Set the C-pointer into lua entity
-    e["entity"]["setEntity"](e["entity"], (intptr_t) &entity);
+    e["_ptr"] = (intptr_t) &entity;
 
     // Add all components for C-Entity
-    if(e["components"] != sol::nil) {
-        e["components"].get<sol::table>().for_each([&](sol::object const& keyComponent, sol::object const& valueComponent) {
-            entity.addComponentsFromLua(&lua, valueComponent.as<sol::table>());
-        });
-    } else {
-        cout << "Warning /!\\ for " << entity.getTag() << " you should add components..." << endl;
-    }
+    e["components"].get<sol::table>().for_each([&](sol::object const& keyComponent, sol::object const& valueComponent) {
+        entity.addComponentsFromLua(&lua, valueComponent.as<sol::table>());
+    });
 
     return entity;
 }

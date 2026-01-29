@@ -1,16 +1,13 @@
 --- Class Entity has essential functions
 --- @class Entity
+--- @field components Components[]
+--- @field tag string The tag of the entity, i.e. the name of entity
 Entity = {
     --- The C pointer from Entity
     --- @private
     --- @type integer
     _ptr = 0,
-
-    --- The tag of the entity, i.e. the name of entity
-    --- @type string
-    tag = "gen-entity"
 }
-
 Entity.__index = Entity
 
 function Entity:__tostring()
@@ -20,7 +17,10 @@ end
 --- @param tag string
 function Entity:new(tag)
     local e = setmetatable({}, Entity)
+
     e.tag = tag
+    e.components = {}
+    e._ptr = 0
 
     return e
 end
@@ -84,20 +84,12 @@ function Entity:getCollideEntity(entity)
 end
 
 --- Kill the entity
-function Entity:destroy()
-    self.cDestroy(self._ptr)
-end
+function Entity:destroy() end
 
 --- Fit the size of the sprite with hitbox
 function Entity:fitSizeWithHitbox()
-    self.cFitSizeWithHitbox(self._ptr)
-end
-
---- Function set the pointer of CEntity
---- @private
---- @param pointer interger The C pointer from Entity
-function Entity:setEntity(pointer)
-    self._ptr = pointer
+    self:cFitSizeWithHitbox()
+    print("fitspite")
 end
 
 --- Function returns the position of the entity

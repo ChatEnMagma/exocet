@@ -220,7 +220,7 @@ void LuaSystem::initEngine() {
 }
 
 void LuaSystem::initEntity() {
-    lua["Entity"]["cDestroy"] = [](intptr_t entity_lua) { ((Entity*) entity_lua)->destroy(); };
+    lua["Entity"]["destroy"] = [](sol::table self) { ((Entity*) self["_ptr"])->destroy(); };
     lua["Entity"]["cGetRect"] = [](intptr_t entity_lua) {
         Entity* e = (Entity*) entity_lua;
 
@@ -238,8 +238,8 @@ void LuaSystem::initEntity() {
         return tuple<int, int, int, int>(ui.getPosition().x, ui.getPosition().y, ui.getWidth(), ui.getHeight());
     };
     // *************** Methods from SpriteComponent **********************
-    lua["Entity"]["cFitSizeWithHitbox"] = [](intptr_t entity_lua) {
-        Entity* e = ((Entity*) entity_lua);
+    lua["Entity"]["cFitSizeWithHitbox"] = [](sol::table self) {
+        Entity* e = (Entity*) self["_ptr"].get<intptr_t>();
         if(e->hasComponent<SpriteComponent>()) {
             e->getComponent<SpriteComponent>().fitSizeWithHitbox();
         } else { cout << "Warning /!\\ function `fitSizeWithHitbot` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl; }

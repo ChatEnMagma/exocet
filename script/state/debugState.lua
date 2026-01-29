@@ -3,6 +3,6 @@ debugState = {
     tag = "debugState",
 
     entities = {
-        Cloud:new(Vector2D:new(100, 100))
+        Player:new()
     }
 }
