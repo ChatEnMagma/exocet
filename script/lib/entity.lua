@@ -2,12 +2,7 @@
 --- @class Entity
 --- @field components Components[]
 --- @field tag string The tag of the entity, i.e. the name of entity
-Entity = {
-    --- The C pointer from Entity
-    --- @private
-    --- @type integer
-    _ptr = 0,
-}
+Entity = {}
 Entity.__index = Entity
 
 function Entity:__tostring()
@@ -89,7 +84,6 @@ function Entity:destroy() end
 --- Fit the size of the sprite with hitbox
 function Entity:fitSizeWithHitbox()
     self:cFitSizeWithHitbox()
-    print("fitspite")
 end
 
 --- Function returns the position of the entity

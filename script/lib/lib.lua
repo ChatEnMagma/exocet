@@ -4,6 +4,7 @@ lib = {
     "tools/json",
 
     -- All components
+    "component/anchorComponent",
     "component/buttonComponent",
     "component/particleComponent",
     "component/physicComponent",

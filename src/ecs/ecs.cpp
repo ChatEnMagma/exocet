@@ -47,6 +47,23 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
             component["color"][1].get_or<Uint8>(0x00),
             component["color"][2].get_or<Uint8>(0x00)
         );
+    } else if(tag == "anchor") {
+        auto& anchor = addComponent<AnchorComponent>();
+
+        anchor.setPosition(component["position"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<int>());
+
+        if(component["hitbox"] != sol::nil) {
+            if(!component["hitbox"].is<Polygon&>()) {
+                anchor.getHitbox()->setRect(
+                    component["hitbox"]["x"].get<int>(),
+                    component["hitbox"]["y"].get<int>(),
+                    component["hitbox"]["w"].get<int>(),
+                    component["hitbox"]["h"].get<int>()
+                );
+            } else {
+                anchor.getHitbox()->setPolygon(component["hitbox"].get<Polygon&>());
+            }
+        }
     } else if(tag == "script") {
         addComponent<ScriptComponent>(component);
     } else if(tag == "sprite") {

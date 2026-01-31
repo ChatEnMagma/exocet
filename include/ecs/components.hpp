@@ -8,3 +8,4 @@
 #include "ecs/ui/buttonComponent.hpp"
 #include "ecs/spriteComponent.hpp"
 #include "ecs/scriptComponent.hpp"
+#include "ecs/anchorComponent.hpp"
