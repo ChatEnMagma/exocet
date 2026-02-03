@@ -8,3 +8,5 @@ versionzip
 tex_temp
 save.json
 makegame.sh
+run_valgrind.sh
+valgrind.supp

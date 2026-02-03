@@ -30,6 +30,7 @@ namespace exocet {
                 this->updateLua = updateLua;
                 this->renderLua = renderLua;
             }
+            ~State() = default;
 
             void init() { if(initLua != sol::nil) initLua(); }
             void update() { 
@@ -82,6 +83,8 @@ namespace exocet {
              */
             std::size_t current;
         public:
+            ~StateManager() = default;
+
             inline void update() { getState()->update(); }
             inline void render() { getState()->render(); }
 

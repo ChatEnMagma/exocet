@@ -13,6 +13,8 @@ namespace exocet {
             Uint8 shape;
             Uint8 color[3];
         public:
+            ~HitboxComponent() = default;
+
             enum SHAPES {
                 POLYGON_SHAPE = 0,
                 RECTANGULAR_SHAPE

@@ -15,9 +15,11 @@ namespace exocet {
             double a;
             int w, h;
 
-            inline void cleanTextures() { for(Texture* t: tex) {
-                if(t != nullptr)
-                    t->clean();
+            inline void cleanTextures() { 
+                for(Texture* t: tex) {
+                if(t != nullptr) {
+                    delete t;
+                }
             } tex.clear(); }
         public:
             ~SpriteComponent() { cleanTextures(); }

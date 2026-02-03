@@ -18,6 +18,7 @@ namespace exocet {
             LuaSystem* lua;
         public:
             Game(Subsystem* subsystem);
+            ~Game();
 
             void update();
             void render();

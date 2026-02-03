@@ -10,6 +10,8 @@ namespace exocet {
             HitboxComponent* hitbox;
             TransformComponent* transform;
         public:
+            DragComponent() = default;
+
             void init() override;
             void update() override;
 

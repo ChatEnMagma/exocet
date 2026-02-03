@@ -50,7 +50,7 @@ namespace exocet {
             Entity* entity;
         public:
             Component() {}
-            ~Component() {}
+            virtual ~Component() = default;
             
             virtual void init() {}
             virtual void update() {}

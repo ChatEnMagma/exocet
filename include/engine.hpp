@@ -12,6 +12,10 @@ namespace exocet {
             Game* game;
             Subsystem* subsys;
         public:
+            ~Engine() {
+                delete game;
+                delete subsys;
+            }
             /**
              * \brief init the game engine
              * \param width the window width

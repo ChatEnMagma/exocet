@@ -31,9 +31,4 @@ void Engine::run() {
 }
 
 void Engine::clean() {
-    sol::state& lua = *game->getLua();
-    lua.stack_clear();
-    lua.clear_package_loaders();
-    
-    subsys->clean();
 }

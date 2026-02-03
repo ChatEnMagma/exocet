@@ -27,6 +27,8 @@ namespace exocet {
 
             bool running;
         public:
+            ~Subsystem() { clean(); };
+
             /**
              * \brief Init the subsystem
              * \param width the window width

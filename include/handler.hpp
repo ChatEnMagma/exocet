@@ -15,6 +15,7 @@ namespace exocet {
                 this->subsys = subsystem;
                 this->game = game;
             }
+            ~Handler() = default;
 
             inline Subsystem* getSubsystem() { return subsys; }
             /**

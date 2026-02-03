@@ -25,5 +25,10 @@ namespace exocet {
             void preloadPackages(const std::string pathPackage, const std::string name);
         public:
             LuaSystem(Handler* handler);
+            ~LuaSystem() {
+                this->collect_garbage();
+
+                this->clear_package_loaders();
+            };
     };
 }

@@ -7,6 +7,8 @@ namespace exocet {
         private:
             PhysicComponent* physic;
         public:
+            AnchorComponent() = default;
+
             void init() override;
 
             IntVector2D getPosition() const { return physic->getPosition(); }

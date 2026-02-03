@@ -6,6 +6,8 @@
 namespace exocet {
     class TransformComponent: public Component {
         public:
+            TransformComponent() = default;
+
             Vector2D<int> pos;
             Vector2D<float> vel;
 

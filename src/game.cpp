@@ -39,6 +39,11 @@ Game::Game(Subsystem* subsys) {
 
     cout << "Success to config the game" << endl;
 }
+Game::~Game() {
+    delete sManager;
+    delete lua;
+    delete handler;
+}
 
 void Game::update() {
     if(handler->getJustKey(SDLK_ESCAPE))
