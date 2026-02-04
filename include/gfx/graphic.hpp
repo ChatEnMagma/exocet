@@ -18,6 +18,9 @@ namespace exocet {
 
             SDL_Color color;
         public:
+            ~Graphic() {
+                clean();
+            }
             static TTF_Font* freeRoyalty;
 
             inline void setColor(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 0xFF) {

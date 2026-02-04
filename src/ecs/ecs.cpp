@@ -24,8 +24,11 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
     if(tag == "physic") {
         auto& physic = addComponent<PhysicComponent>();
         
-        physic.setPosition(component["position"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<int>());
-        physic.setVelocity(component["velocity"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<float>());
+        auto defaultPos = LuaVector2D(0, 0);
+        physic.setPosition(component["position"].get_or<LuaVector2D>(defaultPos).convert<int>());
+
+        auto defaultVec = LuaVector2D(0, 0);
+        physic.setVelocity(component["velocity"].get_or<LuaVector2D>(defaultVec).convert<float>());
 
         if(component["hitbox"] != sol::nil) {
             if(!component["hitbox"].is<Polygon&>()) {
@@ -50,7 +53,8 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
     } else if(tag == "anchor") {
         auto& anchor = addComponent<AnchorComponent>();
 
-        anchor.setPosition(component["position"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<int>());
+        auto defaultPos = LuaVector2D(0, 0);
+        anchor.setPosition(component["position"].get_or<LuaVector2D>(defaultPos).convert<int>());
 
         if(component["hitbox"] != sol::nil) {
             if(!component["hitbox"].is<Polygon&>()) {
@@ -122,8 +126,11 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
 
         particle.setTime(component["time"].get_or<>(0));
 
-        particle.setPosition(component["position"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<int>());
-        particle.setVelocity(component["velocity"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<float>());
+        LuaVector2D defaultPos = LuaVector2D(0, 0);
+        particle.setPosition(component["position"].get_or<LuaVector2D>(defaultPos).convert<int>());
+
+        LuaVector2D defaultVel = LuaVector2D(0, 0);
+        particle.setVelocity(component["velocity"].get_or<LuaVector2D>(defaultVel).convert<float>());
     } else {
         cout << "Warning: unknow component `" << tag << "`" << endl;
     }

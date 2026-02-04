@@ -76,8 +76,6 @@ namespace exocet {
             EntityManager uiManager;
             Background background;
 
-            State* loadingState;
-
             /**
              * \brief The index of the current state
              */

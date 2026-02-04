@@ -9,4 +9,4 @@ tex_temp
 save.json
 makegame.sh
 run_valgrind.sh
-valgrind.supp
+valgrind_checks/

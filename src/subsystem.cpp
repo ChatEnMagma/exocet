@@ -114,7 +114,7 @@ void Subsystem::handleEvents() {
 }
 
 void Subsystem::clean() {
-    gfx->clean();
+    delete gfx;
     SDL_FreeSurface(icon);
 
     // All SDL clean

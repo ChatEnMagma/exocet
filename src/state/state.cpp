@@ -44,7 +44,7 @@ void State::loadState() {
 }
 
 void StateManager::initStates() {
-    sol::state& lua = *handler->getLua();
+    sol::state_view lua(handler->getLua()->lua_state());
 
     // Check if the config file from lua have states field
     if(lua["config"]["states"] == sol::nil) {
@@ -70,9 +70,6 @@ void StateManager::initStates() {
         );
         addState(state);
     });
-
-    lua.require_file("loadingState", string(DIR_SCRIPT_STATES) + "loadingState.lua");
-    loadingState = new State("loadingState");
 }
 
 void StateManager::setState(std::size_t state) { 
