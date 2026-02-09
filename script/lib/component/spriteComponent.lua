@@ -1,33 +1,32 @@
 --- @class SpriteComponent
-SpriteComponent = {
-    tag = "sprite",
-    --- @type string|nil
-    path = "",
-    fps = 60,
-    angle = 0,
-    nTextures = 1,
-    --- @type Rect
-    size = nil
-}
+--- @field tag string
+--- @field key string
+--- @field path string?
+--- @field size Rect
+--- @field nTextures integer
+--- @field fps integer
+SpriteComponent = {}
 SpriteComponent.__index = SpriteComponent
 
+--- @overload fun(SpriteComponent, key: string)
+--- @overload fun(SpriteComponent, key: string, size: Rect, nTextures: integer, fps: integer)
+--- @param key string
 --- @param path string
---- @param size Rect|nil
---- @param nTextures integer|nil
---- @param fps integer|nil
+--- @param size Rect?
+--- @param nTextures integer?
+--- @param fps integer?
 --- @return SpriteComponent
-function SpriteComponent:new(path, size, nTextures, fps)
+function SpriteComponent:new(key, path, size, nTextures, fps)
     local c = {}
 
     setmetatable(c, SpriteComponent)
 
     c.tag = "sprite"
 
+    c.key = key
     c.path = path
     c.size = size
     c.nTextures = nTextures
-    c.angle = 0
-
     c.fps = fps
 
     return c

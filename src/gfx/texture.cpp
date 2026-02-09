@@ -5,72 +5,70 @@
 using namespace std;
 using namespace exocet;
 
-Texture::Texture(Handler* han, string path) {
+Texture::Texture(Handler* handler, const string& path) {
+    this->handler = handler;
+
+    openTexture(path);
+}
+
+void Texture::openTexture(const string& path) {
     SDL_Surface* surface = IMG_Load(path.c_str());
-    
-    setHandler(han);
 
     if(surface == NULL) {
-        clog << "Failed to load the texture from `" << path << "`: " << IMG_GetError() << endl;
+        cerr << "Failed to load the texture from `" << path << "`: " << IMG_GetError() << endl;
         return;
     }
 
-    w = surface->w;
-    h = surface->h;
+    this->h = surface->h;
+    this->w = surface->w;
 
     SDL_Texture* texture = SDL_CreateTextureFromSurface(handler->getSubsystem()->getRenderer(), surface);
     SDL_FreeSurface(surface);
 
     if(texture == NULL) {
-        clog << "Failed to create the texture from `" << path << "`: " << SDL_GetError() << endl;
+        cerr << "Failed to create the texture from `" << path << "`: " << SDL_GetError() << endl;
+    } else {
+        cout << "Success open the texture from `" << path << "`..." << endl;
     }
 
     tex = texture;
 }
 
-Texture::Texture(Handler* han, string path, int xpos, int ypos, int w, int h) {
-    SDL_Surface* surface = IMG_Load(path.c_str());
-    
-    setHandler(han);
-
-    if(surface == NULL) {
-        clog << "Failed to load the texture from `" << path << "`: " << IMG_GetError() << endl;
-        return;
-    }
-
-    this->x = xpos;
-    this->y = ypos;
-    this->w = w;
-    this->h = h;
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(handler->getSubsystem()->getRenderer(), surface);
-    SDL_FreeSurface(surface);
-
-    if(texture == NULL) {
-        clog << "Failed to create the texture from `" << path << "`: " << SDL_GetError() << endl;
-    }
-
-    tex = texture;
+void Texture::render(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) {
+    renderAnchor(
+        position - handler->getGraphic()->getCamera()->getPosition(),
+        wdest,
+        hdest,
+        xsrc,
+        ysrc,
+        wsrc,
+        hsrc
+    );
 }
 
-void Texture::render(Vector2D<int> pos, int w, int h) {
-    renderAnchor(pos - handler->getGraphic()->getCamera()->getPosition(), w, h);
-}
-
-void Texture::renderAnchor(Vector2D<int> pos, int w, int h) {
-    SDL_Rect src = { x, y, this->w, this->h };
-    SDL_Rect dest = { pos.x, pos.y, w, h };
+void Texture::renderAnchor(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) {
+    SDL_Rect src = { xsrc, xsrc, wsrc, hsrc };
+    SDL_Rect dest = { position.x, position.y, wdest, hdest };
 
     SDL_RenderCopy(handler->getSubsystem()->getRenderer(), tex, &src, &dest);
 }
 
-void Texture::renderAnchorAngle(Vector2D<int> pos, int w, int h, double a) {
-    SDL_Rect src = { x, y, this->w, this->h };
-    SDL_Rect dest = { pos.x, pos.y, w, h };
+void Texture::renderAnchorAngle(const IntVector2D& position, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) {
+    SDL_Rect src = { xsrc, ysrc, wsrc, hsrc };
+    SDL_Rect dest = { position.x, position.y, wdest, hdest };
 
-    SDL_RenderCopyEx(handler->getSubsystem()->getRenderer(), tex, &src, &dest, a, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(handler->getSubsystem()->getRenderer(), tex, &src, &dest, angle, NULL, SDL_FLIP_NONE);
 }
 
-void Texture::renderAngle(Vector2D<int> pos, int w, int h, double a) {
-    renderAnchorAngle(pos - handler->getGraphic()->getCamera()->getPosition(), w, h, a);
+void Texture::renderAngle(const IntVector2D& position, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) {
+    renderAnchorAngle(
+        position - handler->getGraphic()->getCamera()->getPosition(),
+        angle,
+        wdest,
+        hdest,
+        xsrc,
+        ysrc,
+        wsrc,
+        hsrc
+    );
 }

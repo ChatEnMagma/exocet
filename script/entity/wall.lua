@@ -9,7 +9,8 @@ function Wall:new(position)
     local e = setmetatable(Entity:new("wall"), Wall)
 
     e.components = {
-        anchor = AnchorComponent:new(Rect:new(32, 32), position)
+        anchor = AnchorComponent:new(Rect:new(32, 32), position),
+        sprite = SpriteComponent:new("exocet")
     }
 
     return e

@@ -7,7 +7,7 @@
 namespace exocet {
     class Background {
         private:
-            std::vector<Texture*> tex;
+            std::vector<Sprite*> sprites;
             Vector2D<int> position;
             int w, h;
             bool loop;
@@ -29,8 +29,8 @@ namespace exocet {
             void refresh();
             inline void setSize(const int width, const int height) { w = width; h = height; }
 
-            inline void append(const int zindex, Texture* texture) { 
-                tex.insert(tex.begin() + zindex, texture);
+            inline void append(const int zindex, Sprite* sprite) { 
+                sprites.insert(sprites.begin() + zindex, sprite);
             }
             inline Vector2D<int> getPosition() const { return position; }
             inline void setPosition(const Vector2D<int> position) { this->position = position; }

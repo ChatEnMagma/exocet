@@ -3,24 +3,21 @@
 using namespace std;
 using namespace exocet;
 
-TTF_Font* Graphic::freeRoyalty = NULL;
+Graphic::Graphic(SDL_Renderer* ren) {
+    //this->handler = handler;
 
-void Graphic::openFont(TTF_Font** font, string path) {
-    *font = TTF_OpenFont(path.c_str(), 20);
-    if(*font == NULL) {
-        cerr << "Failed to load the font from `" << path << "`: " << TTF_GetError() << endl;
-    }
+    this->ren = ren;
+
+    color.r = 0x00;
+    color.g = 0x00;
+    color.b = 0x00;
+    color.a = 0xFF;
 }
 
-void Graphic::initTextures(Handler* handler) {
-    // All fonts
-    openFont(&Graphic::freeRoyalty, "res/FreeRoyalty.ttf");
-}
-
-void Graphic::renderText(int x, int y, int w, int h, string text, TTF_Font* font) {
+void Graphic::renderText(int x, int y, int w, int h, string text, Font* font) {
     SDL_Rect dest = { x, y, w, h };
 
-    SDL_Surface* text_s = TTF_RenderText_Solid(font, text.c_str(), color);
+    SDL_Surface* text_s = TTF_RenderText_Solid(font->get(), text.c_str(), color);
 
     if(text_s == NULL) {
         cerr << "Failed to create a surface: " << TTF_GetError() << endl;
@@ -36,11 +33,4 @@ void Graphic::renderText(int x, int y, int w, int h, string text, TTF_Font* font
     }
     SDL_FreeSurface(text_s);
     SDL_DestroyTexture(texture);
-}
-
-void Graphic::clean() {
-    // All fonts
-    TTF_CloseFont(Graphic::freeRoyalty);
-
-    SDL_DestroyRenderer(ren);
 }

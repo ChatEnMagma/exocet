@@ -73,23 +73,20 @@ void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
     } else if(tag == "sprite") {
         SpriteComponent& sprite = addComponent<SpriteComponent>();
 
-        if(component["fps"] != sol::nil) {
-            sprite.setFPS(component["fps"].get<size_t>());
-        } else cout << "/!\\ Warning from `" << getTag() << "` you should set fps" << endl;
+        sprite.setFPS(component["fps"].get_or<size_t>(FPS));
 
-        if(component["size"] != sol::nil && component["nTextures"] != sol::nil && component["path"] != sol::nil) {
-            sprite.initFrameFromSheet(
-                "res/" + component["path"].get<string>(),
-                component["nTextures"].get<int>(),
-                component["size"]["x"].get<int>(),
-                component["size"]["y"].get<int>(),
-                component["size"]["w"].get<int>(),
-                component["size"]["h"].get<int>()
-            );
-        }else if(component["size"] == sol::nil) {
-            sprite.initFrameFromSheet("res/" + component["path"].get<string>());
-            sprite.fitSizeWithHitbox();
-        }
+        string emptyString = "";
+
+        sprite.setSprite(handler->getGraphic()->getSprite(
+                component["key"].get<string>(),
+                "res/" + component["path"].get_or<string>(emptyString),
+                component["size"]["x"].get_or<int>(0L),
+                component["size"]["y"].get_or<int>(0L),
+                component["size"]["w"].get_or<int>(0L),
+                component["size"]["h"].get_or<int>(0L),
+                component["nTextures"].get_or<size_t>(0x0)
+            )
+        ); 
 
         sprite.setAngle(component["angle"].get_or<double>(0));
     } else if(tag == "drag") {

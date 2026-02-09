@@ -13,7 +13,7 @@ void State::loadState() {
         lua[getTag()]["background"]["textures"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
             background->append(
                 value.as<sol::table>()["zindex"].get<size_t>(),
-                new Texture(handler, "res/" + value.as<sol::table>()["path"].get<string>())
+                handler->getGraphic()->getSprite("res/" + value.as<sol::table>()["path"].get<string>())
             );
             
             // Set the position of the backgrounds

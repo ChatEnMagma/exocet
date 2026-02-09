@@ -1,27 +1,77 @@
 #pragma once
 
+#include <map>
+#include <memory>
+#include <string>
+
 #include "constantes.hpp"
 #include "tool/vectors.hpp"
 #include "tool/polygon.hpp"
 
 #include "gfx/camera.hpp"
-#include "gfx/texture.hpp"
+#include "gfx/font.hpp"
+#include "gfx/sprite.hpp"
 
 namespace exocet {
     class Graphic {
         private:
+            Handler* handler;
             SDL_Renderer* ren = NULL;
 
             Camera camera;
 
-            void openFont(TTF_Font** font, std::string path);
-
             SDL_Color color;
+
+            std::map<std::string, std::shared_ptr<Font>> fonts;
+            std::map<std::string, std::shared_ptr<Texture>> textures;
+            std::map<std::string, std::shared_ptr<Sprite>> sprites;
         public:
+            Graphic(SDL_Renderer* renderer);
             ~Graphic() {
-                clean();
+                fonts.clear();
+                sprites.clear();
+                textures.clear();
+                
+                SDL_DestroyRenderer(ren);
             }
-            static TTF_Font* freeRoyalty;
+
+            void setHandler(Handler* handler) { this->handler = handler; }
+
+            Font* getFont(const std::string& key, int fontSize) {
+                auto it = fonts.find(key);
+
+                if(it == fonts.end()) {
+                    fonts.insert({ key, make_shared<Font>(key, fontSize)});
+                    return fonts[key].get();
+                }
+                    
+                return fonts[key].get();
+            }
+
+            Texture* getTexture(const std::string& key) {
+                auto it = textures.find(key);
+
+                if(it == textures.end()) {
+                    textures.insert({ key, make_shared<Texture>(handler, key)});
+                    return textures[key].get();
+                }
+
+                return textures[key].get();
+            }
+
+            Sprite* getSprite(const std::string& key, const std::string& path = "", int nCol = 0, int nRow = 0, int wsrc = 0, int hsrc = 0, std::size_t nbFrame = 0) {
+                auto it = sprites.find(key);
+
+                if(it == sprites.end()) {
+                    if(nbFrame == 0)
+                        sprites.insert({ key, make_shared<Sprite>(handler, path)});
+                    else
+                        sprites.insert({ key, make_shared<Sprite>(handler, path, nCol, nRow, wsrc, hsrc, nbFrame)});
+                    return sprites[key].get();
+                }
+                    
+                return sprites[key].get();
+            }
 
             inline void setColor(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 0xFF) {
                 color.r = red;
@@ -31,18 +81,6 @@ namespace exocet {
 
                 SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
             }
-
-            Graphic(SDL_Renderer* renderer) { 
-                ren = renderer; 
-
-                color.r = 0x00;
-                color.g = 0x00;
-                color.b = 0x00;
-                color.a = 0xFF;
-            }
-
-            void initTextures(Handler* handler);
-            void clean();
 
             inline void renderAnchorRect(Vector2D<int> position, int width, int height) {
                 SDL_Rect rect = { position.x, position.y, width, height };
@@ -56,7 +94,7 @@ namespace exocet {
             inline void renderRect(Vector2D<int> position, int width, int height) { renderAnchorRect(position - camera.getPosition(), width, height); }
             inline void renderFillRect(Vector2D<int> position, int width, int height) { renderAnchorFillRect(position - camera.getPosition(), width, height); }
 
-            void renderText(int x, int y, int w, int h, std::string text, TTF_Font* font);
+            void renderText(int x, int y, int w, int h, std::string text, Font* font);
 
             inline void setRenderColor(Uint8 red, Uint8 blue, Uint8 green, Uint8 alpha = 0xff) { SDL_SetRenderDrawColor(ren, red, blue, green, alpha); }
             inline void renderClear() { SDL_RenderClear(ren); }

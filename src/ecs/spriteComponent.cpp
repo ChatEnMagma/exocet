@@ -22,7 +22,7 @@ void SpriteComponent::init() {
 
 void SpriteComponent::update() {
     if(1000/fps < SDL_GetTicks() - frameStart ) {
-        if(frame >= getFrame() - 1)
+        if(frame >= sprite->size() - 1)
             frame = 0;
         else
             frame++;
@@ -31,8 +31,7 @@ void SpriteComponent::update() {
 }
 
 void SpriteComponent::render() {
-    if(!tex.empty())
-        tex[frame]->renderAngle(transform->getPosition(), w, h, a);
+    sprite->renderAngle(transform->getPosition(), a, w, h, frame);
 }
 
 void SpriteComponent::fitSizeWithHitbox() {
@@ -40,21 +39,4 @@ void SpriteComponent::fitSizeWithHitbox() {
         HitboxComponent& hitbox = entity->getComponent<HitboxComponent>();
         setSize(hitbox.getWidth(), hitbox.getHeight());
     }
-}
-
-void SpriteComponent::initFrameFromSheet(std::string path, int nTextures, int xrow, int ycol, int width, int height) {
-    std::vector<Texture*> tex(nTextures);
-
-    if(nTextures > 1) {
-        int xpos = 0;
-        int ypos = 0;
-
-        for(int i = 0; i < nTextures; i++) {
-            tex[i] = new Texture(handler, path, xpos * width, ypos * height, width, height);
-            xpos = (xpos + 1) % xrow;
-            ypos += int (xpos == 0);
-        }
-    } else
-        tex[0] = new Texture(handler, path);
-    setTextures(tex);
 }

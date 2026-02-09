@@ -3,15 +3,6 @@
 Player = {}
 Player.__index = function (_, key) return Player[key] or Entity[key] end
 
-playerAnimations = {
-    --- @type SpriteComponent
-    normal = SpriteComponent:new("exocet_anim.png", Rect:new(7, 1, 32, 32), 7, 10),
-    --- @type SpriteComponent
-    waterMask  = SpriteComponent:new("exocet_anim_waterMask.png", Rect:new(7, 1, 32, 32), 7, 10),
-    --- @type SpriteComponent
-    jetpack = SpriteComponent:new("exocet_anim_jetpack.png", Rect:new(7, 1, 32, 32), 7, 10),
-}
-
 --- @param position Vector2D?
 --- @return Player
 function Player:new(position)
@@ -21,7 +12,7 @@ function Player:new(position)
     p.components = {
         physic = PhysicComponent:new(Rect:new(64, 64), position),
         script = ScriptComponent:new(function () p:update() end),
-        sprite = SpriteComponent:new("exocet_anim.png", Rect:new(7, 1, 32, 32), 7, 10)
+        sprite = SpriteComponent:new("exocet", "exocet_anim.png", Rect:new(7, 1, 32, 32), 7, 10)
     }
 
     return p

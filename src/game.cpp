@@ -16,7 +16,7 @@ Game::Game(Subsystem* subsys) {
     handler = new Handler(this, subsys);
 
     // set handler graphics parts
-    handler->getGraphic()->initTextures(handler);
+    handler->getGraphic()->setHandler(handler);
     handler->getGraphic()->getCamera()->setHandler(handler);
 
     // Init all modules and function lua

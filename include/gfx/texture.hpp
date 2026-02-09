@@ -13,32 +13,22 @@ namespace exocet {
 
             SDL_Texture* tex = NULL;
 
-            int x = 0;
-            int y = 0;
-            int w = 0;
-            int h = 0;
+            int w, h;
+
+            void openTexture(const std::string& path);
         public:
-            Texture(Handler* handler, std::string path);
-            Texture(Handler* handler, std::string path, int xpos, int ypos, int width, int height);
-            
-            ~Texture() { clean(); }
+            Texture(Handler* handler, const std::string& path);
+            ~Texture() { SDL_DestroyTexture(tex); }
 
             /**
              * \brief Render the texture
              */
-            void render(Vector2D<int> postion, int width, int height);
-            void renderAnchor(Vector2D<int> position, int width, int height);
-            void renderAnchorAngle(Vector2D<int> position, int width, int height, double angle);
-            void renderAngle(Vector2D<int> position, int width, int height, double angle);
+            void render(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc);
+            void renderAnchor(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc);
+            void renderAnchorAngle(const IntVector2D& position, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc);
+            void renderAngle(const IntVector2D&, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc);
 
-            inline void setHandler(Handler* handler) { this->handler = handler; }
-            inline void clean() { SDL_DestroyTexture(tex); }
-
-            inline int getWidth() { return w; }
-            inline int getHeight() { return h; }
-
-            inline friend std::ostream& operator<<(std::ostream& os, const Texture& texture) {
-                return os << &texture;
-            }
+            inline int getHeight() const { return h; }
+            inline int getWidth() const { return w; }
     };
 }

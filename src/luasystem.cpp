@@ -202,12 +202,20 @@ void LuaSystem::initEngine() {
             width,
             height,
             text,
-            ((Handler*) hLua)->getGraphic()->freeRoyalty
+            ((Handler*) hLua)->getGraphic()->getFont("res/FreeRoyalty.ttf", 20)
         );
     };
     lua["engine"]["renderPolygon"] = [](sol::table self, LuaVector2D position, sol::table polygon) {
         ((Handler*) hLua)->getGraphic()->renderPolygon(position.convert<int>(), Polygon(polygon.get<sol::table>("polygon")));
     };
+    
+    
+    lua["engine"]["getSprite"] = sol::factories(
+        [](sol::table self, const string& key) { ((Handler*) hLua)->getGraphic()->getSprite(key); },
+        [](sol::table self, const string& key, const string& path) { ((Handler*) hLua)->getGraphic()->getSprite(key, path); },
+        [](sol::table self, const string& key, const string& path, int nCol, int nRow, int wsrc, int hsrc, size_t nbFrames) { ((Handler*) hLua)->getGraphic()->getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrames); }
+    );
+
     lua["engine"]["getBackgroundPosition"] = [](sol::table self) {
         auto vec = ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->getPosition(); 
         return make_shared<LuaVector2D>(static_cast<lua_Number>(vec.x), static_cast<lua_Number>(vec.y));
@@ -244,27 +252,23 @@ void LuaSystem::initEntity() {
             e->getComponent<SpriteComponent>().fitSizeWithHitbox();
         } else { cout << "Warning /!\\ function `fitSizeWithHitbot` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl; }
     };
-    lua["Entity"]["cSetTexture"] = [](intptr_t entity_lua, const string path, int x, int y, int w, int h, size_t nbFrames) {
+    lua["Entity"]["cSetSprite"] = [](intptr_t entity_lua, const string& path, const string& key, int x, int y, int w, int h, size_t nbFrames, sol::this_main_state s) {
+        sol::state_view m_lua(s.lua_state());
+
         Entity* e = (Entity*) entity_lua;
+        Handler* handler = (Handler*) m_lua["engine"]["_handler"].get<intptr_t>();
+
         if(e->hasComponent<SpriteComponent>()) {
-            e->getComponent<SpriteComponent>().initFrameFromSheet("res/" + path, nbFrames, x, y, w, h);
+            e->getComponent<SpriteComponent>().setSprite(handler->getGraphic()->getSprite(path, key, x, y, w, h, nbFrames));
         } else
-            cout << "Warning /!\\ function `setTexture` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl;
+            cout << "Warning /!\\ function `setSprite` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl;
     };
-    lua["Entity"]["cSetTextureAngle"] = [](intptr_t entity_lua, const double angle) {
+    lua["Entity"]["cSetSpriteAngle"] = [](intptr_t entity_lua, const double angle) {
         Entity* e = (Entity*) entity_lua;
         if(e->hasComponent<SpriteComponent>()) {
             e->getComponent<SpriteComponent>().setAngle(angle);
         } else
-             cout << "Warning /!\\ function `setTextureAngle` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl;
-    };
-    lua["Entity"]["cGetFrameAnimation"] = [](intptr_t entity_lua) {
-        Entity* e = (Entity*) entity_lua;
-        if(e->hasComponent<SpriteComponent>()) {
-            return e->getComponent<SpriteComponent>().getFrame();
-        }
-        cout << "Warning /!\\ function `getFrameAnimation` from" << e->getTag() << ": You must initiate the SpriteComponent" << endl;
-        return  (size_t)0;
+             cout << "Warning /!\\ function `setSpriteAngle` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl;
     };
     // ***************** Methods from ParticleComponent ****************
     lua["Entity"]["cGetTime"] = [](intptr_t entity_lua) {

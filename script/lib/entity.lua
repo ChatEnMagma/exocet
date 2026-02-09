@@ -27,18 +27,18 @@ end
 ---@param path string
 ---@param size Rect|nil
 ---@param frame integer|nil
-function Entity:setTexture(path, size, frame)
+function Entity:setSprite(path, size, frame)
     if frame == nil then
         frame = -1
     end
     if size == nil then
         size = Rect:new()
     end
-    Entity.cSetTexture(self._ptr, path, size.x, size.y, size.w, size.h, frame)
+    Entity.cSetSprite(self._ptr, path, size.x, size.y, size.w, size.h, frame)
 end
 --- @param angle number
-function Entity:setTextureAngle(angle)
-    Entity.cSetTextureAngle(self._ptr, angle)
+function Entity:setSpriteAngle(angle)
+    Entity.cSetSpriteAngle(self._ptr, angle)
 end
 
 --- Check if the mouse is well interact with mouse

@@ -16,11 +16,11 @@ namespace exocet {
 
                 if((font = TTF_OpenFont(path.c_str(), fontSize)) == NULL)
                     std::cerr << "Failed to load the font from `" << path << "`: " << TTF_GetError() << std::endl;
+                else
+                    std::cout << "Success to load the font from " << path << "`..." << std::endl;
             }
-            ~Font() {
-                TTF_CloseFont(font);
-                std::cout << "Clean Font..." << std::endl;
-            }
+            ~Font() { TTF_CloseFont(font); }
+            
             int getFontSize() const { return fontSize; }
             TTF_Font* get() { return font; }
     };

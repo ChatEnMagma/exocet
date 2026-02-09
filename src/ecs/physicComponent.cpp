@@ -114,7 +114,7 @@ void PhysicComponent::render() {
             hitbox->getWidth() * 2,
             32,
             text.str(),
-            handler->getGraphic()->freeRoyalty
+            handler->getGraphic()->getFont("res/FreeRoyalty.ttf", 20)
         );
     }
 }
