@@ -1,41 +1,46 @@
 --- Class Player has all methods for the player of the game
---- @class Player: Entity
+--- @class PlayerData
 Player = {}
-Player.__index = function (_, key) return Player[key] or Entity[key] end
+Player.__index = Player
+
+--- @class Player: Entity
+PlayerEntity = {
+    components = {
+        --- @type PhysicComponent
+        PhysicComponent=nil,
+        --- @type ScriptComponent
+        ScriptComponent=nil,
+        --- @type SpriteComponent
+        SpriteComponent=nil
+    }
+}
 
 --- @param position Vector2D?
 --- @return Player
 function Player:new(position)
     --- @class Player: Entity
-    local p = setmetatable(Entity:new("Player"), Player)
+    local e = Entity:new("Player")
 
-    p.components = {
-        physic = PhysicComponent:new(Rect:new(64, 64), position),
-        script = ScriptComponent:new(function () p:update() end),
-        sprite = SpriteComponent:new("exocet", "exocet_anim.png", Rect:new(7, 1, 32, 32), 7, 10)
-    }
+    setmetatable(e.data, Player)
 
-    return p
+    PhysicComponent:new(e, Rect:new(64, 64), position)
+    ScriptComponent:new(e, function () e.data.update(e) end)
+    SpriteComponent:new(e, engine:getSprite("exocet", "exocet_anim.png", 7, 1, 32, 32, 7), 10):fitSizeWithHitbox()
+
+    e.data.test = 0
+
+    return e
 end
 
-function Player:move()
-    if engine:getKey(SDL.SDLK_UP) then
-        self:setVelocity(self:getVelocity() + Vector2D:new(0, -1))
-    end
-    if engine:getKey(SDL.SDLK_DOWN) then
-        self:setVelocity(self:getVelocity() + Vector2D:new(0, 1))
-    end
-    if engine:getKey(SDL.SDLK_LEFT) then
-        self:setVelocity(self:getVelocity() + Vector2D:new(-1, 0))
-    end
-    if engine:getKey(SDL.SDLK_RIGHT) then
-        self:setVelocity(self:getVelocity() + Vector2D:new(1, 0))
-    end
-end
+--- @param e Player
+function Player.update(e)
+    --- @type PhysicComponent
+    local physic = e.components.PhysicComponent
 
-function Player:update()
-    self:move()
+    if engine:getKey(SDL.SDLK_Z) then physic:setVelocity(physic:getVelocity() + Vector2D:new(0, -2)) end
+    if engine:getKey(SDL.SDLK_S) then physic:setVelocity(physic:getVelocity() + Vector2D:new(0, 2)) end
+    if engine:getKey(SDL.SDLK_Q) then physic:setVelocity(physic:getVelocity() + Vector2D:new(-2, 0)) end
+    if engine:getKey(SDL.SDLK_D) then physic:setVelocity(physic:getVelocity() + Vector2D:new(2, 0)) end
 
-    self:fitSizeWithHitbox()
-    engine:centerOnEntity(self)
+    engine:centerOnEntity(e)
 end

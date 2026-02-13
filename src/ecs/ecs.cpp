@@ -9,128 +9,15 @@ Entity::Entity(Handler* handler, std::string tag) {
     this->handler = handler;
 
     this->tag = tag;
+    this->active = true;
 
-    active = true;
+    this->componentsLua = handler->getLua()->create_table();
+    this->data = handler->getLua()->create_table();
 }
 
 void Entity::addGroup(Group group) {
     groupBitset[group] = true;
     
-}
-
-void Entity::addComponentsFromLua(sol::state* lua, sol::table component) {
-    string tag = component.get<string>("tag");
-
-    if(tag == "physic") {
-        auto& physic = addComponent<PhysicComponent>();
-        
-        auto defaultPos = LuaVector2D(0, 0);
-        physic.setPosition(component["position"].get_or<LuaVector2D>(defaultPos).convert<int>());
-
-        auto defaultVec = LuaVector2D(0, 0);
-        physic.setVelocity(component["velocity"].get_or<LuaVector2D>(defaultVec).convert<float>());
-
-        if(component["hitbox"] != sol::nil) {
-            if(!component["hitbox"].is<Polygon&>()) {
-                physic.getHitbox()->setRect(
-                    component["hitbox"]["x"].get<int>(),
-                    component["hitbox"]["y"].get<int>(),
-                    component["hitbox"]["w"].get<int>(),
-                    component["hitbox"]["h"].get<int>()
-                );
-            } else {
-                physic.getHitbox()->setPolygon(component["hitbox"].get<Polygon&>());
-            }
-        }
-
-        physic.setMasse(component["masse"].get_or<float>(0));
-
-        physic.getHitbox()->setColor(
-            component["color"][0].get_or<Uint8>(0xFF),
-            component["color"][1].get_or<Uint8>(0x00),
-            component["color"][2].get_or<Uint8>(0x00)
-        );
-    } else if(tag == "anchor") {
-        auto& anchor = addComponent<AnchorComponent>();
-
-        auto defaultPos = LuaVector2D(0, 0);
-        anchor.setPosition(component["position"].get_or<LuaVector2D>(defaultPos).convert<int>());
-
-        if(component["hitbox"] != sol::nil) {
-            if(!component["hitbox"].is<Polygon&>()) {
-                anchor.getHitbox()->setRect(
-                    component["hitbox"]["x"].get<int>(),
-                    component["hitbox"]["y"].get<int>(),
-                    component["hitbox"]["w"].get<int>(),
-                    component["hitbox"]["h"].get<int>()
-                );
-            } else {
-                anchor.getHitbox()->setPolygon(component["hitbox"].get<Polygon&>());
-            }
-        }
-    } else if(tag == "script") {
-        addComponent<ScriptComponent>(component);
-    } else if(tag == "sprite") {
-        SpriteComponent& sprite = addComponent<SpriteComponent>();
-
-        sprite.setFPS(component["fps"].get_or<size_t>(FPS));
-
-        string emptyString = "";
-
-        sprite.setSprite(handler->getGraphic()->getSprite(
-                component["key"].get<string>(),
-                "res/" + component["path"].get_or<string>(emptyString),
-                component["size"]["x"].get_or<int>(0L),
-                component["size"]["y"].get_or<int>(0L),
-                component["size"]["w"].get_or<int>(0L),
-                component["size"]["h"].get_or<int>(0L),
-                component["nTextures"].get_or<size_t>(0x0)
-            )
-        ); 
-
-        sprite.setAngle(component["angle"].get_or<double>(0));
-    } else if(tag == "drag") {
-        addComponent<DragComponent>();
-    } else if(tag == "ui") {
-        UIComponent& ui = addComponent<UIComponent>();
-
-        if(component["rect"] != sol::nil) {
-            ui.setRect(
-                component["rect"]["x"].get<int>(),
-                component["rect"]["y"].get<int>(),
-                component["rect"]["w"].get<int>(),
-                component["rect"]["h"].get<int>()
-            );
-        }
-    } else if(tag == "button") {
-        ButtonComponent& button = addComponent<ButtonComponent>();
-
-        if(component["func"] != sol::nil) {
-            button.setFunction(component["func"].get<function<void()>>());
-        }
-        if(component["rect"] != sol::nil) {
-            button.setRect(
-                component["rect"]["x"].get<int>(),
-                component["rect"]["y"].get<int>(),
-                component["rect"]["w"].get<int>(),
-                component["rect"]["h"].get<int>()
-            );
-        } else {
-            cout << "Warning from `" << getTag() << "` you should initiate the rect of ButtonComponent" << endl;
-        }
-    } else if(tag == "particle") {
-        ParticleComponent& particle = addComponent<ParticleComponent>();
-
-        particle.setTime(component["time"].get_or<>(0));
-
-        LuaVector2D defaultPos = LuaVector2D(0, 0);
-        particle.setPosition(component["position"].get_or<LuaVector2D>(defaultPos).convert<int>());
-
-        LuaVector2D defaultVel = LuaVector2D(0, 0);
-        particle.setVelocity(component["velocity"].get_or<LuaVector2D>(defaultVel).convert<float>());
-    } else {
-        cout << "Warning: unknow component `" << tag << "`" << endl;
-    }
 }
 
 void EntityManager::refresh() {
@@ -160,7 +47,7 @@ void EntityManager::refresh() {
     entitiedAdd.clear();
 }
 
-Entity& EntityManager::addEntity(string tag) {
+Entity& EntityManager::addEmptyEntity(string tag) {
     Entity* e = new Entity(handler, tag);
     // Add into entities tmp
     entitiedAdd.emplace_back(e);
@@ -168,25 +55,4 @@ Entity& EntityManager::addEntity(string tag) {
     return *e;
 }
 
-Entity& EntityManager::addEntityFromLua(sol::table e) {
-    sol::state& lua = *handler->getLua();
-
-    // Check if the entity have entity in the field
-    /*if(e["entity"] == sol::nil) {
-        cerr << "Error, you are trying add an entity from lua file without entity in the field" << endl;
-        handler->closeGame();   // Close the game
-        return addEntity("Err");
-    }*/
-    
-    // Make C-Entity
-    Entity& entity = addEntity(e["tag"].get<string>());
-    // Set the C-pointer into lua entity
-    e["_ptr"] = (intptr_t) &entity;
-
-    // Add all components for C-Entity
-    e["components"].get<sol::table>().for_each([&](sol::object const& keyComponent, sol::object const& valueComponent) {
-        entity.addComponentsFromLua(&lua, valueComponent.as<sol::table>());
-    });
-
-    return entity;
-}
+void EntityManager::addEntity(Entity* e) { entitiedAdd.emplace_back(e); }

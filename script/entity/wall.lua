@@ -1,17 +1,17 @@
----@class Wall: Entity
+---@class WallData
 Wall = {}
-Wall.__index = function (_, key) return Wall[key] or Entity[key] end
+Wall.__index = Wall
 
 ---@param position Vector2D
 ---@return Wall
 function Wall:new(position)
     --- @class Wall: Entity
-    local e = setmetatable(Entity:new("wall"), Wall)
+    local e = Entity:new("wall")
 
-    e.components = {
-        anchor = AnchorComponent:new(Rect:new(32, 32), position),
-        sprite = SpriteComponent:new("exocet")
-    }
+    setmetatable(e.data, Wall)
+
+    AnchorComponent:new(e, Rect:new(32, 32), position)
+    SpriteComponent:new(e, engine:getSprite("exocet"), 15):fitSizeWithHitbox()
 
     return e
 end

@@ -17,6 +17,11 @@ namespace exocet {
                 updateLua = component.get<sol::function>("update");
                 renderLua = component.get<sol::function>("render");
             }
+            ScriptComponent(sol::function init, sol::function update, sol::function render) {
+                initLua =   init;
+                updateLua = update;
+                renderLua = render;
+            }
             ~ScriptComponent() = default;
 
             void init() override {   if(initLua != sol::nil)     initLua(); }

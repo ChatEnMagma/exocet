@@ -18,6 +18,10 @@ LuaSystem::LuaSystem(Handler* handler) {
 
     initUsertypeLuaVector2D();
     initUsertypePolygon();
+    initUsertypeSprite();
+
+    initUsertypeEntity();
+    initUsertypeComponents();
 
     cout << "Success to initiate all usertypes" << endl;
     
@@ -26,13 +30,27 @@ LuaSystem::LuaSystem(Handler* handler) {
     cout << "Success to initiate all libs' package" << endl;
 
     initEngine();
-    initEntity();
 
     cout << "Success to initiate all specific methods" << endl;
 
     preloadPackages(DIR_SCRIPT, "module");
 
     cout << "Success to initiate all modules' package" << endl;
+}
+
+void LuaSystem::initRectClass() {
+    lua.script(R"a(Rect = {x = 0,y = 0,w = 0,h = 0}
+Rect.__index = Rect
+function Rect:new(x, y, w, h)
+    local r = {}
+    setmetatable(r, Rect)
+    if (w == nil) and (h == nil) then
+        w = x;h = y;x = 0;y = 0;
+    end
+    r.x = x;r.y = y;r.w = w;r.h = h;
+    return r
+end
+function Rect:__tostring()return "(x: " .. self.x .." ; y: " .. self.y .. " ; w: " .. self.w .." ; h: " .. self.h ..")"end)a");
 }
 
 void LuaSystem::initUsertypeLuaVector2D() {
@@ -58,21 +76,6 @@ void LuaSystem::initUsertypeLuaVector2D() {
     );
 }
 
-void LuaSystem::initRectClass() {
-    lua.script(R"a(Rect = {x = 0,y = 0,w = 0,h = 0}
-Rect.__index = Rect
-function Rect:new(x, y, w, h)
-    local r = {}
-    setmetatable(r, Rect)
-    if (w == nil) and (h == nil) then
-        w = x;h = y;x = 0;y = 0;
-    end
-    r.x = x;r.y = y;r.w = w;r.h = h;
-    return r
-end
-function Rect:__tostring()return "(x: " .. self.x .." ; y: " .. self.y .. " ; w: " .. self.w .." ; h: " .. self.h ..")"end)a");
-}
-
 void LuaSystem::initUsertypePolygon() {
     lua.new_usertype<Polygon>(USERTYPE_POLYGON,
         sol::meta_function::construct,
@@ -85,6 +88,161 @@ void LuaSystem::initUsertypePolygon() {
             }
         ),
         sol::meta_function::index, &Polygon::getVertex
+    );
+}
+
+void LuaSystem::initUsertypeSprite() {
+    lua.new_usertype<Sprite>(USERTYPE_SPRITE,
+        "render", &Sprite::render,
+        "renderAnchor", &Sprite::renderAnchor,
+        "renderAngle", &Sprite::renderAngle,
+        "renderAngleAnchor", &Sprite::renderAnchorAngle,
+
+        "getWidth", &Sprite::getWidth,
+        "getHeight", &Sprite::getHeight
+    );
+}
+
+void LuaSystem::initUsertypeEntity() {
+    lua.new_usertype<Entity>(USERTYPE_ENTITY,
+        sol::meta_function::construct, sol::factories(
+            [](sol::object, sol::this_main_state s) {
+                sol::state_view mLua(s.lua_state());
+
+                return new Entity((Handler*) mLua["engine"]["_handler"].get<intptr_t>(), "missigno");
+            },
+            [](sol::object, const string& tag, sol::this_main_state s) {
+                sol::state_view mLua(s.lua_state());
+
+                return new Entity((Handler*) mLua["engine"]["_handler"].get<intptr_t>(), tag);
+            }
+        ),
+        "components", &Entity::componentsLua,
+        "data", &Entity::data,
+        "destroy", &Entity::destroy
+    );
+}
+
+void LuaSystem::initUsertypeComponents() {
+    lua.new_usertype<AnchorComponent>(USERTYPE_ANCHOR_COMPONENT,
+        sol::meta_function::construct, sol::factories(
+            [](sol::object, Entity& e, sol::table rect) { 
+                auto& c = e.addComponent<AnchorComponent>();
+                
+                e.componentsLua[USERTYPE_ANCHOR_COMPONENT] = &c;
+
+                c.getHitbox()->setRect(
+                    rect["x"].get<int>(),
+                    rect["y"].get<int>(),
+                    rect["w"].get<int>(),
+                    rect["h"].get<int>()
+                );
+
+                return &c;
+            },
+            [](sol::object, Entity& e, sol::table rect, const LuaVector2D& position) {
+                auto& c = e.addComponent<AnchorComponent>();
+
+                e.componentsLua[USERTYPE_ANCHOR_COMPONENT] = &c;
+                
+                c.getHitbox()->setRect(
+                    rect["x"].get<int>(),
+                    rect["y"].get<int>(),
+                    rect["w"].get<int>(),
+                    rect["h"].get<int>()
+                );
+                c.setPosition(position.convert<int>());
+
+                return &c;
+            }
+        ),
+
+        "getPosition", [](AnchorComponent& self) { return self.getPosition().convert<lua_Number>(); }
+    );
+
+    lua.new_usertype<PhysicComponent>(USERTYPE_PHYSIC_COMPONENT,
+        sol::meta_function::construct, sol::factories(
+            [](sol::object, Entity& e, sol::table rect) { 
+                auto& c = e.addComponent<PhysicComponent>();
+                
+                e.componentsLua[USERTYPE_PHYSIC_COMPONENT] = &c;
+
+                c.getHitbox()->setRect(
+                    rect["x"].get<int>(),
+                    rect["y"].get<int>(),
+                    rect["w"].get<int>(),
+                    rect["h"].get<int>()
+                );
+
+                return &c;
+            },
+            [](sol::object, Entity& e, sol::table rect, const LuaVector2D& position) {
+                auto& c = e.addComponent<PhysicComponent>();
+
+                e.componentsLua[USERTYPE_PHYSIC_COMPONENT] = &c;
+                
+                c.getHitbox()->setRect(
+                    rect["x"].get<int>(),
+                    rect["y"].get<int>(),
+                    rect["w"].get<int>(),
+                    rect["h"].get<int>()
+                );
+                c.setPosition(position.convert<int>());
+
+                return &c;
+            }
+        ),
+
+        "getPosition", [](PhysicComponent& self) { return self.getPosition().convert<lua_Number>(); },
+        "getVelocity", [](PhysicComponent& self) { return self.getVelocity().convert<lua_Number>(); },
+
+        "setPosition", [](PhysicComponent& self, const LuaVector2D& pos) { self.setPosition(pos.convert<int>()); },
+        "setVelocity", [](PhysicComponent& self, const LuaVector2D& vel) { self.setVelocity(vel.convert<float>()); }
+    );
+
+    lua.new_usertype<SpriteComponent>(USERTYPE_SPRITE_COMPONENT,
+        sol::meta_function::construct, sol::factories(
+            [](sol::object, Entity& e, Sprite* sprite) {
+                auto& c = e.addComponent<SpriteComponent>();
+
+                e.componentsLua[USERTYPE_SPRITE_COMPONENT] = c;
+                
+                c.setSprite(sprite);
+
+                return &c;
+            },
+            [](sol::object, Entity& e, Sprite* sprite, int fps) {
+                auto& c = e.addComponent<SpriteComponent>();
+
+                e.componentsLua[USERTYPE_SPRITE_COMPONENT] = c;
+                
+                c.setSprite(sprite);
+                c.setFPS(fps);
+
+                return &c;
+            }
+        ),
+        "fitSizeWithHitbox", &SpriteComponent::fitSizeWithHitbox,
+        "setFPS", &SpriteComponent::setFPS
+    );
+
+    lua.new_usertype<ScriptComponent>(USERTYPE_SCRIPT_COMPONENT,
+        sol::meta_function::construct, sol::factories(
+            [](sol::object, Entity& e, sol::object init, sol::object update, sol::object render) {
+                auto& c = e.addComponent<ScriptComponent>(init, update, render);
+
+                e.componentsLua[USERTYPE_SCRIPT_COMPONENT] = c;
+
+                return &c;
+            },
+            [](sol::object, Entity& e, sol::object update) {
+                auto& c = e.addComponent<ScriptComponent>(sol::nil, update, sol::nil);
+
+                e.componentsLua[USERTYPE_SCRIPT_COMPONENT] = c;
+
+                return &c;
+            }
+        )
     );
 }
 
@@ -188,8 +346,8 @@ void LuaSystem::initEngine() {
     lua["engine"]["renderAnchorFillRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
         ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(position.convert<int>(), w, h);
     };
-    lua["engine"]["centerOnEntity"] = [](sol::table self, sol::table entity) {
-        ((Handler*) hLua)->getGraphic()->centerOnEntity(((Entity*) entity.get<intptr_t>("_ptr")));
+    lua["engine"]["centerOnEntity"] = [](sol::table self, Entity* entity) {
+        ((Handler*) hLua)->getGraphic()->centerOnEntity(entity);
     };
     lua["engine"]["getCameraPosition"] = [](sol::table self) { 
         auto vec = ((Handler*) hLua)->getGraphic()->getCamera()->getPosition();
@@ -211,9 +369,9 @@ void LuaSystem::initEngine() {
     
     
     lua["engine"]["getSprite"] = sol::factories(
-        [](sol::table self, const string& key) { ((Handler*) hLua)->getGraphic()->getSprite(key); },
-        [](sol::table self, const string& key, const string& path) { ((Handler*) hLua)->getGraphic()->getSprite(key, path); },
-        [](sol::table self, const string& key, const string& path, int nCol, int nRow, int wsrc, int hsrc, size_t nbFrames) { ((Handler*) hLua)->getGraphic()->getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrames); }
+        [](sol::table self, const string& key) { return ((Handler*) hLua)->getGraphic()->getSprite(key); },
+        [](sol::table self, const string& key, const string& path) { return ((Handler*) hLua)->getGraphic()->getSprite(key, path); },
+        [](sol::table self, const string& key, const string& path, int nCol, int nRow, int wsrc, int hsrc, size_t nbFrames) { return ((Handler*) hLua)->getGraphic()->getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrames); }
     );
 
     lua["engine"]["getBackgroundPosition"] = [](sol::table self) {
@@ -224,179 +382,5 @@ void LuaSystem::initEngine() {
         ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(position.convert<int>()); 
     };
     lua["engine"]["setBackgroundSize"] = [](sol::table self, int w, int h) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setSize(w, h); };
-    lua["engine"]["addEntity"] = [](sol::table self, sol::table entity_lua) { (((Handler*) hLua)->getEntityManager()->addEntityFromLua(entity_lua)); };
-}
-
-void LuaSystem::initEntity() {
-    lua["Entity"]["destroy"] = [](sol::table self) { ((Entity*) self["_ptr"])->destroy(); };
-    lua["Entity"]["cGetRect"] = [](intptr_t entity_lua) {
-        Entity* e = (Entity*) entity_lua;
-
-        if(!e->hasComponent<HitboxComponent>() || e->hasComponent<UIComponent>()) {
-            cout << "Warning /!\\ function getRect from: " << e->getTag() << ": You must initiate the HitboxComponent or UIComponent" << endl;
-            return tuple<int, int, int, int>(0, 0, 0, 0);
-        }
-
-        if(e->hasComponent<HitboxComponent>()) {
-            HitboxComponent& hitbox = e->getComponent<HitboxComponent>();
-            return tuple<int, int, int, int>(hitbox.getLeft(), hitbox.getTop(), hitbox.getWidth(), hitbox.getHeight());
-        }
-
-        UIComponent& ui = e->getComponent<UIComponent>();
-        return tuple<int, int, int, int>(ui.getPosition().x, ui.getPosition().y, ui.getWidth(), ui.getHeight());
-    };
-    // *************** Methods from SpriteComponent **********************
-    lua["Entity"]["cFitSizeWithHitbox"] = [](sol::table self) {
-        Entity* e = (Entity*) self["_ptr"].get<intptr_t>();
-        if(e->hasComponent<SpriteComponent>()) {
-            e->getComponent<SpriteComponent>().fitSizeWithHitbox();
-        } else { cout << "Warning /!\\ function `fitSizeWithHitbot` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl; }
-    };
-    lua["Entity"]["cSetSprite"] = [](intptr_t entity_lua, const string& path, const string& key, int x, int y, int w, int h, size_t nbFrames, sol::this_main_state s) {
-        sol::state_view m_lua(s.lua_state());
-
-        Entity* e = (Entity*) entity_lua;
-        Handler* handler = (Handler*) m_lua["engine"]["_handler"].get<intptr_t>();
-
-        if(e->hasComponent<SpriteComponent>()) {
-            e->getComponent<SpriteComponent>().setSprite(handler->getGraphic()->getSprite(path, key, x, y, w, h, nbFrames));
-        } else
-            cout << "Warning /!\\ function `setSprite` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl;
-    };
-    lua["Entity"]["cSetSpriteAngle"] = [](intptr_t entity_lua, const double angle) {
-        Entity* e = (Entity*) entity_lua;
-        if(e->hasComponent<SpriteComponent>()) {
-            e->getComponent<SpriteComponent>().setAngle(angle);
-        } else
-             cout << "Warning /!\\ function `setSpriteAngle` from: " << e->getTag() <<  ": You must inititate the SpriteComponent..." << endl;
-    };
-    // ***************** Methods from ParticleComponent ****************
-    lua["Entity"]["cGetTime"] = [](intptr_t entity_lua) {
-        Entity* e = (Entity*) entity_lua;
-        if(e->hasComponent<ParticleComponent>()) {
-            return e->getComponent<ParticleComponent>().getTime();
-        }
-        cout << "Warning /!\\ function `getTime` from" << e->getTag() << ": You must initiate the ParticleComponent" << endl;
-        return 0;
-    };
-    // **************** Methods from PhysicComponent ********************
-    lua["Entity"]["cGetCollideEntities"] = [](intptr_t entity_lua) {
-        Entity* entity = ((Entity*) entity_lua);
-        
-        vector<intptr_t> entities_ptr;
-
-        if(!entity->hasComponent<PhysicComponent>()) {
-            cout << "Warning: function `getCollideEntities` from: " << entity->getTag() << ". You must initiate the PhysicComponent" << endl;
-            return entities_ptr;
-        }
-
-        for(Entity* e: entity->getComponent<PhysicComponent>().getCollideEntities())
-            entities_ptr.emplace_back((intptr_t) e);
-
-        return entities_ptr;
-    };
-    // ****************** Methods from HitboxComponent ********************
-    lua["Entity"]["cIsOutsideScreen"] = [](intptr_t entity_lua) {
-        Entity* e = (Entity*) entity_lua;
-        if(e->hasComponent<HitboxComponent>())
-            return e->getComponent<HitboxComponent>().isOutsideScreen();
-        else
-            cout << "Warning: function `isOutsideScreen` from" << e->getTag() << ". You must initiate the HitboxComponent" << endl;
-        return false;
-    };
-    lua["Entity"]["cSetRect"] = [](intptr_t entity_lua, int xpos, int ypos, int width, int height) {
-        Entity* e = (Entity*) entity_lua;
-
-        if(e->hasComponent<HitboxComponent>()) {
-            e->getComponent<HitboxComponent>().setRect(xpos, ypos, width, height);
-        } else if(e->hasComponent<UIComponent>()) {
-            e->getComponent<UIComponent>().setRect(xpos, ypos, width, height);
-        } else
-            cout << "Warning: function `setRect` from" << e->getTag() << ". You must initiate the HitboxComponent or UIComponent" << endl;
-    };
-    lua["Entity"]["cDestroyOutsideScreen"] = [](intptr_t entity_lua) {
-        Entity* e = (Entity*) entity_lua;
-        if(e->hasComponent<HitboxComponent>())
-            e->getComponent<HitboxComponent>().destroyOutsideScreen();
-        else
-            cout << "Warning: function `destroyOutsideScreen` from" << e << ". You must initiate the HitboxComponent" << endl;
-    };
-    lua["Entity"]["cGetCollideEntity"] = [](intptr_t entity1_lua, intptr_t entity2_lua) {
-        Entity* entity1 = ((Entity*) entity1_lua);
-        Entity* entity2 = ((Entity*) entity2_lua);
-        
-        if(!entity1->hasComponent<HitboxComponent>()) {
-            cout << "Warning: function `getCollideEntity` from: " << entity1->getTag() << ". You must initiate the HitboxComponent" << endl;
-            return false;
-        }
-        if(!entity2->hasComponent<HitboxComponent>()) {
-            cout << "Warning: function `getCollideEntity` from: " << entity2->getTag() << ". You must initiate the HitboxComponent" << endl;
-            return false;
-        }
-
-        return entity1->getComponent<HitboxComponent>().isCollide(&entity2->getComponent<HitboxComponent>());
-    };
-    lua["Entity"]["cIsInsideMouse"] = [](intptr_t entity_lua) {
-        Entity* entity = ((Entity*) entity_lua);
-
-        if(entity->hasComponent<HitboxComponent>()) {
-            return entity->getComponent<HitboxComponent>().isInsideMouse();
-        } else {
-            cout << "Warning: function `isInsideMouse` from: " << entity->getTag() << ". You must initiate the HitboxComponent" << endl;
-            return false;
-        }
-    };
-    // ***************** Methods from TransfromComponent ******************
-    lua["Entity"]["cGetPosition"] = [](intptr_t entity_lua) {
-        Entity* e = ((Entity*) entity_lua);
-
-        if(e->hasComponent<TransformComponent>()) {
-            Vector2D<int> pos = ((Entity*) entity_lua)->getComponent<TransformComponent>().getPosition();
-            return tuple<int, int>(pos.x, pos.y);
-        } else if(e->hasComponent<UIComponent>()) {
-            Vector2D<int> pos = ((Entity*) entity_lua)->getComponent<UIComponent>().getPosition();
-            return tuple<int, int>(pos.x, pos.y);
-        } else {
-            cout << "Warning /!\\ function `getPosition` from: " << e->getTag() <<  ": You must inititate the TransfromComponent or UIComponents..." << endl;
-
-            return tuple<int, int> ( INT32_MIN, INT32_MIN);
-        }
-    };
-    lua["Entity"]["cGetVelocity"] = [](intptr_t entity_lua) {
-        Entity* e = ((Entity*) entity_lua);
-        if(e->hasComponent<TransformComponent>()) {
-            Vector2D<float> vel = ((Entity*) entity_lua)->getComponent<TransformComponent>().getVelocity();
-            return tuple<float, float>(vel.x, vel.y);
-        } else {
-            cout << "Warning /!\\ function `getVelocity` from: " << e->getTag() <<  ": You must inititate the TransfromComponent..." << endl;
-
-            return tuple<float, float>(FLT_MIN, FLT_MIN);
-        }
-    };
-    lua["Entity"]["cSetPosition"] = [](intptr_t entity_lua, int x, int y) {
-        Entity* e = ((Entity*) entity_lua);
-        if(e->hasComponent<TransformComponent>()) {
-            e->getComponent<TransformComponent>().setPointsPosition(x, y);
-        } else if(e->hasComponent<UIComponent>()) {
-            e->getComponent<UIComponent>().setPointsPosition(x, y);
-        } else { cout << "Warning /!\\ function `setPosition` from: " << e->getTag() <<  ": You must inititate the TransfromComponent or UIComponent..." << endl; }
-    };
-    lua["Entity"]["cSetVelocity"] = [](intptr_t entity_lua, float x, float y) {
-        Entity* e = ((Entity*) entity_lua);
-
-        if(e->hasComponent<TransformComponent>()) {
-            ((Entity*) entity_lua)->getComponent<TransformComponent>().setPointsVelocity(x, y);
-        } else { cout << "Warning /!\\ function `setVelocity` from: " << e->getTag() <<  ": You must inititate the TransfromComponent..." << endl; }
-    };
-    // ======
-    lua["Entity"]["cIsDragging"] = [](intptr_t entity_lua) {
-        Entity* e = ((Entity*) entity_lua);
-
-        if(e->hasComponent<DragComponent>())
-            return e->getComponent<DragComponent>().isDragging();
-        else {
-            cout << "Warning /!\\ function `isDragging` from: " << e->getTag() <<  ": You must inititate the DragComponent..." << endl;
-            return false;
-        }
-    };
+    lua["engine"]["addEntity"] = [](sol::table self, Entity* e) { (((Handler*) hLua)->getEntityManager()->addEntity(e)); };
 }

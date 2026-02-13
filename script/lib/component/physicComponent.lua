@@ -1,18 +1,18 @@
 --- @class PhysicComponent
---- @field tag string the tag of Component
---- @field hitbox Rect
---- @field position Vector2D
 PhysicComponent = {}
 
+--- @param entity Entity
 --- @param hitbox Rect
 --- @param position Vector2D?
-function PhysicComponent:new(hitbox, position)
-    local c = setmetatable({}, PhysicComponent)
+--- @return PhysicComponent ...
+function PhysicComponent:new(entity, hitbox, position) end
 
-    c.tag = "physic"
+--- @return Vector2D ...
+function PhysicComponent:getPosition()end
+--- @return Vector2D ...
+function PhysicComponent:getVelocity()end
 
-    c.hitbox = hitbox
-    c.position = position or Vector2D:new()
-
-    return c
-end
+--- @param position Vector2D
+function PhysicComponent:setPosition(position)end
+--- @param velocity Vector2D
+function PhysicComponent:setVelocity(velocity)end

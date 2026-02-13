@@ -132,6 +132,18 @@ function engine:previousState() end
 
 --=================================== ALL GRAPHICS METHODS ===================================--
 
+--- @overload fun(engine, key: string)
+--- @param key string
+--- @param path string
+--- @param nCol integer
+--- @param nRow integer
+--- @param wsrc integer
+--- @param hsrc integer
+--- @param nbFrame integer
+--- @param fps integer?
+--- @return Sprite ...
+function engine:getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrame, fps)end
+
 --- Set the color of graphics
 --- @param red integer
 --- @param green integer

@@ -64,9 +64,9 @@ namespace exocet {
 
                 if(it == sprites.end()) {
                     if(nbFrame == 0)
-                        sprites.insert({ key, make_shared<Sprite>(handler, path)});
+                        sprites.insert({ key, make_shared<Sprite>(handler, "res/" + path)});
                     else
-                        sprites.insert({ key, make_shared<Sprite>(handler, path, nCol, nRow, wsrc, hsrc, nbFrame)});
+                        sprites.insert({ key, make_shared<Sprite>(handler, "res/" + path, nCol, nRow, wsrc, hsrc, nbFrame)});
                     return sprites[key].get();
                 }
                     

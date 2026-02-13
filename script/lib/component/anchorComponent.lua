@@ -1,18 +1,11 @@
 --- @class AnchorComponent
---- @field tag string the tag of Component
---- @field hitbox Rect
---- @field position Vector2D
 AnchorComponent = {}
 
+--- @param entity Entity
 --- @param hitbox Rect
 --- @param position Vector2D?
-function AnchorComponent:new(hitbox, position)
-    local c = setmetatable({}, AnchorComponent)
+--- @return AnchorComponent ...
+function AnchorComponent:new(entity, hitbox, position)end
 
-    c.tag = "anchor"
-
-    c.hitbox = hitbox
-    c.position = position
-
-    return c
-end
+--- @return Vector2D ...
+function AnchorComponent:getPosition()end

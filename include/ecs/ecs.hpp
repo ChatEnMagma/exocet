@@ -71,11 +71,16 @@ namespace exocet {
 
             std::vector<std::unique_ptr<Component>> components;
             ComponentArray componentArray;
-
+            
             ComponentBitset componentBitset;
             GroupBitset groupBitset;
         public:
             Entity(Handler* handler, std::string tag);
+
+            // ONLY FOR LUA DONT TOUCH IN C++ CODE
+            sol::table componentsLua;
+            sol::table data;
+            //////////////////////////////////////
 
             inline void update() { for(auto& c: components) c->update(); }
             inline void render() { for(auto& c: components) c->render(); }
@@ -135,7 +140,6 @@ namespace exocet {
                 c->init();
                 return *c;
             }
-            void addComponentsFromLua(sol::state* lua, sol::table component);
     };
 
     class EntityManager {
@@ -158,13 +162,8 @@ namespace exocet {
              * \param tag the name of the entity
              * \return The entity created
              */
-            Entity& addEntity(std::string tag);
-            /**
-             * \brief Add a new entity from lua into entityManager
-             * \param entity The entity from lua file
-             * \return The entity created
-             */
-            Entity& addEntityFromLua(sol::table entity);
+            Entity& addEmptyEntity(std::string tag);
+            void addEntity(Entity* entity);
             /**
              * \brief Destroy all entities in the EntityManager
              */

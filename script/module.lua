@@ -4,6 +4,6 @@ module = {
     -- All particles
 
     -- All entities
-    "entity/wall",
     "entity/player",
+    "entity/wall"
 }

@@ -29,18 +29,6 @@ void State::loadState() {
             background->setLoop(true);
         }
     }
-
-    // For each all entities from lua
-    if(lua[getTag()]["entities"] != sol::nil) {
-        lua[getTag()]["entities"].get<sol::table>().for_each([&](sol::object const& keyEntity, sol::object const& valueEntity) {
-            eManager->addEntityFromLua(valueEntity.as<sol::table>());
-        });
-    }
-    if(lua[getTag()]["uis"] != sol::nil) {
-        lua[getTag()]["uis"].get<sol::table>().for_each([&](sol::object const& keyEntity, sol::object const& valueEntity) {
-            uiManager->addEntityFromLua(valueEntity.as<sol::table>());
-        });
-    }
 }
 
 void StateManager::initStates() {
