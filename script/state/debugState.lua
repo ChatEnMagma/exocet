@@ -3,11 +3,11 @@ debugState = {
     tag = "debugState",
 
     init = function ()
-        local sprite = engine:getSprite("exocet", "exocet_anim.png", 7, 1, 32, 32, 7)
+        local backgroundSprite = engine:getSprite("background", "/plage_background.jpg")
+        engine:getBackground():setSize(backgroundSprite:getWidth(), backgroundSprite:getHeight())
+        engine:getBackground():append(backgroundSprite)
 
-        local e = Player:new(Vector2D:new(0, 0))
-
-        engine:addEntity(e)
+        engine:addEntity(Player:new(Vector2D:new(0, 0)))
         engine:addEntity(Wall:new(Vector2D:new(32, 64)))
     end,
 

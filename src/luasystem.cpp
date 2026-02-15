@@ -19,6 +19,7 @@ LuaSystem::LuaSystem(Handler* handler) {
     initUsertypeLuaVector2D();
     initUsertypePolygon();
     initUsertypeSprite();
+    initUsertypeBackground();
 
     initUsertypeEntity();
     initUsertypeComponents();
@@ -91,6 +92,23 @@ void LuaSystem::initUsertypePolygon() {
     );
 }
 
+void LuaSystem::initUsertypeBackground() {
+    lua.new_usertype<Background>(USERTYPE_BACKGROUND,
+        "append", sol::factories(
+            [](Background& self, Sprite* sprite) { self.append(sprite); },
+            &Background::append
+        ),
+
+        "getPosition", [](Background& self) { return self.getPosition().convert<lua_Number>(); },
+        "getWidth", &Background::getWidth,
+        "getHeight", &Background::getHeight,
+        
+        "setPosition", [](Background& self, const LuaVector2D& position) { self.setPosition(position.convert<int>()); },
+        "setSize", &Background::setSize,
+        "setLoop", &Background::setLoop
+    );
+}
+
 void LuaSystem::initUsertypeSprite() {
     lua.new_usertype<Sprite>(USERTYPE_SPRITE,
         "render", &Sprite::render,
@@ -157,6 +175,11 @@ void LuaSystem::initUsertypeComponents() {
             }
         ),
 
+        "isCollide", [](AnchorComponent& self, Entity* e) {
+            if(!e->hasComponent<HitboxComponent>()) { cout << "Warning: the entity: `" << e->getTag() << "` must have hitboxComponent" << endl; return false; }
+            return self.getHitbox()->isCollide(&e->getComponent<HitboxComponent>());
+        },
+
         "getPosition", [](AnchorComponent& self) { return self.getPosition().convert<lua_Number>(); }
     );
 
@@ -192,6 +215,11 @@ void LuaSystem::initUsertypeComponents() {
                 return &c;
             }
         ),
+
+        "isCollide", [](AnchorComponent& self, Entity* e) {
+            if(!e->hasComponent<HitboxComponent>()) { cout << "Warning: the entity: `" << e->getTag() << "` must have hitboxComponent" << endl; return false; }
+            return self.getHitbox()->isCollide(&e->getComponent<HitboxComponent>());
+        },
 
         "getPosition", [](PhysicComponent& self) { return self.getPosition().convert<lua_Number>(); },
         "getVelocity", [](PhysicComponent& self) { return self.getVelocity().convert<lua_Number>(); },
@@ -373,14 +401,6 @@ void LuaSystem::initEngine() {
         [](sol::table self, const string& key, const string& path) { return ((Handler*) hLua)->getGraphic()->getSprite(key, path); },
         [](sol::table self, const string& key, const string& path, int nCol, int nRow, int wsrc, int hsrc, size_t nbFrames) { return ((Handler*) hLua)->getGraphic()->getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrames); }
     );
-
-    lua["engine"]["getBackgroundPosition"] = [](sol::table self) {
-        auto vec = ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->getPosition(); 
-        return make_shared<LuaVector2D>(static_cast<lua_Number>(vec.x), static_cast<lua_Number>(vec.y));
-    };
-    lua["engine"]["setBackgroundPosition"] = [](sol::table self, LuaVector2D position) {
-        ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setPosition(position.convert<int>()); 
-    };
-    lua["engine"]["setBackgroundSize"] = [](sol::table self, int w, int h) { ((Handler*) hLua)->getGame()->getStateManager()->getBackground()->setSize(w, h); };
+    lua["engine"]["getBackground"] = [](sol::table self) { return ((Handler*) hLua)->getGame()->getStateManager()->getBackground(); };
     lua["engine"]["addEntity"] = [](sol::table self, Entity* e) { (((Handler*) hLua)->getEntityManager()->addEntity(e)); };
 }

@@ -29,7 +29,7 @@ namespace exocet {
             void refresh();
             inline void setSize(const int width, const int height) { w = width; h = height; }
 
-            inline void append(const int zindex, Sprite* sprite) { 
+            inline void append(Sprite* sprite, const int zindex = 0) { 
                 sprites.insert(sprites.begin() + zindex, sprite);
             }
             inline Vector2D<int> getPosition() const { return position; }

@@ -50,8 +50,6 @@ namespace exocet {
                 uiManager->render(); 
             }
 
-            void loadState();
-
             inline EntityManager* getEntityManager() { return eManager; }
             inline EntityManager* getUIManager() { return uiManager; }
             inline std::string getTag() const { return tag; }

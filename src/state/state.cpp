@@ -5,32 +5,6 @@
 using namespace std;
 using namespace exocet;
 
-void State::loadState() {
-    sol::state& lua = *handler->getLua();
-
-    if(lua[getTag()]["background"] != sol::nil) {
-
-        lua[getTag()]["background"]["textures"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
-            background->append(
-                value.as<sol::table>()["zindex"].get<size_t>(),
-                handler->getGraphic()->getSprite("res/" + value.as<sol::table>()["path"].get<string>())
-            );
-            
-            // Set the position of the backgrounds
-            background->setPosition(value.as<sol::table>()["postion"].get_or<LuaVector2D>(*(new LuaVector2D(0, 0))).convert<int>());
-        });
-
-        background->setSize(
-            lua[getTag()]["background"].get<sol::table>()["size"]["w"].get<int>(),
-            lua[getTag()]["background"].get<sol::table>()["size"]["h"].get<int>()
-        );
-
-        if(lua[getTag()]["background"]["loop"] != sol::nil) {
-            background->setLoop(true);
-        }
-    }
-}
-
 void StateManager::initStates() {
     sol::state_view lua(handler->getLua()->lua_state());
 
@@ -70,7 +44,6 @@ void StateManager::setState(std::size_t state) {
     current = state;
 
     getState()->init();
-    getState()->loadState();
 
     cout << "Finish initiate the state" << endl;
 }

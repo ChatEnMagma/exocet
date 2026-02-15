@@ -9,6 +9,7 @@
 #define USERTYPE_LUAVECTOR2D "Vector2D"
 #define USERTYPE_POLYGON "Polygon"
 #define USERTYPE_SPRITE "Sprite"
+#define USERTYPE_BACKGROUND "Background"
 
 #define USERTYPE_ENTITY "Entity"
 
@@ -27,6 +28,7 @@ namespace exocet {
             void initUsertypeLuaVector2D();
             void initUsertypePolygon();
             void initUsertypeSprite();
+            void initUsertypeBackground();
 
             void initUsertypeEntity();
             void initUsertypeComponents();
