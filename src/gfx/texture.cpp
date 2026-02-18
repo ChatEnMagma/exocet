@@ -47,7 +47,7 @@ void Texture::render(const IntVector2D& position, int wdest, int hdest, int xsrc
 }
 
 void Texture::renderAnchor(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) {
-    SDL_Rect src = { xsrc, xsrc, wsrc, hsrc };
+    SDL_Rect src = { xsrc, ysrc, wsrc, hsrc };
     SDL_Rect dest = { position.x, position.y, wdest, hdest };
 
     SDL_RenderCopy(handler->getSubsystem()->getRenderer(), tex, &src, &dest);

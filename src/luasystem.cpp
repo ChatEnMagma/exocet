@@ -121,6 +121,19 @@ void LuaSystem::initUsertypeSprite() {
     );
 }
 
+void LuaSystem::initUsertypeSong() {
+    lua.new_usertype<PlaySong>(USERTYPE_SONG,
+        "play", sol::factories(
+            [](PlaySong& self) { self.play(); },
+            &PlaySong::play
+        ),
+        "getVolume", &PlaySong::getVolume,
+        "setVolume", &PlaySong::setVolume,
+        "isPlaying", &PlaySong::isPlaying,
+        "isLoop", &PlaySong::isLoop
+    );
+}
+
 void LuaSystem::initUsertypeEntity() {
     lua.new_usertype<Entity>(USERTYPE_ENTITY,
         sol::meta_function::construct, sol::factories(
@@ -289,7 +302,7 @@ void LuaSystem::preloadPackages(const std::string pathDir, const std::string nam
     }
 
     // Load all modules homemade
-    lua[name].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
+    lua[name].get<sol::table>().for_each([&](sol::object, sol::object const& value) {
         string file = pathDir + value.as<string>() + ".lua";
 
         if(lua["config"]["logOpenLuaFiles"].get_or<bool>(0))
@@ -334,21 +347,7 @@ void LuaSystem::initEngine() {
     lua["engine"]["mute"] = [](sol::table self) { ((Handler*) hLua)->getSubsystem()->mute(); };
     lua["engine"]["unmute"] = [](sol::table self) { ((Handler*) hLua)->getSubsystem()->unmute(); };
     lua["engine"]["isMuting"] = [](sol::table self) { return ((Handler*) hLua)->getSubsystem()->isMuting(); };
-    lua["engine"]["getVolume"] = [](sol::table self, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->getVolume(); };
-    lua["engine"]["setVolume"] = [](sol::table self, const string path, int volume) {
-        Handler* handler = (Handler*) hLua;
-        if(!handler->getSubsystem()->isMuting())
-            handler->getState()->getSong("res/" + path)->setVolume(volume); 
-    };
-    lua["engine"]["playSong"] = [](sol::table self, const string path, sol::object ticksObject) {
-        Handler* handler = (Handler*) hLua;
-        int ticks = (ticksObject == sol::nil)? -1: ticksObject.as<int>();
-        
-        if(!handler->getSubsystem()->isMuting()) 
-            handler->getState()->getSong("res/" + path)->play(ticks); 
-    };
-    lua["engine"]["isPlayingSong"] = [](sol::table self, const string path) { return ((Handler*) hLua)->getState()->getSong("res/" + path)->isPlaying(); };
-    lua["engine"]["setSong"] = [](sol::table self, const string path) { ((Handler*) hLua)->getState()->setSong("res/" + path); };
+    lua["engine"]["getSong"] = [](sol::table self, const string& key, const string& path) { return ((Handler*) hLua)->getState()->getSong(key, "res/" + path); };
 
     // ======== ALL STATES METHODS =====
     lua["engine"]["setState"] = [](sol::table self, size_t state) { ((Handler*) hLua)->getGame()->getStateManager()->setState(state); };

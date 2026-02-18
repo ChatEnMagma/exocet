@@ -1,15 +1,23 @@
+#include <string>
+
 #include "engine.hpp"
 #include "handler.hpp"
 
 using namespace std;
 using namespace exocet;
 
-bool Engine::init(int w, int h, std::string title) {
-    subsys = new Subsystem();
-    bool successInit = subsys->init(w, h, title);
-    game = new Game(subsys);
+void Engine::init(int w, int h, std::string title, bool fullscreen) {
+    try {
+        (subsys = make_unique<Subsystem>())->init(w, h, title);
+    } catch(const bad_alloc& e) {
+        cerr << "Error to initiate the subsystem..." << endl;
+        exit(EXIT_FAILURE);
+    }
 
-    return successInit;
+    if(fullscreen)
+        subsys->setFullscreen();
+
+    game = make_unique<Game>(subsys.get());
 }
 
 void Engine::run() {
@@ -30,5 +38,18 @@ void Engine::run() {
     }
 }
 
-void Engine::clean() {
+int main(int argc, char** argv) {
+    bool fullscreen = false;
+
+    for(int i = 1; i < argc; i++) {
+        if(strcmp(argv[i], "--fullscreen") == 0)
+            fullscreen = true;
+    }
+
+    Engine engin;
+
+    engin.init(WIN_MIN_WIDTH, WIN_MIN_HEIGHT, "Exocet", fullscreen);
+    engin.run();
+
+    return EXIT_SUCCESS;
 }

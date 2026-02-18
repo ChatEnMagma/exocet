@@ -24,9 +24,7 @@ Game::Game(Subsystem* subsys) {
     cout << "Success to initiate the luaSystem" << endl;
 
     // init StateManager
-    sManager = new StateManager();
-    sManager->setHandler(handler);
-    sManager->initStates();
+    (sManager = new StateManager(handler))->initStates();
 
     cout << "Success to initiate all states" << endl;
 

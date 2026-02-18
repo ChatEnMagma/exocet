@@ -42,5 +42,7 @@ function Player.update(e)
     if engine:getKey(SDL.SDLK_Q) then physic:setVelocity(physic:getVelocity() + Vector2D:new(-2, 0)) end
     if engine:getKey(SDL.SDLK_D) then physic:setVelocity(physic:getVelocity() + Vector2D:new(2, 0)) end
 
+    if engine:getKey(SDL.SDLK_U) then engine:addEntity(Wall:new(physic:getPosition())) end
+
     engine:centerOnEntity(e)
 end

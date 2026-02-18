@@ -150,6 +150,8 @@ namespace exocet {
             std::vector<Entity*> entitiedAdd;
             std::array<std::vector<Entity*>, maxGroup> groupedEntities;
         public:
+            EntityManager(Handler* handler) { this->handler = handler; }
+
             inline void update() { for(auto& e: entities) e->update(); }
             inline void render() { for(auto& e: entities) e->render(); }
 
@@ -186,7 +188,5 @@ namespace exocet {
              * \return Return the size of entities
              */
             inline std::size_t getNumberEntities() { return entities.size(); }
-            inline void setHandler(Handler* handler) { this->handler = handler; }
-            inline Handler* getHandler() { return handler; }
     };
 }

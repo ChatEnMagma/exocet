@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 
 #include "constantes.hpp"
 
@@ -12,8 +13,8 @@
 namespace exocet {
     class Subsystem {
         private:
-            SDL_Window* win = NULL;
-            Graphic* gfx = nullptr;
+            SDL_Window* win;
+            std::unique_ptr<Graphic> gfx;
             KeyListener keys;
             MouseListener mouse;
 
@@ -35,12 +36,12 @@ namespace exocet {
              * \param height the window height
              * \param title the window title
              */
-            bool init(int width, int height, std::string title);
+            void init(int width, int height, std::string title);
 
             /**
              * \brief Handle all events from SDL
              */
-            void handleEvents();
+            void handleEvents() noexcept;
             /**
              * \brief Clean the subsystem
              */
@@ -70,7 +71,7 @@ namespace exocet {
             inline bool isMuting() const { return muting; }
             inline bool isResizing() const { return resizing; }
 
-            inline Graphic* getGraphic() { return gfx; }
+            inline Graphic* getGraphic() { return gfx.get(); }
             inline KeyListener* getKeyListener() { return &keys; }
             inline MouseListener* getMouseListener() { return &mouse; }
             
@@ -79,5 +80,7 @@ namespace exocet {
             inline std::string getWinTitle() const { return title; }
 
             inline SDL_Renderer* getRenderer() { return gfx->getRenderer(); }
+
+            inline void setFullscreen() { SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN); }
     };
 }

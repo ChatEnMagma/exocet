@@ -6,28 +6,28 @@ using namespace exocet;
 
 Uint8 PlaySong::volume[] = { 0, 0, 0, 0 };
 
-bool Subsystem::init(int w, int h, string title) {
+void Subsystem::init(int w, int h, string title) {
     // init the SDL
     if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         cerr << "Fail to initiate SDL: " << SDL_GetError() << endl;
-        return false;
+        throw bad_alloc();
     }
     if(IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) == 0) {
         cerr << "Fail to initiate IMG: " << IMG_GetError() << endl;
-        return false;
+        throw bad_alloc();
     }
     // init the TTF
     if(TTF_Init() != 0) {
         cerr << "Fail to initiate TTF: " << TTF_GetError() << endl;
-        return false;
+        throw bad_alloc();
     }
     if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) != 0) {
         cerr << "Fail to initiate Mixer: " << Mix_GetError() << endl;
-        return false;
+        throw bad_alloc();
     }
     if(Mix_AllocateChannels(4) < 0) {
         cerr << "Unable to allocate mixing channels: %s" << Mix_GetError() << endl;
-        return false;
+        throw bad_alloc();
     }
 
     // set the window size
@@ -49,13 +49,13 @@ bool Subsystem::init(int w, int h, string title) {
 
     if(win == NULL) {
         cerr << "Fail to initiate the window: " << SDL_GetError() << endl;
-        return false; 
+        throw bad_alloc();
     }
 
     SDL_SetWindowMinimumSize(win, WIN_MIN_WIDTH, WIN_MIN_HEIGHT);
 
     // create the renderer
-    gfx = new Graphic(SDL_CreateRenderer(
+    gfx = make_unique<Graphic>(SDL_CreateRenderer(
         win, 
         -1, 
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
@@ -63,7 +63,7 @@ bool Subsystem::init(int w, int h, string title) {
 
     if(gfx->getRenderer() == NULL) {
         cerr << "Fail to initiate the renderer: " << SDL_GetError() << endl;
-        return false;
+        throw bad_alloc();
     }
 
     icon = IMG_Load("res/icon.ico");
@@ -76,11 +76,9 @@ bool Subsystem::init(int w, int h, string title) {
     running = true;
 
     cout << "Success to ititiate the subsystem" << endl;
-
-    return true;
 }
 
-void Subsystem::handleEvents() {
+void Subsystem::handleEvents() noexcept {
     SDL_Event e;
     while(SDL_PollEvent(&e)) {
         switch(e.type) {
@@ -114,7 +112,7 @@ void Subsystem::handleEvents() {
 }
 
 void Subsystem::clean() {
-    delete gfx;
+    gfx.reset();
     SDL_FreeSurface(icon);
 
     // All SDL clean

@@ -5,6 +5,14 @@
 using namespace std;
 using namespace exocet;
 
+StateManager::StateManager(Handler* handler) {
+    this->handler = handler;
+
+    eManager = make_unique<EntityManager>(handler);
+    uiManager = make_unique<EntityManager>(handler);
+    background = make_unique<Background>(handler);
+}
+
 void StateManager::initStates() {
     sol::state_view lua(handler->getLua()->lua_state());
 
@@ -15,7 +23,7 @@ void StateManager::initStates() {
     }
 
     // For each all states
-    lua["config"]["states"].get<sol::table>().for_each([&](sol::object const& key, sol::object const& value) {
+    lua["config"]["states"].get<sol::table>().for_each([&](sol::object, sol::object const& value) {
         // Make a new state with the tag from config
         sol::optional<sol::error> maybeErr = lua.safe_script_file(DIR_SCRIPT_STATES + value.as<string>() + ".lua");
 
@@ -24,22 +32,23 @@ void StateManager::initStates() {
             handler->closeGame();
         }
 
-        State* state = new State(
+        auto state = make_unique<State>(
+            handler,
             value.as<string>(), 
             lua[value.as<string>()]["init"].get<sol::function>(),
             lua[value.as<string>()]["update"].get<sol::function>(),
             lua[value.as<string>()]["render"].get<sol::function>()
         );
-        addState(state);
+        addState(move(state));
     });
 }
 
 void StateManager::setState(std::size_t state) { 
-    eManager.destroyAllEntities();
-    uiManager.destroyAllEntities();
-    background.refresh();
+    eManager->destroyAllEntities();
+    uiManager->destroyAllEntities();
+    background->refresh();
 
-    handler->getGraphic()->getCamera()->setPosition(Vector2D<int>());
+    handler->getGraphic()->getCamera()->setPosition(IntVector2D());
 
     current = state;
 

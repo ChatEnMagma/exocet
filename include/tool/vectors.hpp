@@ -53,6 +53,7 @@ namespace exocet {
             }
     };
 
+    using DoubleVector2D = Vector2D<double>;
     using IntVector2D = Vector2D<int>;
     using LuaVector2D = Vector2D<lua_Number>;
     using FloatVector2D = Vector2D<float>;

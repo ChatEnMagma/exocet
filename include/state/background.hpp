@@ -14,8 +14,11 @@ namespace exocet {
 
             Handler* handler;
         public:
-            Background(bool loop = false) {
+            Background(Handler* handler, bool loop = false) {
+                this->handler = handler;
+
                 this->loop = loop;
+
                 w = 0;
                 h = 0;
             }
@@ -37,7 +40,5 @@ namespace exocet {
             inline int getWidth() const { return w; }
             inline int getHeight() const { return h; }
             inline void setLoop(bool loop) { this->loop = loop; }
-
-            inline void setHandler(Handler* handler) { this->handler = handler; }
     };
 }

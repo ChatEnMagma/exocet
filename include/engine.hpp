@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "subsystem.hpp"
 #include "game.hpp"
 
@@ -9,28 +11,20 @@ namespace exocet {
      */
     class Engine {
         private:
-            Game* game;
-            Subsystem* subsys;
+            std::unique_ptr<Game> game;
+            std::unique_ptr<Subsystem> subsys;
         public:
-            ~Engine() {
-                delete game;
-                delete subsys;
-            }
             /**
              * \brief init the game engine
              * \param width the window width
              * \param height the window height
              * \param title the window title
              */
-            bool init(int width, int height, std::string title);
+            void init(int width, int height, std::string title, bool fullscreen = false);
 
             /**
              * \brief Run the game engine
              */
             void run();
-            /**
-             * \brief Clean the game engine
-             */
-            void clean();
     };
 }

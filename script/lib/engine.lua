@@ -5,26 +5,12 @@ engine = {}
 
 --===================================== ALL SUBSYS METHDOS =====================================--
 
---- Play a song with ticks during. You should initiate the song file before to play
---- @param path string
---- @param ticks integer|nil
-function engine:playSong(path, ticks)end
---- Get the main volume
---- @param path string
---- @return integer ...
---- @nodiscard
-function engine:getVolume(path)end
---- @param path string
---- @param volume integer between 0 to 128
-function engine:setVolume(path, volume)end
---- Check if the song is playing
---- @param path string
---- @return boolean ...
---- @nodiscard
-function engine:isPlayingSong(path)end
 --- Set a song
+--- @overload fun(engine, key: string)
+--- @param key string
 --- @param path string the path of the song
-function engine:setSong(path)end
+--- @return Song ...
+function engine:getSong(key, path)end
 --- Tell if the game is muting
 --- @return boolean ...
 --- @nodiscard

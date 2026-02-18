@@ -5,7 +5,7 @@
 #include "tool/vectors.hpp"
 
 namespace exocet {
-    using Vertex = LuaVector2D;
+    using Vertex = DoubleVector2D;
 
     class Polygon {
         private:
@@ -50,9 +50,7 @@ namespace exocet {
              * \brief Make a polygon with lua table like {{x: 0, y: 0}, {x: 0, y: 32}, ...}
              */
             Polygon(sol::table vertices) {
-                vertices.for_each([&](sol::object const& key, sol::object const& value) {
-                    this->vertices.push_back(value.as<LuaVector2D>());
-                });
+                vertices.for_each([&](sol::object, sol::object const& value) { this->vertices.push_back(value.as<LuaVector2D>()); });
 
                 this->width = 0;
                 this->height = 0;
@@ -126,10 +124,6 @@ namespace exocet {
                 }
 
                 return poly;
-            }
-
-            Polygon rotate(float angle) const {
-                return Polygon();
             }
 
             std::vector<Vertex>::iterator begin() { return vertices.begin(); }
