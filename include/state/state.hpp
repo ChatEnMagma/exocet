@@ -75,9 +75,10 @@ namespace exocet {
             PlaySong* getSong(const std::string& key, const std::string& path = "") {
                 auto it = songs.find(key);
 
-                if(it == songs.end() && !path.empty())
+                if(it == songs.end() && path.empty())
+                    throw std::runtime_error("you must initiate the path when you want to load a new song...");
+                if(it == songs.end())
                     songs[key] = std::move(std::make_unique<PlaySong>(path));
-                else throw std::runtime_error("you must initiate the path when you want to load a new song...");
 
                 return songs[key].get();
             }

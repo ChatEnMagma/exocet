@@ -21,11 +21,11 @@ void Subsystem::init(int w, int h, string title) {
         cerr << "Fail to initiate TTF: " << TTF_GetError() << endl;
         throw bad_alloc();
     }
-    if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) != 0) {
+    if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_CHANNELS, 1024) != 0) {
         cerr << "Fail to initiate Mixer: " << Mix_GetError() << endl;
         throw bad_alloc();
     }
-    if(Mix_AllocateChannels(4) < 0) {
+    if(Mix_AllocateChannels(MIX_CHANNELS) < 0) {
         cerr << "Unable to allocate mixing channels: %s" << Mix_GetError() << endl;
         throw bad_alloc();
     }

@@ -1,3 +1,5 @@
+#include <limits>
+
 #include "ecs/anchorComponent.hpp"
 
 using namespace exocet;
@@ -8,7 +10,7 @@ void AnchorComponent::init() {
         physic = &entity->addComponent<PhysicComponent>();
     physic = &entity->getComponent<PhysicComponent>();
 
-    physic->setMasse(MAXFLOAT);
+    physic->setMasse(numeric_limits<double>::max());
     physic->setFriction(0);
     physic->setSpeed(0);
 }

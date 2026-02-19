@@ -9,9 +9,9 @@ namespace exocet {
             TransformComponent* transform;
             HitboxComponent* hitbox;
 
-            float speed, maxSpeed;
-            float friction;
-            float masse;
+            double speed, maxSpeed;
+            double friction;
+            double masse;
 
             /**
              * \brief Calculates all movement of the physic component
@@ -38,32 +38,32 @@ namespace exocet {
             std::vector<Entity*> getCollideEntities();
 
             // Getters from PhysicComponent
-            inline float getMasse() const { return masse; }
-            inline float getSpeed() const { return speed; }
-            inline float getMaxSpeed() const { return maxSpeed; }
-            inline float getFriction() const { return friction; }
+            inline double getMasse() const { return masse; }
+            inline double getSpeed() const { return speed; }
+            inline double getMaxSpeed() const { return maxSpeed; }
+            inline double getFriction() const { return friction; }
 
             // Getters from TransformComponent
             inline TransformComponent* getTransform() { return transform; }
-            inline Vector2D<int> getPosition() const { return transform->getPosition(); }
+            inline IntVector2D getPosition() const { return transform->getPosition(); }
             inline int getPositionX() const { return transform->pos.x; }
             inline int getPositionY() const { return transform->pos.y; }
-            inline Vector2D<float> getVelocity() const { return transform->getVelocity(); }
+            inline DoubleVector2D getVelocity() const { return transform->getVelocity(); }
 
             inline HitboxComponent* getHitbox() { return hitbox; }
 
             // ALL SETTERS
             // Setters from PhysicComponent
-            inline void setMasse(float masse) { this->masse = masse; }
-            inline void setSpeed(float speed) { this->speed = speed; }
-            inline void setMaxSpeed(float maxSpeed) { this->maxSpeed = maxSpeed; }
-            inline void setFriction(float friction) { this->friction = friction; }
+            inline void setMasse(double masse) { this->masse = masse; }
+            inline void setSpeed(double speed) { this->speed = speed; }
+            inline void setMaxSpeed(double maxSpeed) { this->maxSpeed = maxSpeed; }
+            inline void setFriction(double friction) { this->friction = friction; }
 
             // Setters from TransformComponent
-            inline void setPosition(Vector2D<int> position) { transform->setPosition(position); }
+            inline void setPosition(const IntVector2D& position) { transform->setPosition(position); }
             inline void setPointsPosition(int xpos, int ypos) { transform->setPointsPosition(xpos, ypos); }
-            inline void setVelocity(Vector2D<float> velocity) { transform->setVelocity(velocity); }
-            inline void setPointsVelocity(float xvel, float yvel) { transform->setPointsVelocity(xvel, yvel); }
+            inline void setVelocity(const DoubleVector2D& velocity) { transform->setVelocity(velocity); }
+            inline void setPointsVelocity(double xvel, double yvel) { transform->setPointsVelocity(xvel, yvel); }
 
             inline friend std::ostream& operator<<(std::ostream& os, const PhysicComponent* component) {
                 return os << "PhysicC: {vel: " << component->getVelocity();

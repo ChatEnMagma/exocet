@@ -11,10 +11,10 @@ namespace exocet {
             void init() override;
             void update() override;
 
-            inline void setPosition(const Vector2D<int> position) { transform->setPosition(position); }
+            inline void setPosition(const IntVector2D& position) { transform->setPosition(position); }
             inline void setPointsPosition(int xpos, int ypos) { transform->setPointsPosition(xpos, ypos); }
-            inline void setVelocity(const Vector2D<float> velocity) { transform->setVelocity(velocity); }
-            inline void setPointsVelocity(float xvel, float yvel) { transform->setPointsVelocity(xvel, yvel); }
+            inline void setVelocity(const DoubleVector2D& velocity) { transform->setVelocity(velocity); }
+            inline void setPointsVelocity(double xvel, double yvel) { transform->setPointsVelocity(xvel, yvel); }
             inline void setTime(int time) { this->time = time; }
             inline int getTime() const { return time; }
     };

@@ -44,5 +44,8 @@ function Player.update(e)
 
     if engine:getKey(SDL.SDLK_U) then engine:addEntity(Wall:new(physic:getPosition())) end
 
+    if engine:getJustKey(SDL.SDLK_H) then engine:getSong("plouf", "plouf.wav"):play() end
+    if engine:getJustKey(SDL.SDLK_G) then engine:getSong("whoosh", "whoosh0.wav"):play(300) end
+
     engine:centerOnEntity(e)
 end

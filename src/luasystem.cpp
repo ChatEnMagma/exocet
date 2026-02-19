@@ -20,6 +20,7 @@ LuaSystem::LuaSystem(Handler* handler) {
     initUsertypePolygon();
     initUsertypeSprite();
     initUsertypeBackground();
+    initUsertypeSong();
 
     initUsertypeEntity();
     initUsertypeComponents();
@@ -238,7 +239,7 @@ void LuaSystem::initUsertypeComponents() {
         "getVelocity", [](PhysicComponent& self) { return self.getVelocity().convert<lua_Number>(); },
 
         "setPosition", [](PhysicComponent& self, const LuaVector2D& pos) { self.setPosition(pos.convert<int>()); },
-        "setVelocity", [](PhysicComponent& self, const LuaVector2D& vel) { self.setVelocity(vel.convert<float>()); }
+        "setVelocity", [](PhysicComponent& self, const LuaVector2D& vel) { self.setVelocity(vel.convert<double>()); }
     );
 
     lua.new_usertype<SpriteComponent>(USERTYPE_SPRITE_COMPONENT,
@@ -347,7 +348,10 @@ void LuaSystem::initEngine() {
     lua["engine"]["mute"] = [](sol::table self) { ((Handler*) hLua)->getSubsystem()->mute(); };
     lua["engine"]["unmute"] = [](sol::table self) { ((Handler*) hLua)->getSubsystem()->unmute(); };
     lua["engine"]["isMuting"] = [](sol::table self) { return ((Handler*) hLua)->getSubsystem()->isMuting(); };
-    lua["engine"]["getSong"] = [](sol::table self, const string& key, const string& path) { return ((Handler*) hLua)->getState()->getSong(key, "res/" + path); };
+    lua["engine"]["getSong"] = sol::factories(
+        [](sol::table self, const string& key) { return ((Handler*) hLua)->getState()->getSong(key); },
+        [](sol::table self, const string& key, const string& path) { return ((Handler*) hLua)->getState()->getSong(key, "res/" + path); }
+    );
 
     // ======== ALL STATES METHODS =====
     lua["engine"]["setState"] = [](sol::table self, size_t state) { ((Handler*) hLua)->getGame()->getStateManager()->setState(state); };
@@ -358,29 +362,17 @@ void LuaSystem::initEngine() {
     lua["engine"]["restart"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
 
     // ========= ALL GFX METHODS
-    lua["engine"]["setColor"] = [](sol::table self, int r, int g, int b, int a) {
-        ((Handler*) hLua)->getGraphic()->setColor(r, g, b, a);
-    };
-    lua["engine"]["renderRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
-        ((Handler*) hLua)->getGraphic()->renderRect(position.convert<int>(), w, h);
-    };
-    lua["engine"]["renderFillRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
-        ((Handler*) hLua)->getGraphic()->renderFillRect(position.convert<int>(), w, h);
-    };
-    lua["engine"]["renderAnchorRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
-        ((Handler*) hLua)->getGraphic()->renderAnchorRect(position.convert<int>(), w, h);
-    };
-    lua["engine"]["renderAnchorFillRect"] = [](sol::table self, LuaVector2D position, int w, int h) {
-        ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(position.convert<int>(), w, h);
-    };
-    lua["engine"]["centerOnEntity"] = [](sol::table self, Entity* entity) {
-        ((Handler*) hLua)->getGraphic()->centerOnEntity(entity);
-    };
-    lua["engine"]["getCameraPosition"] = [](sol::table self) { 
-        auto vec = ((Handler*) hLua)->getGraphic()->getCamera()->getPosition();
-        return make_shared<LuaVector2D>(static_cast<lua_Number>(vec.x), static_cast<lua_Number>(vec.y));
-    };
-    lua["engine"]["renderText"] = [](sol::table self, LuaVector2D position, int width, int height, string text) {
+    lua["engine"]["setColor"] = sol::factories(
+        [](sol::table self, int r, int g, int b) { ((Handler*) hLua)->getGraphic()->setColor(r, g, b); },
+        [](sol::table self, int r, int g, int b, int a) { ((Handler*) hLua)->getGraphic()->setColor(r, g, b, a); }
+    );
+    lua["engine"]["renderRect"] = [](sol::table self, const LuaVector2D& position, int w, int h) { ((Handler*) hLua)->getGraphic()->renderRect(position.convert<int>(), w, h); };
+    lua["engine"]["renderFillRect"] = [](sol::table self, const LuaVector2D& position, int w, int h) { ((Handler*) hLua)->getGraphic()->renderFillRect(position.convert<int>(), w, h); };
+    lua["engine"]["renderAnchorRect"] = [](sol::table self, const LuaVector2D& position, int w, int h) { ((Handler*) hLua)->getGraphic()->renderAnchorRect(position.convert<int>(), w, h); };
+    lua["engine"]["renderAnchorFillRect"] = [](sol::table self, const LuaVector2D& position, int w, int h) { ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(position.convert<int>(), w, h); };
+    lua["engine"]["centerOnEntity"] = [](sol::table self, Entity* entity) { ((Handler*) hLua)->getGraphic()->centerOnEntity(entity); };
+    lua["engine"]["getCameraPosition"] = [](sol::table self) {  return ((Handler*) hLua)->getGraphic()->getCamera()->getPosition().convert<lua_Number>(); };
+    lua["engine"]["renderText"] = [](sol::table self, const LuaVector2D& position, int width, int height, string text) {
         ((Handler*) hLua)->getGraphic()->renderText(
             static_cast<int>(position.x),
             static_cast<int>(position.y),
@@ -390,8 +382,8 @@ void LuaSystem::initEngine() {
             ((Handler*) hLua)->getGraphic()->getFont("res/FreeRoyalty.ttf", 20)
         );
     };
-    lua["engine"]["renderPolygon"] = [](sol::table self, LuaVector2D position, sol::table polygon) {
-        ((Handler*) hLua)->getGraphic()->renderPolygon(position.convert<int>(), Polygon(polygon.get<sol::table>("polygon")));
+    lua["engine"]["renderPolygon"] = [](sol::table self, const LuaVector2D& position, const Polygon& polygon) {
+        ((Handler*) hLua)->getGraphic()->renderPolygon(position.convert<int>(), polygon);
     };
     
     

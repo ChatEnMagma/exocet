@@ -28,7 +28,7 @@ void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
     //Vector2D<float> m_v1 = transform->vel;
     //Vector2D<float> e_v1 = e_physic->transform->vel;
 
-    Vector2D<float> m_v2, e_v2;
+    DoubleVector2D m_v2, e_v2;
     
     /*// Formular one-dimensional Newtonian
 
@@ -41,11 +41,11 @@ void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
                                 ve1.scalar((e_physic->getMasse() - getMasse()) / (getMasse() + e_physic->getMasse()));
     */
 
-    Vector2D<float> vCollide = e_physic->getVelocity() - getVelocity();
-    float distance = Vector2D<float>::twoVectorsMagnitude(getVelocity(), e_physic->getVelocity());
-    Vector2D<float> vCollideNorm = Vector2D<float>(vCollide.x / distance, vCollide.y / distance);
+    auto vCollide = e_physic->getVelocity() - getVelocity();
+    float distance = DoubleVector2D::twoVectorsMagnitude(getVelocity(), e_physic->getVelocity());
+    auto vCollideNorm = DoubleVector2D(vCollide.x / distance, vCollide.y / distance);
 
-    Vector2D<float> vRelativeVel = getVelocity() - e_physic->getVelocity();
+    auto vRelativeVel = getVelocity() - e_physic->getVelocity();
 
     float vSpeed = vRelativeVel.x * vCollideNorm.x + vRelativeVel.y * vCollideNorm.y;
     float impulse = 2 * vSpeed / (getMasse() + e_physic->getMasse());
@@ -95,7 +95,7 @@ void PhysicComponent::update() {
 void PhysicComponent::render() {
     // Render the hitbox
     if(handler->getGame()->isShowingHitbox()) {
-        Vector2D<float> norm = transform->vel.normalized();
+        auto norm = transform->vel.normalized();
         float vSpeed = transform->vel.x * norm.x + transform->vel.y * norm.y;
 
         handler->getGraphic()->setRenderColor(0xff, 0xff, 0xff);
