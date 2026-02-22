@@ -8,16 +8,16 @@ namespace exocet {
         private:
             int drag;
             HitboxComponent* hitbox;
-            TransformComponent* transform;
+            MovementComponent* movement;
         public:
             DragComponent() = default;
 
-            void init() override;
-            void update() override;
+            void init() noexcept override;
+            void update() noexcept override;
 
             /**
              * \return If the entity is dragging
              */
-            inline bool isDragging() const { return drag; }
+            inline bool isDragging() const noexcept { return drag; }
     };
 }

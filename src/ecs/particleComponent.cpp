@@ -3,19 +3,19 @@
 using namespace exocet;
 using namespace std;
 
-void ParticleComponent::init() {
-    if(!entity->hasComponent<TransformComponent>()) {
-        transform = &entity->addComponent<TransformComponent>();
+void ParticleComponent::init() noexcept {
+    if(!entity->hasComponent<MovementComponent>()) {
+        movement = &entity->addComponent<MovementComponent>();
     } else {
-        transform = &entity->getComponent<TransformComponent>();
+        movement = &entity->getComponent<MovementComponent>();
     }
 
     time = PARTICLE_DEFAULT_TIME;
 }
 
-void ParticleComponent::update() {
-    if(time < 0) entity->destroy();
+void ParticleComponent::update() noexcept {
+    if(time == 0) entity->destroy();
     time--;
 
-    transform->setPosition(transform->move());
+    movement->move();
 }

@@ -12,17 +12,17 @@ namespace exocet {
             /**
              * \param component The component settings from lua file
              */
-            ScriptComponent(sol::table component) {
+            ScriptComponent(sol::table component) noexcept {
                 initLua =   component.get<sol::function>("init");
                 updateLua = component.get<sol::function>("update");
                 renderLua = component.get<sol::function>("render");
             }
-            ScriptComponent(sol::function init, sol::function update, sol::function render) {
+            ScriptComponent(sol::function init, sol::function update, sol::function render) noexcept {
                 initLua =   init;
                 updateLua = update;
                 renderLua = render;
             }
-            ~ScriptComponent() = default;
+            ~ScriptComponent() noexcept = default;
 
             void init() override {   if(initLua != sol::nil)     initLua(); }
             void update() override { if(updateLua != sol::nil) { updateLua(); } }

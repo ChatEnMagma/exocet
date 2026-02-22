@@ -6,50 +6,19 @@
 using namespace std;
 using namespace exocet;
 
-void HitboxComponent::init() {
-    if(!entity->hasComponent<TransformComponent>()) {
-        transform = &entity->addComponent<TransformComponent>();
+void HitboxComponent::init() noexcept {
+    if(!entity->hasComponent<MovementComponent>()) {
+        movement = &entity->addComponent<MovementComponent>();
     } else {
-        transform = &entity->getComponent<TransformComponent>();
+        movement = &entity->getComponent<MovementComponent>();
     }
 
     polygons = Polygon(0, 0, HITBOX_DEFAULT_SIZE, HITBOX_DEFAULT_SIZE);
-    shape = RECTANGULAR_SHAPE;
 
     setColor(0xff, 0x00, 0x00);
 }
 
-int HitboxComponent::getRight() const {
-    double tmp = -MAXFLOAT;
-    for(Vertex p: polygons.getVertices()) {
-        tmp = std::max(tmp, p.x);
-    }
-    return tmp;
-}
-int HitboxComponent::getLeft() const {
-    double tmp = MAXFLOAT;
-    for(Vertex p: polygons.getVertices()) {
-        tmp = std::min(tmp, p.x);
-    }
-    return tmp;
-}
-int HitboxComponent::getTop() const {
-    double tmp = MAXFLOAT;
-    for(Vertex p: polygons.getVertices()) {
-        tmp = std::min(tmp, p.y);
-    }
-    return tmp;
-}
-int HitboxComponent::getBottom() const {
-    double tmp = -MAXFLOAT;
-    for(Vertex p: polygons.getVertices()) {
-        tmp = std::max(tmp, p.y);
-    }
-    return tmp;
-}
-
-
-void projection(const Polygon& poly, const Vector2D<double> axis, double* max, double* min) {
+void projection(const Polygon& poly, const Vector2D<double> axis, double* max, double* min) noexcept {
     *max = *min = poly[0].dot(axis);
 
     for(size_t i = 1; i < poly.size(); i++) {
@@ -59,17 +28,17 @@ void projection(const Polygon& poly, const Vector2D<double> axis, double* max, d
     }
 }
 
-bool overlaps(double max1, double max2, double min1, double min2) {
+bool overlaps(double max1, double max2, double min1, double min2) noexcept {
     return !(min1 > max2 || min2 > max1);
 }
 
-bool HitboxComponent::isCollide(HitboxComponent* hitbox) const {
+bool HitboxComponent::isCollide(HitboxComponent* hitbox) const noexcept {
     // Use the Separating Axis Theorem
 
     double max1, max2, min1, min2;
 
     // Get the transpos of the hitbox
-    Polygon p1 = polygons.translate(transform->getPosition().convert<double>());
+    Polygon p1 = polygons.translate(movement->getPosition().convert<double>());
     Polygon p2 = hitbox->getPolygon().translate(hitbox->getPosition().convert<double>());
 
     auto axes1 = p1.getAxes();
@@ -93,48 +62,49 @@ bool HitboxComponent::isCollide(HitboxComponent* hitbox) const {
     return true;
 }
 
-bool HitboxComponent::isCollideHorizontal(HitboxComponent* hitbox) const {
-    return (
-        ((((float) (hitbox->getLeft() - getRight()) / transform->vel.x) > 1.f) ||
-        (((float) (hitbox->getRight() - getLeft()) / transform->vel.x) > 1.f)) &&
-        ((((float) (hitbox->getTop() - getBottom()) / transform->vel.y) < 0.f) ||
-        (((float) (hitbox->getBottom() - getTop()) / transform->vel.y) < 0.f))
+bool HitboxComponent::isCollideHorizontal(HitboxComponent* hitbox) const noexcept {
+    return movement->vel.x != 0 && movement->vel.y != 0 && (
+        ((((float) (hitbox->getLeft() - getRight()) / movement->vel.x) > 1.f) ||
+        (((float) (hitbox->getRight() - getLeft()) / movement->vel.x) > 1.f)) &&
+        ((((float) (hitbox->getUp() - getDown()) / movement->vel.y) < 0.f) ||
+        (((float) (hitbox->getDown() - getUp()) / movement->vel.y) < 0.f))
     );
 }
 
-bool HitboxComponent::isCollideVertical(HitboxComponent* hitbox) const {
-    return (
-        (((float) ((hitbox->getTop() - getBottom()) / transform->vel.y) > 1.f) ||
-        (((float) (hitbox->getBottom() - getTop()) / transform->vel.y) > 1.f)) &&
-        (((float) ((hitbox->getLeft() - getRight()) / transform->vel.x) < 0.f) ||
-        (((float) (hitbox->getRight() - getLeft()) / transform->vel.x) < 0.f))
+bool HitboxComponent::isCollideVertical(HitboxComponent* hitbox) const noexcept {
+    return movement->vel.x != 0 && movement->vel.y != 0 && (
+        (((float) ((hitbox->getUp() - getDown()) / movement->vel.y) > 1.f) ||
+        (((float) (hitbox->getDown() - getUp()) / movement->vel.y) > 1.f)) &&
+        (((float) ((hitbox->getLeft() - getRight()) / movement->vel.x) < 0.f) ||
+        (((float) (hitbox->getRight() - getLeft()) / movement->vel.x) < 0.f))
     );
 }
 
-void HitboxComponent::render() {
-    if(!handler->isShowingHitbox()) return;
+void HitboxComponent::render() noexcept {
+    if(!isInsideScreen() || !handler->isShowingHitbox()) return;
 
     handler->getGraphic()->setRenderColor(color[0], color[1], color[2]);
-    handler->getGraphic()->renderPolygon(transform->getPosition(), polygons);
+    handler->getGraphic()->renderPolygon(movement->getPosition(), polygons);
 }
 
-bool HitboxComponent::isInsideMouse() const {
+bool HitboxComponent::isInsideMouse() const noexcept {
     Vector2D<int> pos = handler->getMousePosition() + handler->getGraphic()->getCamera()->getPosition();
     
     return (
         pos.x >= getLeft()  &&
         pos.x <= getRight() &&
-        pos.y >= getTop()   &&
-        pos.y <= getBottom()
+        pos.y >= getUp()   &&
+        pos.y <= getDown()
     );
 }
 
-bool HitboxComponent::isOutsideScreen() {
-    Vector2D<int> posCam = handler->getGraphic()->getCamera()->getPosition();
+bool HitboxComponent::isInsideScreen() const noexcept {
+    IntVector2D posCam = handler->getGraphic()->getCamera()->getPosition();
+
     return (
-        (getRight() < posCam.x) ||
-        (getLeft() > posCam.x + handler->getWinWidth()) ||
-        (getBottom() > posCam.y + handler->getWinHeight()) ||
-        (getTop() < posCam.y)
+        movement->pos.x > posCam.x - getWidth() && 
+        movement->pos.x + getWidth() < posCam.x + handler->getWinWidth() + getWidth() &&
+        movement->pos.y > posCam.y - getHeight() &&
+        movement->pos.y + getHeight() < posCam.y + handler->getWinHeight() + getHeight()
     );
 }

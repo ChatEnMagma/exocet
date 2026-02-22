@@ -27,7 +27,7 @@ namespace exocet {
             std::map<std::string, std::shared_ptr<Sprite>> sprites;
         public:
             Graphic(SDL_Renderer* renderer);
-            ~Graphic() {
+            ~Graphic() noexcept {
                 fonts.clear();
                 sprites.clear();
                 textures.clear();
@@ -35,7 +35,7 @@ namespace exocet {
                 SDL_DestroyRenderer(ren);
             }
 
-            void setHandler(Handler* handler) { this->handler = handler; }
+            void setHandler(Handler* handler) noexcept { this->handler = handler; }
 
             Font* getFont(const std::string& key, int fontSize) {
                 auto it = fonts.find(key);
@@ -73,7 +73,7 @@ namespace exocet {
                 return sprites[key].get();
             }
 
-            inline void setColor(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 0xFF) {
+            inline void setColor(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 0xFF) noexcept {
                 color.r = red;
                 color.g = green;
                 color.b = blue;
@@ -82,39 +82,39 @@ namespace exocet {
                 SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
             }
 
-            inline void renderAnchorRect(const IntVector2D& position, int width, int height) {
+            inline void renderAnchorRect(const IntVector2D& position, int width, int height) noexcept {
                 SDL_Rect rect = { position.x, position.y, width, height };
                 SDL_RenderDrawRect(ren, &rect);
             }
-            inline void renderAnchorFillRect(const IntVector2D& position, int width, int height) {
+            inline void renderAnchorFillRect(const IntVector2D& position, int width, int height) noexcept {
                 SDL_Rect rect = { position.x, position.y, width, height };
                 SDL_RenderFillRect(ren, &rect);
             }
 
-            inline void renderRect(const IntVector2D& position, int width, int height) { renderAnchorRect(position - camera.getPosition(), width, height); }
-            inline void renderFillRect(const IntVector2D& position, int width, int height) { renderAnchorFillRect(position - camera.getPosition(), width, height); }
+            inline void renderRect(const IntVector2D& position, int width, int height) noexcept { renderAnchorRect(position - camera.getPosition(), width, height); }
+            inline void renderFillRect(const IntVector2D& position, int width, int height) noexcept { renderAnchorFillRect(position - camera.getPosition(), width, height); }
 
             void renderText(int x, int y, int w, int h, std::string text, Font* font);
 
-            inline void setRenderColor(Uint8 red, Uint8 blue, Uint8 green, Uint8 alpha = 0xff) { SDL_SetRenderDrawColor(ren, red, blue, green, alpha); }
-            inline void renderClear() { SDL_RenderClear(ren); }
-            inline void renderPresent() { SDL_RenderPresent(ren); }
+            inline void setRenderColor(Uint8 red, Uint8 blue, Uint8 green, Uint8 alpha = 0xff) noexcept { SDL_SetRenderDrawColor(ren, red, blue, green, alpha); }
+            inline void renderClear() noexcept { SDL_RenderClear(ren); }
+            inline void renderPresent() noexcept { SDL_RenderPresent(ren); }
 
-            inline void renderAnchorLine(const IntVector2D& pos1, const IntVector2D& pos2) { SDL_RenderDrawLine(ren, pos1.x, pos1.y, pos2.x, pos2.y); }
-            inline void renderLine(const IntVector2D& pos1, const IntVector2D& pos2) { renderAnchorLine(pos1 - camera.getPosition(), pos2 - camera.getPosition()); }
+            inline void renderAnchorLine(const IntVector2D& pos1, const IntVector2D& pos2) noexcept { SDL_RenderDrawLine(ren, pos1.x, pos1.y, pos2.x, pos2.y); }
+            inline void renderLine(const IntVector2D& pos1, const IntVector2D& pos2) noexcept { renderAnchorLine(pos1 - camera.getPosition(), pos2 - camera.getPosition()); }
 
-            void renderAnchorPolygon(const IntVector2D& position, const Polygon& polygon) {
+            void renderAnchorPolygon(const IntVector2D& position, const Polygon& polygon) noexcept {
                 for(std::size_t i = 0; i < polygon.size(); i++) {
                     int nxt = (i + 1) % polygon.size();
                     renderAnchorLine(position + polygon[i].convert<int>(), position + polygon[nxt].convert<int>());
                 }
             }
-            inline void renderPolygon(const IntVector2D& position, const Polygon& polygon) { renderAnchorPolygon(position - camera.getPosition(), polygon); }
+            inline void renderPolygon(const IntVector2D& position, const Polygon& polygon) noexcept { renderAnchorPolygon(position - camera.getPosition(), polygon); }
 
-            inline SDL_Renderer* getRenderer() { return ren; }
-            inline void setRenderer(SDL_Renderer* renderer) { ren = renderer; }
+            inline SDL_Renderer* getRenderer() noexcept { return ren; }
+            inline void setRenderer(SDL_Renderer* renderer) noexcept { ren = renderer; }
 
-            inline Camera* getCamera() { return &camera; }
-            inline void centerOnEntity(Entity* entity) { camera.centerOnEntity(entity); }
+            inline Camera* getCamera() noexcept { return &camera; }
+            inline void centerOnEntity(Entity* entity) noexcept { camera.centerOnEntity(entity); }
     };
 }

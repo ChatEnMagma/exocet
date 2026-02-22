@@ -5,18 +5,18 @@
 using namespace std;
 using namespace exocet;
 
-void PhysicComponent::init() {
+void PhysicComponent::init() noexcept {
     if(!entity->hasComponent<HitboxComponent>()) {
         hitbox = &entity->addComponent<HitboxComponent>();
     } else {
         hitbox = &entity->getComponent<HitboxComponent>();
     }
 
-    transform = &entity->getComponent<TransformComponent>();
+    movement = &entity->getComponent<MovementComponent>();
 
-    setSpeed(PHYSIC_DEFAULT_SPEED);
-    setMaxSpeed(PHYSIC_DEFAULT_MAXSPEED);
-    setFriction(PHYSIC_DEFAULT_FRICTION);
+    setSpeed(DoubleVector2D(PHYSIC_DEFAULT_SPEED, PHYSIC_DEFAULT_SPEED));
+    setMaxSpeed(DoubleVector2D(PHYSIC_DEFAULT_SPEED, PHYSIC_DEFAULT_SPEED));
+    setFriction(DoubleVector2D(0.4f, 0.4f));
 
     setMasse(PHYSIC_DEFALULT_MASSE);
 
@@ -25,8 +25,8 @@ void PhysicComponent::init() {
 
 void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
     PhysicComponent* e_physic = &e->getComponent<PhysicComponent>();
-    //Vector2D<float> m_v1 = transform->vel;
-    //Vector2D<float> e_v1 = e_physic->transform->vel;
+    //Vector2D<float> m_v1 = movement->vel;
+    //Vector2D<float> e_v1 = e_physic->movement->vel;
 
     DoubleVector2D m_v2, e_v2;
     
@@ -50,29 +50,8 @@ void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
     float vSpeed = vRelativeVel.x * vCollideNorm.x + vRelativeVel.y * vCollideNorm.y;
     float impulse = 2 * vSpeed / (getMasse() + e_physic->getMasse());
 
-    if(speed <= 0) return;
-
-    transform->vel -= vCollideNorm.scalar(impulse * e_physic->getMasse());
-    e_physic->transform->vel += vCollideNorm.scalar(impulse * getMasse());
-}
-
-void PhysicComponent::move() {
-    // set the limite of velocity of abscie
-    if(getVelocity().x > maxSpeed) {
-        transform->vel.x = maxSpeed;
-    } else if(getVelocity().x < -maxSpeed) {
-        transform->vel.x = -maxSpeed;
-    }
-
-    // set the limite of velocity of ordonée
-    if(getVelocity().y > maxSpeed) {
-        transform->vel.y = maxSpeed;
-    } else if(getVelocity().y < -maxSpeed) {
-        transform->vel.y = -maxSpeed;
-    }
-
-    setPosition(transform->move());
-    setVelocity(getVelocity().scalar(friction));
+    movement->vel -= vCollideNorm.scalar(impulse * e_physic->getMasse());
+    e_physic->movement->vel += vCollideNorm.scalar(impulse * getMasse());
 }
 
 vector<Entity*> PhysicComponent::getCollideEntities() {
@@ -88,20 +67,19 @@ vector<Entity*> PhysicComponent::getCollideEntities() {
     return entities;
 }
 
-void PhysicComponent::update() {
-    move();
+void PhysicComponent::update() noexcept {
+    movement->move();
 }
 
-void PhysicComponent::render() {
+void PhysicComponent::render() noexcept {
+    if(!hitbox->isInsideScreen()) return;
+
     // Render the hitbox
     if(handler->getGame()->isShowingHitbox()) {
-        auto norm = transform->vel.normalized();
-        float vSpeed = transform->vel.x * norm.x + transform->vel.y * norm.y;
-
         handler->getGraphic()->setRenderColor(0xff, 0xff, 0xff);
         handler->getGraphic()->renderLine(
-            hitbox->getCenter(), 
-            hitbox->getCenter() + norm.scalar(vSpeed * hitbox->getWidth() / 4).convert<int>() );
+            hitbox->getCenter().convert<int>(), 
+            (hitbox->getCenter() + movement->computeMove() * movement->getSpeed()).convert<int>());
     }
     // Render the pointer address
     if(handler->getGame()->isShowingPointerEntities()) {
@@ -110,7 +88,7 @@ void PhysicComponent::render() {
 
         handler->getGraphic()->renderText(
             hitbox->getCenter().x - hitbox->getWidth() - handler->getGraphic()->getCamera()->getPosition().x,
-            transform->getPosition().y - 32 - handler->getGraphic()->getCamera()->getPosition().y,
+            movement->getPosition().y - 32 - handler->getGraphic()->getCamera()->getPosition().y,
             hitbox->getWidth() * 2,
             32,
             text.str(),

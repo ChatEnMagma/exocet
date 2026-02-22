@@ -14,7 +14,7 @@ namespace exocet {
 
             Handler* handler;
         public:
-            Background(Handler* handler, bool loop = false) {
+            Background(Handler* handler, bool loop = false) noexcept {
                 this->handler = handler;
 
                 this->loop = loop;
@@ -22,23 +22,21 @@ namespace exocet {
                 w = 0;
                 h = 0;
             }
-            ~Background() {
-                refresh();
-            }
+            ~Background() noexcept { refresh(); }
 
-            void update();
-            void render();
+            void update() noexcept;
+            void render() noexcept;
 
             void refresh();
-            inline void setSize(const int width, const int height) { w = width; h = height; }
+            inline void setSize(const int width, const int height) noexcept { w = width; h = height; }
 
             inline void append(Sprite* sprite, const int zindex = 0) { 
                 sprites.insert(sprites.begin() + zindex, sprite);
             }
-            inline Vector2D<int> getPosition() const { return position; }
-            inline void setPosition(const Vector2D<int> position) { this->position = position; }
-            inline int getWidth() const { return w; }
-            inline int getHeight() const { return h; }
-            inline void setLoop(bool loop) { this->loop = loop; }
+            inline Vector2D<int> getPosition() const noexcept { return position; }
+            inline void setPosition(const IntVector2D position) noexcept { this->position = position; }
+            inline int getWidth() const noexcept { return w; }
+            inline int getHeight() const noexcept { return h; }
+            inline void setLoop(bool loop) noexcept { this->loop = loop; }
     };
 }

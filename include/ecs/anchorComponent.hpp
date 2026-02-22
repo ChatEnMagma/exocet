@@ -9,11 +9,11 @@ namespace exocet {
         public:
             AnchorComponent() = default;
 
-            void init() override;
+            void init() noexcept override;
 
-            IntVector2D getPosition() const { return physic->getPosition(); }
-            HitboxComponent* getHitbox() { return physic->getHitbox(); }
+            IntVector2D getPosition() const noexcept { return physic->getPosition(); }
+            HitboxComponent* getHitbox() noexcept { return physic->getHitbox(); }
 
-            void setPosition(const IntVector2D& position) { return physic->setPosition(position); }
+            void setPosition(const IntVector2D& position) noexcept { return physic->setPosition(position); }
     };
 }

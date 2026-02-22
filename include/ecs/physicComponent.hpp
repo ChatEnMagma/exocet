@@ -1,23 +1,17 @@
 #pragma once
 
 #include <climits>
+#include "ecs/movementComponent.hpp"
 #include "ecs/hitboxComponent.hpp"
 
 namespace exocet {
     class PhysicComponent: public Component {
         private:
-            TransformComponent* transform;
+            MovementComponent* movement;
             HitboxComponent* hitbox;
 
-            double speed, maxSpeed;
-            double friction;
             double masse;
-
-            /**
-             * \brief Calculates all movement of the physic component
-             */
-            void move();
-
+            
             /**
              * \brief Interact the collision with other entityPhysic
              * \param e the entity in collide
@@ -26,10 +20,10 @@ namespace exocet {
         public:
             ~PhysicComponent() = default;
 
-            void init() override;
+            void init() noexcept override;
 
-            void update() override;
-            void render() override;
+            void update() noexcept override;
+            void render() noexcept override;
 
             // ALL GETTERS
             /**
@@ -38,34 +32,30 @@ namespace exocet {
             std::vector<Entity*> getCollideEntities();
 
             // Getters from PhysicComponent
-            inline double getMasse() const { return masse; }
-            inline double getSpeed() const { return speed; }
-            inline double getMaxSpeed() const { return maxSpeed; }
-            inline double getFriction() const { return friction; }
+            inline double getMasse() const noexcept { return masse; }
+            inline DoubleVector2D getSpeed() const noexcept { return movement->getSpeed(); }
+            inline DoubleVector2D getMaxSpeed() const noexcept { return movement->getMaxSpeed(); }
+            inline DoubleVector2D getFriction() const noexcept { return movement->getFriction(); }
 
-            // Getters from TransformComponent
-            inline TransformComponent* getTransform() { return transform; }
-            inline IntVector2D getPosition() const { return transform->getPosition(); }
-            inline int getPositionX() const { return transform->pos.x; }
-            inline int getPositionY() const { return transform->pos.y; }
-            inline DoubleVector2D getVelocity() const { return transform->getVelocity(); }
+            // Getters from movementComponent
+            inline MovementComponent* getmovement() noexcept { return movement; }
+            inline IntVector2D getPosition() const noexcept { return movement->getPosition(); }
+            inline DoubleVector2D getVelocity() const noexcept { return movement->getVelocity(); }
 
-            inline HitboxComponent* getHitbox() { return hitbox; }
+            inline HitboxComponent* getHitbox() noexcept { return hitbox; }
 
             // ALL SETTERS
             // Setters from PhysicComponent
-            inline void setMasse(double masse) { this->masse = masse; }
-            inline void setSpeed(double speed) { this->speed = speed; }
-            inline void setMaxSpeed(double maxSpeed) { this->maxSpeed = maxSpeed; }
-            inline void setFriction(double friction) { this->friction = friction; }
+            inline void setMasse(double masse) noexcept { this->masse = masse; }
+            inline void setSpeed(const DoubleVector2D& speed) noexcept { movement->setSpeed(speed); }
+            inline void setMaxSpeed(const DoubleVector2D& maxSpeed) noexcept { movement->setMaxSpeed(maxSpeed); }
+            inline void setFriction(const DoubleVector2D& friction) { movement->setFriction(friction); }
 
-            // Setters from TransformComponent
-            inline void setPosition(const IntVector2D& position) { transform->setPosition(position); }
-            inline void setPointsPosition(int xpos, int ypos) { transform->setPointsPosition(xpos, ypos); }
-            inline void setVelocity(const DoubleVector2D& velocity) { transform->setVelocity(velocity); }
-            inline void setPointsVelocity(double xvel, double yvel) { transform->setPointsVelocity(xvel, yvel); }
+            // Setters from movementComponent
+            inline void setPosition(const IntVector2D& position) noexcept { movement->setPosition(position); }
+            inline void setVelocity(const DoubleVector2D& velocity) noexcept { movement->setVelocity(velocity); }
 
-            inline friend std::ostream& operator<<(std::ostream& os, const PhysicComponent* component) {
+            inline friend std::ostream& operator<<(std::ostream& os, const PhysicComponent* component) noexcept {
                 return os << "PhysicC: {vel: " << component->getVelocity();
             }
     };

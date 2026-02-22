@@ -4,16 +4,16 @@
 using namespace exocet;
 using namespace std;
 
-void DragComponent::init() {
+void DragComponent::init() noexcept {
     if(!entity->hasComponent<HitboxComponent>()) {
         hitbox = &entity->addComponent<HitboxComponent>();
     } else {
         hitbox = &entity->getComponent<HitboxComponent>();
     }
-    transform = &entity->getComponent<TransformComponent>();
+    movement = &entity->getComponent<MovementComponent>();
     drag = false;
 }
 
-void DragComponent::update() {
+void DragComponent::update() noexcept {
     drag = handler->getButton(0) && hitbox->isInsideMouse();
 }

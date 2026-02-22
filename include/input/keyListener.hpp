@@ -16,7 +16,7 @@ namespace exocet {
             bool justPressing;
             bool cantPressing;
         public:
-            KeyListener() { 
+            KeyListener() noexcept { 
                 memset(keys, false, SDL_NUM_SCANCODES * sizeof(bool)); 
                 memset(justPress, false, SDL_NUM_SCANCODES * sizeof(bool)); 
                 memset(cantPress, false, SDL_NUM_SCANCODES * sizeof(bool));
@@ -25,6 +25,7 @@ namespace exocet {
                 cantPressing = false;
                 justPressing = false;
             }
+            ~KeyListener() noexcept = default;
             
             void update() {
                 for(size_t i = 0; i < SDL_NUM_SCANCODES; i++) {
@@ -50,12 +51,12 @@ namespace exocet {
             /**
              * \brief Set the key interact if it is pressing
              */
-            inline void interactKey(Uint16 scancode, bool isPressing) { pressing = isPressing; this->scancode = scancode; keys[scancode] = isPressing; }
+            inline void interactKey(Uint16 scancode, bool isPressing) noexcept { pressing = isPressing; this->scancode = scancode; keys[scancode] = isPressing; }
 
-            inline bool getKey(Uint16 scancode) const { return keys[scancode]; }
-            inline bool getJustKey(Uint16 scancode) const { return justPress[scancode]; }
-            inline Uint16 getKeyCode() const { return (pressing)? scancode: 0; }
-            inline bool isPressing() const { return pressing; }
-            inline bool isJustPressing() const { return justPressing; }
+            inline bool getKey(Uint16 scancode) const noexcept { return keys[scancode]; }
+            inline bool getJustKey(Uint16 scancode) const noexcept { return justPress[scancode]; }
+            inline Uint16 getKeyCode() const noexcept { return (pressing)? scancode: 0; }
+            inline bool isPressing() const noexcept { return pressing; }
+            inline bool isJustPressing() const noexcept { return justPressing; }
     };
 }

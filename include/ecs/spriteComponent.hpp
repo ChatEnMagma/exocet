@@ -1,37 +1,38 @@
 #pragma once
 
 #include "gfx/sprite.hpp"
-#include "ecs/transformComponent.hpp"
+#include "ecs/hitboxComponent.hpp"
 
 namespace exocet {
     class SpriteComponent: public Component {
         private:
             Sprite* sprite;
             std::size_t frame;
-            Uint32 fps;
-            Uint32 frameStart, frameTime;
+            Uint64 fps;
+            Uint64 frameStart, frameTime;
 
-            TransformComponent* transform;
+            MovementComponent* movement;
+            HitboxComponent* hitbox;
             
             double a;
             int w, h;
         public:
-            void init() override;
-            void update() override;
-            void render() override;
+            void init() noexcept override;
+            void update() noexcept override;
+            void render() noexcept override;
 
-            void fitSizeWithHitbox();
+            inline void fitSizeWithHitbox() noexcept { setSize(hitbox->getWidth(), hitbox->getHeight()); }
 
-            inline std::size_t getCurrentFrame() const { return frame; }
-            inline Uint32 getFPS() const { return fps; }
+            inline std::size_t getCurrentFrame() const noexcept { return frame; }
+            inline Uint64 getFPS() const noexcept { return fps; }
 
-            inline double getAngle() const { return a; }
-            inline int getWidth() const { return w; }
-            inline int getHeight() const { return h; }
+            inline double getAngle() const noexcept { return a; }
+            inline int getWidth() const noexcept { return w; }
+            inline int getHeight() const noexcept { return h; }
             
-            inline void setAngle(const double angle) { a = angle; }
-            inline void setSize(int width, int height) { w = width; h = height; }
-            inline void setFPS(const Uint32 fps) { this->fps = fps; }
-            inline void setSprite(Sprite* sprite) { this->sprite = sprite; }
+            inline void setAngle(const double angle) noexcept { a = angle; }
+            inline void setSize(int width, int height) noexcept { w = width; h = height; }
+            inline void setFPS(const Uint64 fps) noexcept { this->fps = fps; }
+            inline void setSprite(Sprite* sprite) noexcept { this->sprite = sprite; }
     };
 }

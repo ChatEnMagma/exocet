@@ -16,6 +16,9 @@ Sprite::Sprite(Handler* handler, const string& path) {
 }
 
 Sprite::Sprite(Handler* handler, const string& path, int nCol, int nRow, int w, int h, size_t nFrames) {
+    if(nCol <= 0 || nRow <= 0 || w <= 0 || h <= 0 || nFrames == 0)
+        throw invalid_argument("Bad format source sprite");
+
     this->texture = handler->getGraphic()->getTexture(path);
 
     this->nCol = nCol;

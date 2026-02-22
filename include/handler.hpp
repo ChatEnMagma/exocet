@@ -17,68 +17,68 @@ namespace exocet {
             }
             ~Handler() = default;
 
-            inline Subsystem* getSubsystem() { return subsys; }
+            inline Subsystem* getSubsystem() noexcept { return subsys; }
             /**
              * \brief Close the game, will exit the excucatable
              */
-            inline void closeGame() { subsys->close(); }
+            inline void closeGame() noexcept { subsys->close(); }
             /** 
              * \return Get the width of the game window
             */
-            inline int getWinWidth() const { return subsys->getWinWidth(); }
+            inline int getWinWidth() const noexcept { return subsys->getWinWidth(); }
             /** 
              * \return Get the height of the game window
             */
-            inline int getWinHeight() const { return subsys->getWinHeight(); }
+            inline int getWinHeight() const noexcept { return subsys->getWinHeight(); }
             /** 
              * \brief Return if the key is pressing
              * \param scancode the scancode of the key with SDLK
              * \return get true if the key is pressing else false
             */
-            inline bool getKey(Uint16 scancode) { return subsys->getKeyListener()->getKey(scancode); }
+            inline bool getKey(Uint16 scancode) noexcept { return subsys->getKeyListener()->getKey(scancode); }
             /** 
              * \brief Return if the key is just pressing
              * \param scancode the scancode of the key with SDLK
              * \return get true if the key is just pressing else false
             */
-            inline bool getJustKey(Uint16 scancode) { return subsys->getKeyListener()->getJustKey(scancode); }
+            inline bool getJustKey(Uint16 scancode) noexcept { return subsys->getKeyListener()->getJustKey(scancode); }
             /**
              * \brief Tell is any key is pressing
              */
-            inline bool getAnyKey() const { return subsys->getKeyListener()->isPressing(); }
-            inline bool getJustAnyKey() const { return subsys->getKeyListener()->isJustPressing(); }
+            inline bool getAnyKey() const noexcept { return subsys->getKeyListener()->isPressing(); }
+            inline bool getJustAnyKey() const noexcept { return subsys->getKeyListener()->isJustPressing(); }
             /** 
              * \brief Return if the button is pressing
              * \param scancode the scancode of the key with SDL
              * \return get true if the button is pressing else false
             */
-            inline bool getButton(Uint16 scancode) { return subsys->getMouseListener()->getButton(scancode); }
+            inline bool getButton(Uint16 scancode) noexcept { return subsys->getMouseListener()->getButton(scancode); }
             /** 
              * \brief Return if the button is just pressing
              * \param scancode the scancode of the key with SDL
              * \return get true if the button is just pressing else false
             */
-            inline bool getJustButton(Uint16 scancode) { return subsys->getMouseListener()->getJustButton(scancode); }
+            inline bool getJustButton(Uint16 scancode) noexcept { return subsys->getMouseListener()->getJustButton(scancode); }
             /**
              * \return the position of the mouse in the game frame
              */
-            inline Vector2D<int> getMousePosition() const { return subsys->getMouseListener()->getPosition(); }
+            inline IntVector2D getMousePosition() const noexcept { return subsys->getMouseListener()->getPosition(); }
             /**
              * \return Graphics class with all functions graphics
              */
-            inline Graphic* getGraphic() { return subsys->getGraphic(); }
+            inline Graphic* getGraphic() noexcept { return subsys->getGraphic(); }
 
-            inline Game* getGame() { return game; }
+            inline Game* getGame() noexcept { return game; }
             /**
              * \return True if game show the all hitbox of entities
              */
-            inline bool isShowingHitbox() const { return game->isShowingHitbox(); }
-            inline State* getState() { return game->getState(); }
+            inline bool isShowingHitbox() const noexcept { return game->isShowingHitbox(); }
+            inline State* getState() noexcept { return game->getState(); }
             /** 
              * \return Get the lua with all libs and functions
              */
-            inline sol::state* getLua() { return game->getLua(); }
-            inline EntityManager* getEntityManager() { return game->getEntityManager(); }
+            inline sol::state* getLua() noexcept { return game->getLua(); }
+            inline EntityManager* getEntityManager() noexcept { return game->getEntityManager(); }
             /**
              * \brief Set the current state
              * \param state the state become current

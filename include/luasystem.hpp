@@ -24,7 +24,7 @@ namespace exocet {
         private:
             Handler* handler;
 
-            void initRectClass();
+            void initRectClass() noexcept;
 
             void initUsertypeLuaVector2D();
             void initUsertypePolygon();
@@ -35,12 +35,12 @@ namespace exocet {
             void initUsertypeEntity();
             void initUsertypeComponents();
 
-            void initEngine();
+            void initEngine() noexcept;
 
             void preloadPackages(const std::string pathPackage, const std::string name);
         public:
             LuaSystem(Handler* handler);
-            ~LuaSystem() {
+            ~LuaSystem() noexcept {
                 this->collect_garbage();
 
                 this->clear_package_loaders();

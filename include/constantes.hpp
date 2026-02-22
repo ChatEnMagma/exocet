@@ -26,6 +26,5 @@ namespace exocet { class Handler; }
 #define PHYSIC_DEFALULT_MASSE 10.f
 #define PHYSIC_DEFAULT_SPEED 1.f
 #define PHYSIC_DEFAULT_MAXSPEED 10.f
-#define PHYSIC_DEFAULT_FRICTION 0.8f
 
 #define PARTICLE_DEFAULT_TIME 1000

@@ -49,7 +49,7 @@ void Game::update() {
     
     sManager->update();
 
-    handler->getSubsystem()->setTitle("Exocet state: " + to_string(sManager->getCurrentState()) + " | e: " + to_string(sManager->getEntityManager()->getNumberEntities()));
+    handler->getSubsystem()->setTitle("Exocet state: " + to_string(sManager->getCurrentState()) + " | e: " + to_string(sManager->getEntityManager()->size()));
 }
 
 void Game::render() {

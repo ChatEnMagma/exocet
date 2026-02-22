@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ecs/transformComponent.hpp"
 #include "ecs/hitboxComponent.hpp"
+#include "ecs/movementComponent.hpp"
 #include "ecs/physicComponent.hpp"
 #include "ecs/dragComponent.hpp"
 #include "ecs/particleComponent.hpp"

@@ -6,20 +6,20 @@
 namespace exocet {
     class UIComponent: public Component {
         private:
-            Vector2D<int> position;
+            IntVector2D position;
             int w, h;
         public:
-            void init() override {
+            void init() noexcept override {
                 setSize(0, 0);
             }
 
-            inline Vector2D<int> getPosition() const { return position; }
-            inline int getWidth() const { return w; }
-            inline int getHeight() const { return h; }
+            inline Vector2D<int> getPosition() const noexcept { return position; }
+            inline int getWidth() const noexcept { return w; }
+            inline int getHeight() const noexcept { return h; }
 
-            inline void setSize(int width, int height) { w = width; h = height; }
-            inline void setPosition(const Vector2D<int> position) { this->position = position; }
-            inline void setPointsPosition(int xpos, int ypos) { position.x = xpos; position.y = ypos; }
-            inline void setRect(int xpos, int ypos, int width, int height) { setPointsPosition(xpos, ypos); setSize(width, height); }
+            inline void setSize(int width, int height) noexcept { w = width; h = height; }
+            inline void setPosition(const IntVector2D& position) noexcept { this->position = position; }
+            inline void setPointsPosition(int xpos, int ypos) noexcept { position.x = xpos; position.y = ypos; }
+            inline void setRect(int xpos, int ypos, int width, int height) noexcept { setPointsPosition(xpos, ypos); setSize(width, height); }
     };
 }

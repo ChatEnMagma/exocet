@@ -47,10 +47,7 @@ void Subsystem::init(int w, int h, string title) {
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN
     );
 
-    if(win == NULL) {
-        cerr << "Fail to initiate the window: " << SDL_GetError() << endl;
-        throw bad_alloc();
-    }
+    if(win == NULL) throw runtime_error("Fail to initiate the window: " + string(SDL_GetError()));
 
     SDL_SetWindowMinimumSize(win, WIN_MIN_WIDTH, WIN_MIN_HEIGHT);
 
@@ -61,17 +58,12 @@ void Subsystem::init(int w, int h, string title) {
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
     ));
 
-    if(gfx->getRenderer() == NULL) {
-        cerr << "Fail to initiate the renderer: " << SDL_GetError() << endl;
-        throw bad_alloc();
-    }
+    if(gfx->getRenderer() == NULL) throw runtime_error("Fail to initiate the renderer: " + string(SDL_GetError()));
 
-    icon = IMG_Load("res/icon.ico");
-    if(icon == NULL) {
-        cerr << "Failed to load icon: " << IMG_GetError() << endl;
-    } else {
-        SDL_SetWindowIcon(win, icon);
-    }
+    if((icon = IMG_Load("res/icon.ico")) == NULL)
+        throw runtime_error("Failed to load icon: " + string(IMG_GetError()));
+    
+    SDL_SetWindowIcon(win, icon);
 
     running = true;
 
@@ -111,7 +103,7 @@ void Subsystem::handleEvents() noexcept {
     mouse.update();
 }
 
-void Subsystem::clean() {
+void Subsystem::clean() noexcept {
     gfx.reset();
     SDL_FreeSurface(icon);
 

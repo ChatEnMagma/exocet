@@ -6,22 +6,25 @@
 
 namespace exocet {
     using Vertex = DoubleVector2D;
+    using Vertices = std::vector<Vertex>;
 
     class Polygon {
         private:
             std::vector<Vertex> vertices;
+            Vertex pos;
             int width, height;
         public:
-            Polygon() {
-                vertices = std::vector<Vertex>();
+            Polygon() noexcept {
+                vertices = Vertices();
 
                 this->width = 0;
                 this->height = 0;
+                this->pos = Vertex(0, 0);
             }
             /**
              * \brief Make a rectangular shape
              */
-            Polygon(int xpos, int ypos, int width, int height) {
+            Polygon(int xpos, int ypos, int width, int height) noexcept {
                 vertices = {
                     Vertex(xpos, ypos),
                     Vertex(xpos + width, ypos),
@@ -31,11 +34,12 @@ namespace exocet {
 
                 this->width = width;
                 this->height = height;
+                this->pos = Vertex(xpos, ypos);
             }
             /**
              * \brief Make a new polygon
              */
-            Polygon(std::vector<Vertex> vertices) {
+            Polygon(Vertices vertices) noexcept {
                 this->vertices.assign(vertices.begin(), vertices.end());
 
                 this->width = 0;
@@ -44,6 +48,9 @@ namespace exocet {
                 for(Vertex v: this->vertices) {
                     this->width = std::max<int>(this->width, v.x);
                     this->height = std::max<int>(this->height, v.y);
+
+                    this->pos.x = std::min<double>(this->pos.x, v.x);
+                    this->pos.y = std::min<double>(this->pos.y, v.y);
                 }
             }
             /**
@@ -54,36 +61,52 @@ namespace exocet {
 
                 this->width = 0;
                 this->height = 0;
+                this->pos = Vertex(0, 0);
 
                 for(Vertex v: this->vertices) {
                     this->width = std::max<int>(this->width, v.x);
                     this->height = std::max<int>(this->height, v.y);
+
+                    this->pos.x = std::min<double>(this->pos.x, v.x);
+                    this->pos.y = std::min<double>(this->pos.y, v.y);
                 }
             }
+            ~Polygon() noexcept = default;
 
-            inline int getWidth() const { return this->width; }
-            inline int getHeight() const { return this->height; }
+            inline Vertex getPosition() const noexcept { return this->pos; }
+            inline int getWidth() const noexcept { return this->width; }
+            inline int getHeight() const noexcept { return this->height; }
+
+            inline double getUp() const noexcept { return this->pos.y; }
+            inline double getDown() const noexcept { return this->pos.y + this->height; }
+            inline double getLeft() const noexcept { return this->pos.x; }
+            inline double getRight() const noexcept { return this->pos.x + this->width; }
+
+            inline Vertex getCenter() const noexcept { return Vertex(pos.x + width / 2, pos.y + height / 2); }
 
             /**
              * \return Get a specific vertex
              */
-            inline Vertex getVertex(std::size_t i) const { return vertices[i]; }
+            Vertex getVertex(std::size_t i) const {
+                if(i > size()) throw std::runtime_error("overflow");
+                return vertices.at(i);
+            }
             /**
              * \return Get all vertices
              */
-            inline std::vector<Vertex> getVertices() const { return vertices; }
+            inline std::vector<Vertex> getVertices() const noexcept { return vertices; }
             /**
              * \return The number of vertices
              */
-            inline std::size_t size() const { return vertices.size(); }
-            Vertex getEdge(std::size_t i) const {
+            inline std::size_t size() const noexcept { return vertices.size(); }
+            Vertex getEdge(std::size_t i) const noexcept {
                 return vertices[i] - vertices[(i + 1) % size()];
             }
-            Vertex getEdgeNormal(std::size_t i) const {
+            Vertex getEdgeNormal(std::size_t i) const  noexcept {
                 Vertex edge = getEdge(i);
                 return Vector2D<double>(edge.y, -edge.x).normalized();
             }
-            std::vector<Vertex> getAxes() const {
+            std::vector<Vertex> getAxes() const noexcept {
                 std::vector<Vertex> axis;
 
                 for(std::size_t i = 0; i < size(); i++) {
@@ -97,7 +120,7 @@ namespace exocet {
              * \brief Transpose the polygon
              * \return The polygon transposed
              */
-            Polygon translate(Vertex position) const {
+            Polygon translate(Vertex position) const noexcept {
                 std::vector<Vertex> vrt = std::vector<Vertex>(size());
 
                 for(std::size_t i = 0; i < size(); i++) {
@@ -110,7 +133,7 @@ namespace exocet {
              * \brief Rotate the polygon
              * \return The polygon rotated
              */
-            Polygon rotate(double angle) const {
+            Polygon rotate(double angle) const noexcept {
                 Polygon poly(vertices);
 
                 int x, y;
@@ -126,12 +149,12 @@ namespace exocet {
                 return poly;
             }
 
-            std::vector<Vertex>::iterator begin() { return vertices.begin(); }
-            std::vector<Vertex>::iterator end() { return vertices.end(); }
+            std::vector<Vertex>::iterator begin() noexcept { return vertices.begin(); }
+            std::vector<Vertex>::iterator end() noexcept { return vertices.end(); }
 
             inline Vertex operator[](std::size_t i) const { return getVertex(i); }
 
-            inline friend std::ostream& operator<<(std::ostream& os, const Polygon& poly) {
+            inline friend std::ostream& operator<<(std::ostream& os, const Polygon& poly) noexcept {
                 os << "[";
                 for(std::size_t i = 0; i < poly.size(); i++) {
                     os << poly[i];

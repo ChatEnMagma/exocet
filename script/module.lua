@@ -1,6 +1,6 @@
 module = {
     "config",
-
+    "sdl",
     -- All particles
 
     -- All entities

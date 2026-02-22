@@ -5,7 +5,7 @@
 using namespace std;
 using namespace exocet;
 
-StateManager::StateManager(Handler* handler) {
+StateManager::StateManager(Handler* handler) noexcept {
     this->handler = handler;
 
     eManager = make_unique<EntityManager>(handler);
@@ -17,20 +17,15 @@ void StateManager::initStates() {
     sol::state_view lua(handler->getLua()->lua_state());
 
     // Check if the config file from lua have states field
-    if(lua["config"]["states"] == sol::nil) {
-        cerr << "You must have `states` field in the config..." << endl;
-        handler->closeGame();
-    }
+    if(lua["config"]["states"] == sol::nil)
+        throw invalid_argument("You must have `states` field in the config...");
 
     // For each all states
     lua["config"]["states"].get<sol::table>().for_each([&](sol::object, sol::object const& value) {
         // Make a new state with the tag from config
         sol::optional<sol::error> maybeErr = lua.safe_script_file(DIR_SCRIPT_STATES + value.as<string>() + ".lua");
 
-        if(maybeErr) {
-            cerr << maybeErr->what() << endl;
-            handler->closeGame();
-        }
+        if(maybeErr) throw runtime_error(maybeErr->what());
 
         auto state = make_unique<State>(
             handler,

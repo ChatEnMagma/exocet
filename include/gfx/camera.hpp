@@ -17,9 +17,9 @@ namespace exocet {
             /**
              * \return the position of offset camera
              */
-            inline Vector2D<int> getPosition() { return pos; }
-            inline void setPosition(const Vector2D<int> position) { pos = position; }
+            inline IntVector2D getPosition() const noexcept { return pos; }
+            inline void setPosition(const IntVector2D position) noexcept { pos = position; }
 
-            inline void setHandler(Handler* handler) { this->handler = handler; }
+            inline void setHandler(Handler* handler) noexcept { this->handler = handler; }
     };
 }

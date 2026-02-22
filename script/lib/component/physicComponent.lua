@@ -15,8 +15,20 @@ function PhysicComponent:isCollide(entity)end
 function PhysicComponent:getPosition()end
 --- @return Vector2D ...
 function PhysicComponent:getVelocity()end
+--- @return Vector2D ...
+function PhysicComponent:getFriction()end
+--- @return Vector2D ...
+function PhysicComponent:getSpeed()end
+--- @return Vector2D ...
+function PhysicComponent:getMaxSpeed()end
 
 --- @param position Vector2D
 function PhysicComponent:setPosition(position)end
 --- @param velocity Vector2D
 function PhysicComponent:setVelocity(velocity)end
+--- @param friction Vector2D
+function PhysicComponent:setFriction(friction)end
+--- @param speed Vector2D
+function PhysicComponent:setSpeed(speed)end
+--- @param maxSpeed Vector2D
+function PhysicComponent:setMaxSpeed(maxSpeed)end

@@ -28,7 +28,7 @@ namespace exocet {
 
             bool running;
         public:
-            ~Subsystem() { clean(); };
+            ~Subsystem() noexcept { clean(); };
 
             /**
              * \brief Init the subsystem
@@ -45,42 +45,42 @@ namespace exocet {
             /**
              * \brief Clean the subsystem
              */
-            void clean();
+            void clean() noexcept;
 
             /**
              * \brief Set window title
              * \param title the title for window
              */
-            inline void setTitle(std::string title) { SDL_SetWindowTitle(win, title.c_str()); }
+            inline void setTitle(const std::string& title) noexcept { SDL_SetWindowTitle(win, title.c_str()); }
             /**
              * \brief Close the game, will exit the excucatable
              */
-            inline void close() { running = false; }
+            inline void close() noexcept { running = false; }
             /**
              * \return True if the subsystem run else false
              */
-            inline bool isRunning() { return running; }
-            inline void mute() { 
+            inline bool isRunning() noexcept { return running; }
+            inline void mute() noexcept { 
                 muting = true;
                 Mix_Volume(-1, 0);
             }
-            inline void unmute() { 
+            inline void unmute() noexcept { 
                 muting = false; 
                 Mix_Volume(-1, 128);
             }
-            inline bool isMuting() const { return muting; }
-            inline bool isResizing() const { return resizing; }
+            inline bool isMuting() const noexcept { return muting; }
+            inline bool isResizing() const noexcept { return resizing; }
 
-            inline Graphic* getGraphic() { return gfx.get(); }
-            inline KeyListener* getKeyListener() { return &keys; }
-            inline MouseListener* getMouseListener() { return &mouse; }
+            inline Graphic* getGraphic() noexcept { return gfx.get(); }
+            inline KeyListener* getKeyListener() noexcept { return &keys; }
+            inline MouseListener* getMouseListener() noexcept { return &mouse; }
             
-            inline int getWinWidth() const { return w; }
-            inline int getWinHeight() const { return h; }
-            inline std::string getWinTitle() const { return title; }
+            inline int getWinWidth() const noexcept { return w; }
+            inline int getWinHeight() const noexcept { return h; }
+            inline std::string getWinTitle() const noexcept { return title; }
 
-            inline SDL_Renderer* getRenderer() { return gfx->getRenderer(); }
+            inline SDL_Renderer* getRenderer() noexcept { return gfx->getRenderer(); }
 
-            inline void setFullscreen() { SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN); }
+            inline void setFullscreen() noexcept { SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN); }
     };
 }

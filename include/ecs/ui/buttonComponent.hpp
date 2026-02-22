@@ -11,10 +11,10 @@ namespace exocet {
             void init() override;
             void update() override;
 
-            bool isMouseover() const;
-            bool click() const;
+            bool isMouseover() const noexcept;
+            bool click() const noexcept;
 
-            inline void setFunction(std::function<void()> function) { this->function = function; }
-            inline void setRect(int xpos, int ypos, int width, int height) { ui->setRect(xpos, ypos, width, height); }
+            inline void setFunction(std::function<void()> function) noexcept { this->function = function; }
+            inline void setRect(int xpos, int ypos, int width, int height) noexcept { ui->setRect(xpos, ypos, width, height); }
     };
 }

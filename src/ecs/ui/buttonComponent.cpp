@@ -19,7 +19,7 @@ void ButtonComponent::update() {
         function();
 }
 
-bool ButtonComponent::isMouseover() const {
+bool ButtonComponent::isMouseover() const noexcept {
     Vector2D<int> mousePos = handler->getMousePosition();
     Vector2D<int> pos = ui->getPosition();
 
@@ -31,6 +31,6 @@ bool ButtonComponent::isMouseover() const {
     );
 }
 
-bool ButtonComponent::click() const {
+bool ButtonComponent::click() const noexcept {
     return isMouseover() && handler->getJustButton(SDL_BUTTON_LEFT); 
 }

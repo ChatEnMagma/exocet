@@ -14,14 +14,14 @@ namespace exocet {
             Font(const std::string& path, int fontSize) {
                 this->fontSize = fontSize;
 
-                if((font = TTF_OpenFont(path.c_str(), fontSize)) == NULL)
-                    std::cerr << "Failed to load the font from `" << path << "`: " << TTF_GetError() << std::endl;
-                else
-                    std::cout << "Success to load the font from " << path << "`..." << std::endl;
+                if((font = TTF_OpenFont(path.c_str(), fontSize)) == NULL) 
+                    throw std::runtime_error("Failed to load the font from `" + path + "`: " + std::string(TTF_GetError()));
+                
+                std::cout << "Success to load the font from " << path << "`..." << std::endl;
             }
-            ~Font() { TTF_CloseFont(font); }
+            ~Font() noexcept { TTF_CloseFont(font); }
             
-            int getFontSize() const { return fontSize; }
-            TTF_Font* get() { return font; }
+            int getFontSize() const noexcept { return fontSize; }
+            TTF_Font* get() noexcept { return font; }
     };
 }

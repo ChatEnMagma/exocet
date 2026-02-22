@@ -25,7 +25,7 @@ namespace exocet {
             std::string tag;
             std::map<std::string, std::unique_ptr<PlaySong>> songs;
         public:
-            State(Handler* handler) { 
+            State(Handler* handler) noexcept { 
                 this->handler = handler;
                 
                 this->tag = "no_name"; 
@@ -35,7 +35,7 @@ namespace exocet {
                 this->renderLua = sol::nil;
             }
 
-            State(Handler* handler, std::string tag, sol::function initLua, sol::function updateLua, sol::function renderLua) { 
+            State(Handler* handler, std::string tag, sol::function initLua, sol::function updateLua, sol::function renderLua) noexcept { 
                 this->handler = handler;
                 
                 this->tag = tag; 
@@ -44,9 +44,7 @@ namespace exocet {
                 this->updateLua = updateLua;
                 this->renderLua = renderLua;
             }
-            ~State() {
-                songs.clear();
-            }
+            ~State() noexcept { songs.clear(); }
 
             void init() { if(initLua != sol::nil) initLua(); }
             void update() { 
@@ -66,12 +64,12 @@ namespace exocet {
                 uiManager->render(); 
             }
 
-            inline EntityManager* getEntityManager() { return eManager; }
-            inline EntityManager* getUIManager() { return uiManager; }
-            inline std::string getTag() const { return tag; }
-            inline void setEntityManager(EntityManager* entityManager) { eManager = entityManager; }
-            inline void setUIManager(EntityManager* uiManager) { this->uiManager = uiManager; }
-            inline void setBackground(Background* background) { this->background = background; }
+            inline EntityManager* getEntityManager() noexcept { return eManager; }
+            inline EntityManager* getUIManager() noexcept { return uiManager; }
+            inline std::string getTag() const noexcept { return tag; }
+            inline void setEntityManager(EntityManager* entityManager) noexcept { eManager = entityManager; }
+            inline void setUIManager(EntityManager* uiManager) noexcept { this->uiManager = uiManager; }
+            inline void setBackground(Background* background) noexcept { this->background = background; }
             PlaySong* getSong(const std::string& key, const std::string& path = "") {
                 auto it = songs.find(key);
 
@@ -98,13 +96,13 @@ namespace exocet {
              */
             std::size_t current;
         public:
-            StateManager(Handler* handler);
-            ~StateManager() = default;
+            StateManager(Handler* handler) noexcept;
+            ~StateManager() noexcept = default;
 
             inline void update() { getState()->update(); }
             inline void render() { getState()->render(); }
 
-            inline void addState(std::unique_ptr<State> state) {
+            inline void addState(std::unique_ptr<State> state) noexcept {
                 state->setEntityManager(getEntityManager());
                 state->setUIManager(getUIManager());
                 state->setBackground(getBackground());
@@ -118,11 +116,11 @@ namespace exocet {
             inline void nextState() { if(current < states.size() - 1) setState(current + 1); }
             inline void previousState() { if(current > 0) setState(current - 1); }
 
-            inline std::size_t getCurrentState() { return current; }
-            inline EntityManager* getEntityManager() { return eManager.get(); }
-            inline EntityManager* getUIManager() { return uiManager.get(); }
-            inline Background* getBackground() { return background.get(); }
-            inline State* getState() { return states[current].get(); }
+            inline std::size_t getCurrentState() noexcept { return current; }
+            inline EntityManager* getEntityManager() noexcept { return eManager.get(); }
+            inline EntityManager* getUIManager() noexcept { return uiManager.get(); }
+            inline Background* getBackground() noexcept { return background.get(); }
+            inline State* getState() noexcept { return states[current].get(); }
             
             void setState(std::size_t state);
     };

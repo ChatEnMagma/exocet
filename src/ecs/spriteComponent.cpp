@@ -5,38 +5,37 @@
 using namespace exocet;
 using namespace std;
 
-void SpriteComponent::init() {
-    if(!entity->hasComponent<TransformComponent>())
-        transform = &entity->addComponent<TransformComponent>();
+void SpriteComponent::init() noexcept {
+    if(!entity->hasComponent<MovementComponent>())
+        movement = &entity->addComponent<MovementComponent>();
     else
-        transform = &entity->getComponent<TransformComponent>();
+        movement = &entity->getComponent<MovementComponent>();
+    
+    if(!entity->hasComponent<HitboxComponent>())
+        hitbox = &entity->addComponent<HitboxComponent>();
+    else
+        hitbox = &entity->getComponent<HitboxComponent>();
 
     fps = FPS;
     frame = 0;
-    frameStart = SDL_GetTicks();
+    frameStart = SDL_GetTicks64();
     
     a = 0;
 
-    setSize(32, 32);
+    setSize(hitbox->getWidth(), hitbox->getHeight());
 }
 
-void SpriteComponent::update() {
-    if(1000/fps < SDL_GetTicks() - frameStart ) {
+void SpriteComponent::update() noexcept {
+    if(1000/fps < SDL_GetTicks64() - frameStart ) {
         if(frame >= sprite->size() - 1)
             frame = 0;
         else
             frame++;
-        frameStart = SDL_GetTicks();
+        frameStart = SDL_GetTicks64();
     }
 }
 
-void SpriteComponent::render() {
-    sprite->renderAngle(transform->getPosition(), a, w, h, frame);
-}
-
-void SpriteComponent::fitSizeWithHitbox() {
-    if(entity->hasComponent<HitboxComponent>()) {
-        HitboxComponent& hitbox = entity->getComponent<HitboxComponent>();
-        setSize(hitbox.getWidth(), hitbox.getHeight());
-    }
+void SpriteComponent::render() noexcept {
+    if(hitbox->isInsideScreen())
+        sprite->renderAngle(movement->getPosition(), a, w, h, frame);
 }

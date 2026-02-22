@@ -1,21 +1,19 @@
 #pragma once
 
-#include "ecs/transformComponent.hpp"
+#include "ecs/movementComponent.hpp"
 
 namespace exocet {
     class ParticleComponent: public Component {
         private:
-            TransformComponent* transform;
-            int time;
+            MovementComponent* movement;
+            std::size_t time;
         public:
-            void init() override;
-            void update() override;
+            void init() noexcept override;
+            void update() noexcept override;
 
-            inline void setPosition(const IntVector2D& position) { transform->setPosition(position); }
-            inline void setPointsPosition(int xpos, int ypos) { transform->setPointsPosition(xpos, ypos); }
-            inline void setVelocity(const DoubleVector2D& velocity) { transform->setVelocity(velocity); }
-            inline void setPointsVelocity(double xvel, double yvel) { transform->setPointsVelocity(xvel, yvel); }
-            inline void setTime(int time) { this->time = time; }
-            inline int getTime() const { return time; }
+            inline void setPosition(const IntVector2D& position) noexcept { movement->setPosition(position); }
+            inline void setVelocity(const DoubleVector2D& velocity) noexcept { movement->setVelocity(velocity); }
+            inline void setTime(std::size_t time) noexcept { this->time = time; }
+            inline int getTime() const noexcept { return time; }
     };
 }

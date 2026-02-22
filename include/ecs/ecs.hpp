@@ -30,7 +30,7 @@ namespace exocet {
         GROUP_COLLIDER
     };
 
-    inline ComponentID getNewComponentTypeID() {
+    inline ComponentID getNewComponentTypeID() noexcept {
         static ComponentID lastID = 0UL;
         return lastID++;
     }
@@ -56,9 +56,9 @@ namespace exocet {
             virtual void update() {}
             virtual void render() {}
 
-            inline Entity* getEntity() { return entity; }
-            inline void setEntity(Entity* entity) { this->entity = entity; }
-            inline void setHandler(Handler* handler) { this->handler = handler; }
+            inline Entity* getEntity() noexcept { return entity; }
+            inline void setEntity(Entity* entity) noexcept { this->entity = entity; }
+            inline void setHandler(Handler* handler) noexcept { this->handler = handler; }
     };
 
     class Entity {
@@ -83,18 +83,18 @@ namespace exocet {
             //////////////////////////////////////
 
             inline void update() { for(auto& c: components) c->update(); }
-            inline void render() { for(auto& c: components) c->render(); }
+            inline void render() { for(auto& c: components) c->render();}
 
             /**
              * \brief It kills or destroys the entity
              */
-            inline void destroy() { active = false; }
+            inline void destroy() noexcept { active = false; }
             /**
              * \return true if the entity is active or alive else false
              */
-            inline bool isActive() { return active; }
+            inline bool isActive() const noexcept { return active; }
 
-            inline std::string getTag() { return tag; }
+            inline std::string getTag() const noexcept { return tag; }
 
             /**
              * \brief Check if the entity is well in the group
@@ -150,10 +150,10 @@ namespace exocet {
             std::vector<Entity*> entitiedAdd;
             std::array<std::vector<Entity*>, maxGroup> groupedEntities;
         public:
-            EntityManager(Handler* handler) { this->handler = handler; }
+            EntityManager(Handler* handler) noexcept { this->handler = handler; }
 
             inline void update() { for(auto& e: entities) e->update(); }
-            inline void render() { for(auto& e: entities) e->render(); }
+            inline void render() {for(auto& e: entities) e->render(); }
 
             /**
              * \brief Refresh the entity and group array, and clear if the entity is not active
@@ -187,6 +187,6 @@ namespace exocet {
             /**
              * \return Return the size of entities
              */
-            inline std::size_t getNumberEntities() { return entities.size(); }
+            inline std::size_t size() const noexcept { return entities.size(); }
     };
 }

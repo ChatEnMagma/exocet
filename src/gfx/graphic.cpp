@@ -19,18 +19,14 @@ void Graphic::renderText(int x, int y, int w, int h, string text, Font* font) {
 
     SDL_Surface* text_s = TTF_RenderText_Solid(font->get(), text.c_str(), color);
 
-    if(text_s == NULL) {
-        cerr << "Failed to create a surface: " << TTF_GetError() << endl;
-        return;
-    }
+    if(text_s == NULL) throw runtime_error("Failed to create a surface: " + string(TTF_GetError()));
                 
     SDL_Texture* texture = SDL_CreateTextureFromSurface(ren, text_s);
 
-    if(texture != NULL) {
-        SDL_RenderCopy(ren, texture, NULL, &dest);
-    } else {
-        cerr << "Failed to create a texture: " << SDL_GetError() << endl;
-    }
+    if(texture == NULL) throw runtime_error("Failed to create a texture: " + string(SDL_GetError()));
+
+    SDL_RenderCopy(ren, texture, NULL, &dest);
+  
     SDL_FreeSurface(text_s);
     SDL_DestroyTexture(texture);
 }

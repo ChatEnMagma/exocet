@@ -1,87 +1,71 @@
 #pragma once
 
-#include "ecs/transformComponent.hpp"
+#include "ecs/movementComponent.hpp"
 
 #include "tool/polygon.hpp"
 
 namespace exocet {
     class HitboxComponent: public Component {
         private:
-            int x, y, w, h;
             Polygon polygons;
-            TransformComponent* transform;
-            Uint8 shape;
+            MovementComponent* movement;
             Uint8 color[3];
         public:
-            ~HitboxComponent() = default;
+            ~HitboxComponent() noexcept = default;
 
-            enum SHAPES {
-                POLYGON_SHAPE = 0,
-                RECTANGULAR_SHAPE
-            };
+            void init() noexcept override;
+            void render() noexcept override;
 
-            void init() override;
-            void render() override;
-
-            bool isCollide(HitboxComponent* hitbox) const;
-            bool isCollideHorizontal(HitboxComponent* hitbox) const;
-            bool isCollideVertical(HitboxComponent* hitbox) const;
+            bool isCollide(HitboxComponent* hitbox) const noexcept;
+            bool isCollideHorizontal(HitboxComponent* hitbox) const noexcept;
+            bool isCollideVertical(HitboxComponent* hitbox) const noexcept;
 
             /**
              * \return True if the mouse is inside the entity else false
              */
-            bool isInsideMouse() const;
+            bool isInsideMouse() const noexcept;
             /**
              * \return True if the entity is ouside the screen (depend of the camera) else false
              */
-            bool isOutsideScreen();
+            bool isInsideScreen() const noexcept;
             /**
              * \brief If the entity is outside the screen, then it destroyes
              */
-            inline void destroyOutsideScreen() { if(isOutsideScreen()) entity->destroy(); }
+            inline void destroyOutsideScreen() noexcept { if(!isInsideScreen()) entity->destroy(); }
 
             // ALL GETTERS POINT HITBOX
             /**
              * \return The focal point of the entity
              */
-            inline Vector2D<int> getCenter() const { 
-                return Vector2D<int>(
-                    transform->getPosition().x + (x + getWidth()) / 2, 
-                    transform->getPosition().y + (y + getHeight()) / 2
-                ); 
-            }
-            int getLeft() const;
-            int getRight() const;
-            int getTop() const;
-            int getBottom() const;
+            inline DoubleVector2D getCenter() const noexcept { return movement->pos.convert<double>() + DoubleVector2D(getWidth() / 2, getHeight() / 2); }
+            double getLeft() const noexcept { return polygons.getLeft() + static_cast<double>(movement->pos.x); }
+            double getRight() const noexcept { return polygons.getRight() + static_cast<double>(movement->pos.x); }
+            double getUp() const noexcept { return polygons.getUp() + static_cast<double>(movement->pos.y); }
+            double getDown() const noexcept { return polygons.getDown() + static_cast<double>(movement->pos.y); }
 
-            inline float getMoveLeft() const { return transform->getVelocity().x + (float) getLeft(); }
-            inline float getMoveRight() const { return transform->getVelocity().x + (float) getRight(); }
-            inline float getMoveTop() const { return transform->getVelocity().y + (float) getTop(); }
-            inline float getMoveBottom() const { return transform->getVelocity().y + (float) getBottom(); }
+            inline double getMovementLeft() const noexcept { return movement->getVelocity().x + getLeft(); }
+            inline double getMovementRight() const noexcept { return movement->getVelocity().x + getRight(); }
+            inline double getMovementUp() const noexcept { return movement->getVelocity().y + getUp(); }
+            inline double getMovementDown() const noexcept { return movement->getVelocity().y + getDown(); }
             /**
              * \return The width of the entity
              */
-            int getWidth() const { return polygons.getWidth(); }
+            inline int getWidth() const noexcept { return polygons.getWidth(); }
             /**
              * \return The height of the entity
              */
-            int getHeight() const { return polygons.getHeight(); }
+            inline int getHeight() const noexcept { return polygons.getHeight(); }
             /**
              * \brief Set a rectangular hitbox for the entity
              */
-            inline void setRect(int xpos, int ypos, int width, int height) {
-                polygons = Polygon(xpos, ypos, width, height); shape = RECTANGULAR_SHAPE; 
-            }
-            inline void setPolygon(Polygon polygon) { this->polygons = polygon; }
-            inline void setHitbox(Polygon polygon) { polygons = polygon; }
-            inline void setColor(Uint8 red, Uint8 green, Uint8 blue) { color[0] = red; color[1] = green; color[2] = blue; }
+            inline void setRect(int xpos, int ypos, int width, int height) noexcept { polygons = Polygon(xpos, ypos, width, height); }
+            inline void setHitbox(Polygon polygon) noexcept { polygons = polygon; }
+            inline void setColor(Uint8 red, Uint8 green, Uint8 blue) noexcept { color[0] = red; color[1] = green; color[2] = blue; }
 
-            inline int getPositionX() const { return transform->getPosition().x; }
-            inline int getPositionY() const { return transform->getPosition().y; }
-            inline Vector2D<int> getPosition() const { return transform->getPosition(); } 
+            inline int getPositionX() const noexcept { return movement->getPosition().x; }
+            inline int getPositionY() const noexcept { return movement->getPosition().y; }
+            inline IntVector2D getPosition() const noexcept { return movement->getPosition(); } 
 
-            inline Uint8 getTypeShaped() const { return shape; }
-            inline Polygon getPolygon() const { return polygons; }
+            inline Polygon getPolygon() const noexcept { return polygons; }
     };
 }

@@ -7,14 +7,12 @@ using namespace exocet;
 
 void Camera::centerOnEntity(Entity* e) {
     // Check if the entity has the physicComponent
-    if(!e->hasComponent<PhysicComponent>()) {
-        cout << "Warning: `" << e->getTag() << "` does not have physicComponent" << endl;
-        return;
-    }
+    if(!e->hasComponent<HitboxComponent>()) 
+        throw invalid_argument("this entity does not have HitboxComponent");
 
-    auto& e_physic = e->getComponent<PhysicComponent>();
+    auto center = e->getComponent<HitboxComponent>().getCenter();
 
     // Set the new offset
-    this->pos.x = e_physic.getPosition().x - handler->getWinWidth() / 2 + e_physic.getHitbox()->getWidth() / 2;
-    this->pos.y = e_physic.getPosition().y - handler->getWinHeight() / 2 + e_physic.getHitbox()->getHeight() / 2;
+    this->pos.x = static_cast<int>(center.x - handler->getWinWidth() / 2);
+    this->pos.y = static_cast<int>(center.y - handler->getWinHeight() / 2);
 }

@@ -18,17 +18,17 @@ namespace exocet {
             void openTexture(const std::string& path);
         public:
             Texture(Handler* handler, const std::string& path);
-            ~Texture() { SDL_DestroyTexture(tex); }
+            ~Texture() noexcept { SDL_DestroyTexture(tex); }
 
             /**
              * \brief Render the texture
              */
-            void render(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc);
-            void renderAnchor(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc);
-            void renderAnchorAngle(const IntVector2D& position, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc);
-            void renderAngle(const IntVector2D&, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc);
+            void render(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
+            void renderAnchor(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
+            void renderAnchorAngle(const IntVector2D& position, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
+            void renderAngle(const IntVector2D&, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
 
-            inline int getHeight() const { return h; }
-            inline int getWidth() const { return w; }
+            inline int getHeight() const noexcept { return h; }
+            inline int getWidth() const noexcept { return w; }
     };
 }

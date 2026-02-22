@@ -4,11 +4,11 @@
 using namespace exocet;
 using namespace std;
 
-void Background::update() {
+void Background::update() noexcept {
 
 }
 
-void Background::render() {
+void Background::render() noexcept {
     for(auto s : sprites) {
         if(!loop)
             s->render(position, w, h);
