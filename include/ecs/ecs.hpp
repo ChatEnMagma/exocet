@@ -110,6 +110,7 @@ namespace exocet {
              */
             template <typename T> 
             inline bool hasComponent() const { return componentBitset[getComponentTypeID<T>()]; }
+            inline std::size_t componentSize() const { return components.size(); }
 
             /**
              * \brief Get the component

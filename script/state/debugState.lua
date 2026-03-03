@@ -8,7 +8,8 @@ debugState = {
         engine:getBackground():append(backgroundSprite)
 
         engine:addEntity(Player:new(Vector2D:new(0, 0)))
-        engine:addEntity(Wall:new(Vector2D:new(32, 64)))
+        -- engine:addEntity(Wall:new(Vector2D:new(32, 64)))
+         engine:addEntity(Box:new(Vector2D:new(128, 0)))
     end,
 
     update = function ()

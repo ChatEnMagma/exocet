@@ -19,7 +19,7 @@ namespace exocet { class Handler; }
 #define DIR_SCRIPT_PACKAGE_MODULES "script/exocet_package_modules.lua"
 #define DIR_SCRIPT_STATES "script/state/"
 
-#define FPS 60
+#define FPS 30
 #define FRAME_DELAY 1000/FPS
 
 #define HITBOX_DEFAULT_SIZE 32

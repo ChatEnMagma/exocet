@@ -2,6 +2,8 @@
 
 #include "ecs/hitboxComponent.hpp"
 #include "ecs/movementComponent.hpp"
+#include "controllerDirectionsComponent.hpp"
+#include "inputComponent.hpp"
 #include "ecs/physicComponent.hpp"
 #include "ecs/dragComponent.hpp"
 #include "ecs/particleComponent.hpp"

@@ -15,6 +15,8 @@
 #define USERTYPE_ENTITY "Entity"
 
 #define USERTYPE_ANCHOR_COMPONENT "AnchorComponent"
+#define USERTYPE_CONTROLLERDIRECTIONS_COMPONENT "ControllerDirectionsComponent"
+#define USERTYPE_INPUT_COMPONENT "InputComponent"
 #define USERTYPE_PHYSIC_COMPONENT "PhysicComponent"
 #define USERTYPE_SPRITE_COMPONENT "SpriteComponent"
 #define USERTYPE_SCRIPT_COMPONENT "ScriptComponent"

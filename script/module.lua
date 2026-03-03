@@ -5,5 +5,6 @@ module = {
 
     -- All entities
     "entity/player",
-    "entity/wall"
+    "entity/wall",
+    "entity/box"
 }

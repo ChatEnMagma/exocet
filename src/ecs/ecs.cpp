@@ -17,12 +17,11 @@ Entity::Entity(Handler* handler, std::string tag) {
 
 void Entity::addGroup(Group group) {
     groupBitset[group] = true;
-    
 }
 
 void EntityManager::refresh() {
     for(Group i = 0u; i < maxGroup; i++) {
-         auto& v(groupedEntities[i]);
+        auto& v(groupedEntities[i]);
         v.erase(
             std::remove_if(
                 std::begin(v), std::end(v),

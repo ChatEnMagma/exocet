@@ -150,7 +150,8 @@ void LuaSystem::initUsertypeEntity() {
         ),
         "components", &Entity::componentsLua,
         "data", &Entity::data,
-        "destroy", &Entity::destroy
+        "destroy", &Entity::destroy,
+        "componentSize", &Entity::componentSize
     );
 }
 
@@ -196,6 +197,16 @@ void LuaSystem::initUsertypeComponents() {
         "getPosition", [](AnchorComponent& self) noexcept { return self.getPosition().convert<lua_Number>(); }
     );
 
+    lua.new_usertype<InputComponent>(USERTYPE_INPUT_COMPONENT,
+        sol::meta_function::construct, [](sol::object, Entity& e) {
+            auto& c = e.addComponent<InputComponent>();
+
+            e.componentsLua[USERTYPE_INPUT_COMPONENT] = &c;
+
+            return &c;
+        }
+    );
+
     lua.new_usertype<PhysicComponent>(USERTYPE_PHYSIC_COMPONENT,
         sol::meta_function::construct, sol::factories(
             [](sol::object, Entity& e, sol::table rect) { 
@@ -234,12 +245,16 @@ void LuaSystem::initUsertypeComponents() {
             return self.getHitbox()->isCollide(&e->getComponent<HitboxComponent>());
         },
 
+        "getAcceleration", [](PhysicComponent& self) noexcept { return self.getMovement()->acc.convert<lua_Number>(); },
+        "getMasse", &PhysicComponent::getMasse,
         "getPosition", [](PhysicComponent& self) noexcept { return self.getPosition().convert<lua_Number>(); },
         "getVelocity", [](PhysicComponent& self) noexcept { return self.getVelocity().convert<lua_Number>(); },
         "getFriction", [](PhysicComponent& self) noexcept { return self.getFriction().convert<lua_Number>(); },
         "getSpeed", [](PhysicComponent& self) noexcept { return self.getSpeed().convert<lua_Number>(); },
         "getMaxSpeed", [](PhysicComponent& self) noexcept { return self.getMaxSpeed().convert<lua_Number>(); },
 
+        "setAcceleration", [](PhysicComponent& self, const LuaVector2D& acc) noexcept { self.getMovement()->acc = acc.convert<double>(); },
+        "setMasse", &PhysicComponent::setMasse,
         "setPosition", [](PhysicComponent& self, const LuaVector2D& pos) noexcept { self.setPosition(pos.convert<int>()); },
         "setVelocity", [](PhysicComponent& self, const LuaVector2D& vel) noexcept { self.setVelocity(vel.convert<double>()); },
         "setFriction", [](PhysicComponent& self, const LuaVector2D& friction) { self.setFriction(friction.convert<double>()); },

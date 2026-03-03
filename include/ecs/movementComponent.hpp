@@ -7,17 +7,20 @@
 
 namespace exocet {
     class MovementComponent: public Component {
+        private:
+            DoubleVector2D speed, maxSpeed;
+            DoubleVector2D friction;
         public:
             MovementComponent() noexcept = default;
 
             IntVector2D pos;
             DoubleVector2D vel;
-            DoubleVector2D speed, maxSpeed;
-            DoubleVector2D friction;
+            DoubleVector2D acc;
 
             void init() noexcept override {
-                setPosition(IntVector2D());
-                setVelocity(DoubleVector2D());
+                setAccelaration(DoubleVector2D::vectorZeros());
+                setPosition(IntVector2D::vectorZeros());
+                setVelocity(DoubleVector2D::vectorZeros());
 
                 setSpeed(DoubleVector2D(1.l, 1.f));
                 setMaxSpeed(DoubleVector2D(std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
@@ -29,8 +32,6 @@ namespace exocet {
              */
             void move() noexcept;
 
-            inline DoubleVector2D computeMove() const noexcept { return vel.normalized().scalar(vel.magnitude()); }
-
             // All methods to fetch the direction
             inline bool isMovingLeft() const noexcept { return vel.x < 0; }
             inline bool isMovingRight() const noexcept { return vel.x > 0; }
@@ -38,6 +39,7 @@ namespace exocet {
             inline bool isMovingDown() const noexcept { return vel.y > 0; }
 
             // ALL GETTERS
+            inline DoubleVector2D getAccelation() const noexcept { return acc; }
             inline IntVector2D getPosition() const noexcept { return pos; }
             inline DoubleVector2D getVelocity() const noexcept { return vel.normalized() * speed; }
             inline DoubleVector2D getFriction() const noexcept { return friction; }
@@ -46,6 +48,7 @@ namespace exocet {
             inline double getAngle() const noexcept { return vel.getAngle(); }
 
             // ALL SETTERS
+            inline void setAccelaration(const DoubleVector2D& accelaration) noexcept { acc = accelaration; }
             inline void setPosition(const IntVector2D& position) noexcept { pos = position; }
             inline void setVelocity(const DoubleVector2D& velocity) noexcept { vel = velocity; }
             inline void setFriction(const DoubleVector2D& friction) {

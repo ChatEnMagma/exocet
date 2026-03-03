@@ -24,34 +24,39 @@ void PhysicComponent::init() noexcept {
 }
 
 void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
-    PhysicComponent* e_physic = &e->getComponent<PhysicComponent>();
-    //Vector2D<float> m_v1 = movement->vel;
-    //Vector2D<float> e_v1 = e_physic->movement->vel;
-
-    DoubleVector2D m_v2, e_v2;
+    PhysicComponent& e_physic = e->getComponent<PhysicComponent>();
     
-    /*// Formular one-dimensional Newtonian
+    auto sMid = getHitbox()->getCenter();
+    auto oMid = e_physic.getHitbox()->getCenter();
 
-    // this-vel = (this->masse - e->masse) / (this->masse + e->masse) * this->vel + (2 * e->masse) / (this->masse + e->masse) * e->vel
-    Vector2D<float> newVt = vt1.scalar((getMasse() - e_physic->getMasse()) / (getMasse() + e_physic->getMasse())) + 
-                             ve1.scalar((2 * e_physic->getMasse()) / (getMasse() + e_physic->getMasse()));
+    auto dir = DoubleVector2D(
+        (oMid.x - sMid.x) / e_physic.getHitbox()->getWidth() / 2, 
+        (oMid.y - sMid.y) / e_physic.getHitbox()->getHeight() / 2
+    );
+    auto absDir = dir.abs();
 
-    // (2 * this->masse) / (this->masse + e->masse) * this->vel + (e->masse - this->masse) / (this->masse + e->masse) * e->vel
-    Vector2D<float> newVe =  vt1.scalar((2 * getMasse()) / (getMasse() + e_physic->getMasse())) +
-                                ve1.scalar((e_physic->getMasse() - getMasse()) / (getMasse() + e_physic->getMasse()));
-    */
+    if(abs(absDir.x - absDir.y) < .0001) {
+        if(absDir.x > 0) { movement->acc.x = 0; movement->acc.x = 0; }
+        if(absDir.y > 0) { movement->acc.y = 0; movement->acc.y = 0; }
 
-    auto vCollide = e_physic->getVelocity() - getVelocity();
-    float distance = DoubleVector2D::twoVectorsMagnitude(getVelocity(), e_physic->getVelocity());
-    auto vCollideNorm = DoubleVector2D(vCollide.x / distance, vCollide.y / distance);
+        if((rand() % 2) == 0) {
+            movement->vel.x = -movement->vel.x;
+            movement->acc.x = 0;
+        } else {
+            movement->vel.y = -movement->vel.y;
+            movement->acc.y = 0;
+        }
+    } else if(absDir.x > absDir.y) {
+        if(absDir.x > 0) movement->acc.x = 0;
 
-    auto vRelativeVel = getVelocity() - e_physic->getVelocity();
+        movement->vel.x = -movement->vel.x * e_physic.getMasse();
+        movement->acc.x = 0;
+    } else {
+        if(absDir.y > 0) movement->acc.y = 0;
 
-    float vSpeed = vRelativeVel.x * vCollideNorm.x + vRelativeVel.y * vCollideNorm.y;
-    float impulse = 2 * vSpeed / (getMasse() + e_physic->getMasse());
-
-    movement->vel -= vCollideNorm.scalar(impulse * e_physic->getMasse());
-    e_physic->movement->vel += vCollideNorm.scalar(impulse * getMasse());
+        movement->vel.y = -movement->vel.y * e_physic.getMasse();
+        movement->acc.y = 0;
+    }
 }
 
 vector<Entity*> PhysicComponent::getCollideEntities() {
@@ -68,7 +73,11 @@ vector<Entity*> PhysicComponent::getCollideEntities() {
 }
 
 void PhysicComponent::update() noexcept {
-    movement->move();
+    auto collides = getCollideEntities();
+
+    if(collides.empty())
+        movement->move();
+    for(auto& e: collides) this->collisionWithPhysicEntity(e);
 }
 
 void PhysicComponent::render() noexcept {
@@ -79,7 +88,7 @@ void PhysicComponent::render() noexcept {
         handler->getGraphic()->setRenderColor(0xff, 0xff, 0xff);
         handler->getGraphic()->renderLine(
             hitbox->getCenter().convert<int>(), 
-            (hitbox->getCenter() + movement->computeMove() * movement->getSpeed()).convert<int>());
+            (hitbox->getCenter() + movement->vel.clampMagnitude(getSpeed().x).scalar(getSpeed().x * 4)).convert<int>());
     }
     // Render the pointer address
     if(handler->getGame()->isShowingPointerEntities()) {

@@ -38,7 +38,7 @@ namespace exocet {
             inline DoubleVector2D getFriction() const noexcept { return movement->getFriction(); }
 
             // Getters from movementComponent
-            inline MovementComponent* getmovement() noexcept { return movement; }
+            inline MovementComponent* getMovement() noexcept { return movement; }
             inline IntVector2D getPosition() const noexcept { return movement->getPosition(); }
             inline DoubleVector2D getVelocity() const noexcept { return movement->getVelocity(); }
 

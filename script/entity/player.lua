@@ -26,12 +26,14 @@ function Player:new(position)
     PhysicComponent:new(e, Rect:new(64, 64), position)
     ScriptComponent:new(e, function () e.data.update(e) end)
     SpriteComponent:new(e, engine:getSprite("exocet", "exocet_anim.png", 7, 1, 32, 32, 7), 10):fitSizeWithHitbox()
+    InputComponent:new(e)
 
     e.components.PhysicComponent:setSpeed(Vector2D:new(5, 5))
-    e.components.PhysicComponent:setMaxSpeed(Vector2D:new(40, 40))
-    e.components.PhysicComponent:setFriction(Vector2D:new(0.1, 0.1))
+    e.components.PhysicComponent:setMaxSpeed(Vector2D:new(64, 64))
+    e.components.PhysicComponent:setFriction(Vector2D:new(0.999999, 0.999999))
+    e.components.PhysicComponent:setMasse(200)
 
-    e.data.test = 0
+    print(e:componentSize())
 
     return e
 end
@@ -40,12 +42,6 @@ end
 function Player.update(e)
     --- @type PhysicComponent
     local physic = e.components.PhysicComponent
-
-    local speed = e.components.PhysicComponent:getSpeed()
-    if engine:getKey(SDL.SDLK_Z) then physic:setVelocity(physic:getVelocity() + Vector2D:new(0, -speed.y)) end
-    if engine:getKey(SDL.SDLK_S) then physic:setVelocity(physic:getVelocity() + Vector2D:new(0, speed.y)) end
-    if engine:getKey(SDL.SDLK_Q) then physic:setVelocity(physic:getVelocity() + Vector2D:new(-speed.x, 0)) end
-    if engine:getKey(SDL.SDLK_D) then physic:setVelocity(physic:getVelocity() + Vector2D:new(speed.x, 0)) end
 
     if engine:getKey(SDL.SDLK_U) then engine:addEntity(Wall:new(physic:getPosition())) end
 

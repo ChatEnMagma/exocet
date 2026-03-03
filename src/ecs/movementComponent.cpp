@@ -6,20 +6,21 @@ using namespace std;
 using namespace exocet;
 
 void MovementComponent::move() noexcept {
-    vel.x = clamp(vel.x, -maxSpeed.x * (1 + maxSpeed.x), maxSpeed.x * (1 + maxSpeed.x));
-    vel.y = clamp(vel.y, -maxSpeed.y * (1 + maxSpeed.y), maxSpeed.y * (1 + maxSpeed.y));
+    if(abs(vel.x) < 0.001) vel.x = 0;
+    if(abs(vel.y) < 0.001) vel.y = 0;
 
-    auto norm = computeMove();
-                
+    vel += acc.scalar(handler->getDeltaTime());
+    
     if(isMovingRight())
-        pos.x += (int) floor(norm.x);
+        pos.x += static_cast<int>(ceil(vel.x));
     else if(isMovingLeft())
-        pos.x += (int) ceil(norm.x);
-                
-    if(isMovingUp())
-        pos.y += (int) ceil(norm.y);
-    else if(isMovingDown())
-        pos.y += (int) floor(norm.y);
+        pos.x += static_cast<int>(floor(vel.x));     
 
+    if(isMovingUp())
+        pos.y += static_cast<int>(floor(vel.y));
+    else if(isMovingDown())
+       pos.y += static_cast<int>(ceil(vel.y));
+    
+       
     vel *= friction;
 }

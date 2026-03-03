@@ -16,11 +16,13 @@ namespace exocet {
             bool showingPointerEntities = false;
 
             LuaSystem* lua;
+
+            double deltaTime;
         public:
             Game(Subsystem* subsystem);
             ~Game();
 
-            void update();
+            void update(double deltaTime);
             void render();
 
             /**
@@ -53,6 +55,8 @@ namespace exocet {
             inline StateManager* getStateManager() noexcept { return sManager; }
             inline EntityManager* getEntityManager() noexcept { return sManager->getEntityManager(); }
             inline void setState(std::size_t state) { sManager->setState(state); }
+
+            inline double getDeltaTime() const noexcept { return deltaTime; }
 
             inline Handler* getHandler() noexcept { return handler; };
             /** 

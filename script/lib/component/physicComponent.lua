@@ -12,6 +12,10 @@ function PhysicComponent:new(entity, hitbox, position) end
 function PhysicComponent:isCollide(entity)end
 
 --- @return Vector2D ...
+function PhysicComponent:getAcceleration()end
+--- @return number ...
+function PhysicComponent:getMasse()end
+--- @return Vector2D ...
 function PhysicComponent:getPosition()end
 --- @return Vector2D ...
 function PhysicComponent:getVelocity()end
@@ -22,6 +26,10 @@ function PhysicComponent:getSpeed()end
 --- @return Vector2D ...
 function PhysicComponent:getMaxSpeed()end
 
+--- @param acceleration Vector2D
+function PhysicComponent:setAcceleration(acceleration)end
+--- @param masse number
+function PhysicComponent:setMasse(masse)end
 --- @param position Vector2D
 function PhysicComponent:setPosition(position)end
 --- @param velocity Vector2D

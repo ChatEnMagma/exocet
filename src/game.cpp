@@ -35,6 +35,8 @@ Game::Game(Subsystem* subsys) {
     if((*lua)["config"]["showHitbox"].get_or<bool>(0)) showHitbox();
     if((*lua)["config"]["showPointerEntities"].get_or<bool>(0)) showPointerEntities();
 
+    deltaTime = 0.f;
+
     cout << "Success to config the game" << endl;
 }
 Game::~Game() {
@@ -43,7 +45,9 @@ Game::~Game() {
     delete handler;
 }
 
-void Game::update() {
+void Game::update(double deltaTime) {
+    this->deltaTime = deltaTime;
+
     if(handler->getJustKey(SDLK_ESCAPE))
         handler->closeGame();
     

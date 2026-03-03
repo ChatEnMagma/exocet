@@ -23,17 +23,25 @@ void Engine::init(int w, int h, std::string title, bool fullscreen) {
 void Engine::run() {
     cout << "Start the game..." << endl;
 
-    Uint32 frameStart, frameTime;
+    Uint64 frameStart, frameTime;
+    Uint64 frameLast = SDL_GetTicks64();
+
+    double deltaTime;
+
     // main loop
     while(subsys->isRunning()) {
-        frameStart = SDL_GetTicks();
+        frameStart = SDL_GetTicks64();
+
+        deltaTime = (frameStart - frameLast) / 1000000.0f;
 
         subsys->handleEvents();
-        game->update();
+        game->update(deltaTime);
         game->render();
 
+        frameLast = frameStart;
+
         // set up the delay, they game is limite by FPS
-        frameTime = SDL_GetTicks() - frameStart;
+        frameTime = SDL_GetTicks64() - frameStart;
         if(FRAME_DELAY > frameTime) SDL_Delay(FRAME_DELAY - frameTime);
     }
 }

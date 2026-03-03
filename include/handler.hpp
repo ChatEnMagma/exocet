@@ -69,6 +69,7 @@ namespace exocet {
             inline Graphic* getGraphic() noexcept { return subsys->getGraphic(); }
 
             inline Game* getGame() noexcept { return game; }
+            inline double getDeltaTime() noexcept { return game->getDeltaTime(); }
             /**
              * \return True if game show the all hitbox of entities
              */
