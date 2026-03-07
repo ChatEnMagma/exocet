@@ -20,8 +20,8 @@ void ButtonComponent::update() {
 }
 
 bool ButtonComponent::isMouseover() const noexcept {
-    Vector2D<int> mousePos = handler->getMousePosition();
-    Vector2D<int> pos = ui->getPosition();
+    auto mousePos = handler->getMousePosition();
+    auto pos = ui->getPosition();
 
     return (
         mousePos.x >= pos.x &&

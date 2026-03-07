@@ -14,6 +14,9 @@ void InputComponent::init() {
 }
 
 void InputComponent::controllerKeyboard() {
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Woverflow"
+
     if(handler->getKey(SDLK_z) || handler->getKey(SDLK_UP))
         controller->setDirectionY(-1.f);
     else if(handler->getKey(SDLK_s) || handler->getKey(SDLK_DOWN))
@@ -25,6 +28,8 @@ void InputComponent::controllerKeyboard() {
     else if(handler->getKey(SDLK_q) || handler->getKey(SDLK_LEFT))
         controller->setDirectionX(-1.f);
     else controller->setDirectionX(0.f);
+
+    #pragma GCC diagnostic pop
 }
 
 void InputComponent::controllerGamepad() {

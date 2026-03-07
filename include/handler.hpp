@@ -58,11 +58,11 @@ namespace exocet {
              * \param scancode the scancode of the key with SDL
              * \return get true if the button is just pressing else false
             */
-            inline bool getJustButton(Uint16 scancode) noexcept { return subsys->getMouseListener()->getJustButton(scancode); }
+            inline bool getJustButton(Uint16 scancode) const noexcept { return subsys->getMouseListener()->getJustButton(scancode); }
             /**
              * \return the position of the mouse in the game frame
              */
-            inline IntVector2D getMousePosition() const noexcept { return subsys->getMouseListener()->getPosition(); }
+            inline EngineVector2D getMousePosition() const noexcept { return subsys->getMouseListener()->getPosition(); }
             /**
              * \return Graphics class with all functions graphics
              */

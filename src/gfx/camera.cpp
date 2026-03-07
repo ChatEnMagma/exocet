@@ -13,6 +13,6 @@ void Camera::centerOnEntity(Entity* e) {
     auto center = e->getComponent<HitboxComponent>().getCenter();
 
     // Set the new offset
-    this->pos.x = static_cast<int>(center.x - handler->getWinWidth() / 2);
-    this->pos.y = static_cast<int>(center.y - handler->getWinHeight() / 2);
+    this->pos.x = center.x - handler->getWinWidth() / 2;
+    this->pos.y = center.y - handler->getWinHeight() / 2;
 }

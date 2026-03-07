@@ -8,7 +8,8 @@ namespace exocet {
     class Background {
         private:
             std::vector<Sprite*> sprites;
-            Vector2D<int> position;
+
+            EngineVector2D position;
             int w, h;
             bool loop;
 
@@ -33,8 +34,8 @@ namespace exocet {
             inline void append(Sprite* sprite, const int zindex = 0) { 
                 sprites.insert(sprites.begin() + zindex, sprite);
             }
-            inline Vector2D<int> getPosition() const noexcept { return position; }
-            inline void setPosition(const IntVector2D position) noexcept { this->position = position; }
+            inline EngineVector2D getPosition() const noexcept { return position; }
+            inline void setPosition(const EngineVector2D& position) noexcept { this->position = position; }
             inline int getWidth() const noexcept { return w; }
             inline int getHeight() const noexcept { return h; }
             inline void setLoop(bool loop) noexcept { this->loop = loop; }

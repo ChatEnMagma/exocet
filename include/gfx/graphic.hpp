@@ -73,6 +73,11 @@ namespace exocet {
                 return sprites[key].get();
             }
 
+            Sprite* loadSpriteSheet(const std::string& key, const std::string& path, int xPos, int yPos, int width, int height) {
+                sprites[key] = make_shared<Sprite>(handler, "res/" + path, xPos, yPos, width, height);
+                return sprites[key].get();
+            }
+
             inline void setColor(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 0xFF) noexcept {
                 color.r = red;
                 color.g = green;
@@ -82,17 +87,17 @@ namespace exocet {
                 SDL_SetRenderDrawColor(ren, color.r, color.g, color.b, color.a);
             }
 
-            inline void renderAnchorRect(const IntVector2D& position, int width, int height) noexcept {
-                SDL_Rect rect = { position.x, position.y, width, height };
+            inline void renderAnchorRect(const EngineVector2D& position, int width, int height) noexcept {
+                SDL_Rect rect = { static_cast<int>(position.x), static_cast<int>(position.y), width, height };
                 SDL_RenderDrawRect(ren, &rect);
             }
-            inline void renderAnchorFillRect(const IntVector2D& position, int width, int height) noexcept {
-                SDL_Rect rect = { position.x, position.y, width, height };
+            inline void renderAnchorFillRect(const EngineVector2D& position, int width, int height) noexcept {
+                SDL_Rect rect = { static_cast<int>(position.x), static_cast<int>(position.y), width, height };
                 SDL_RenderFillRect(ren, &rect);
             }
 
-            inline void renderRect(const IntVector2D& position, int width, int height) noexcept { renderAnchorRect(position - camera.getPosition(), width, height); }
-            inline void renderFillRect(const IntVector2D& position, int width, int height) noexcept { renderAnchorFillRect(position - camera.getPosition(), width, height); }
+            inline void renderRect(const EngineVector2D& position, int width, int height) noexcept { renderAnchorRect(position - camera.getPosition(), width, height); }
+            inline void renderFillRect(const EngineVector2D& position, int width, int height) noexcept { renderAnchorFillRect(position - camera.getPosition(), width, height); }
 
             void renderText(int x, int y, int w, int h, std::string text, Font* font);
 
@@ -100,16 +105,16 @@ namespace exocet {
             inline void renderClear() noexcept { SDL_RenderClear(ren); }
             inline void renderPresent() noexcept { SDL_RenderPresent(ren); }
 
-            inline void renderAnchorLine(const IntVector2D& pos1, const IntVector2D& pos2) noexcept { SDL_RenderDrawLine(ren, pos1.x, pos1.y, pos2.x, pos2.y); }
-            inline void renderLine(const IntVector2D& pos1, const IntVector2D& pos2) noexcept { renderAnchorLine(pos1 - camera.getPosition(), pos2 - camera.getPosition()); }
+            inline void renderAnchorLine(const EngineVector2D& pos1, const EngineVector2D& pos2) noexcept { SDL_RenderDrawLine(ren, pos1.x, pos1.y, pos2.x, pos2.y); }
+            inline void renderLine(const EngineVector2D& pos1, const EngineVector2D& pos2) noexcept { renderAnchorLine(pos1 - camera.getPosition(), pos2 - camera.getPosition()); }
 
-            void renderAnchorPolygon(const IntVector2D& position, const Polygon& polygon) noexcept {
+            void renderAnchorPolygon(const EngineVector2D& position, const Polygon& polygon) noexcept {
                 for(std::size_t i = 0; i < polygon.size(); i++) {
                     int nxt = (i + 1) % polygon.size();
-                    renderAnchorLine(position + polygon[i].convert<int>(), position + polygon[nxt].convert<int>());
+                    renderAnchorLine(position + polygon[i], position + polygon[nxt]);
                 }
             }
-            inline void renderPolygon(const IntVector2D& position, const Polygon& polygon) noexcept { renderAnchorPolygon(position - camera.getPosition(), polygon); }
+            inline void renderPolygon(const EngineVector2D& position, const Polygon& polygon) noexcept { renderAnchorPolygon(position - camera.getPosition(), polygon); }
 
             inline SDL_Renderer* getRenderer() noexcept { return ren; }
             inline void setRenderer(SDL_Renderer* renderer) noexcept { ren = renderer; }

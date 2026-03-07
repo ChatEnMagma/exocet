@@ -1,6 +1,8 @@
 #include "luasystem.hpp"
 #include "handler.hpp"
 
+#include "state/tileBuilder.hpp"
+
 #define SOL_ALL_SAFETIES_ON 1
 
 #define lua (*this)
@@ -21,6 +23,7 @@ LuaSystem::LuaSystem(Handler* handler) {
     initUsertypeSprite();
     initUsertypeBackground();
     initUsertypeSong();
+    initUsertypeTileBuilder();
 
     initUsertypeEntity();
     initUsertypeComponents();
@@ -52,20 +55,20 @@ function Rect:__tostring()return "(x: " .. self.x .." ; y: " .. self.y .. " ; w:
 }
 
 void LuaSystem::initUsertypeLuaVector2D() {
-    lua.new_usertype<LuaVector2D>(USERTYPE_LUAVECTOR2D,
+    lua.new_usertype<EngineVector2D>(USERTYPE_LUAVECTOR2D,
         sol::meta_function::construct, 
         sol::factories(
-            [](sol::object) noexcept { return make_shared<LuaVector2D>(0.f, 0.f); },
-            [](sol::object, const lua_Number& x, const lua_Number& y) noexcept { return make_shared<LuaVector2D>(x, y); }
+            [](sol::object) noexcept { return make_shared<EngineVector2D>(0.f, 0.f); },
+            [](sol::object, const lua_Number& x, const lua_Number& y) noexcept { return make_shared<EngineVector2D>(x, y); }
         ),
 
-        sol::meta_function::addition, &LuaVector2D::operator+,
-        sol::meta_function::subtraction, &LuaVector2D::operator-,
-        sol::meta_function::multiplication, &LuaVector2D::operator*,
+        sol::meta_function::addition, &EngineVector2D::operator+,
+        sol::meta_function::subtraction, &EngineVector2D::operator-,
+        sol::meta_function::multiplication, &EngineVector2D::operator*,
         
-        "getAngle", &LuaVector2D::getAngle,
-        "x", &LuaVector2D::x,
-        "y", &LuaVector2D::y
+        "getAngle", &EngineVector2D::getAngle,
+        "x", &EngineVector2D::x,
+        "y", &EngineVector2D::y
     );
 }
 
@@ -91,29 +94,44 @@ void LuaSystem::initUsertypeBackground() {
         "getWidth", &Background::getWidth,
         "getHeight", &Background::getHeight,
         
-        "setPosition", [](Background& self, const LuaVector2D& position) noexcept { self.setPosition(position.convert<int>()); },
+        "setPosition", &Background::setPosition,
         "setSize", &Background::setSize,
         "setLoop", &Background::setLoop
+    );
+}
+
+void LuaSystem::initUsertypeTileBuilder() {
+    lua.new_usertype<TileBuilder>(USERTYPE_TILE_BUILDER,
+        sol::meta_function::construct, [this](sol::object, int w, int h) { return make_shared<TileBuilder>(this->handler, w, h); },
+        "addLine", [](TileBuilder& self, sol::variadic_args args) {
+            vector<size_t> tiles;
+
+            for(auto v: args)
+                tiles.emplace_back(v.as<size_t>());
+
+            return self.addLine(tiles);
+        },
+        "settupTiles", &TileBuilder::settupTiles
     );
 }
 
 void LuaSystem::initUsertypeSprite() {
     lua.new_usertype<Sprite>(USERTYPE_SPRITE,
         "render", sol::factories(
-            [](Sprite& sprite, LuaVector2D pos, int w, int h) noexcept { sprite.render(pos.convert<int>(), w, h); },
-            [](Sprite& sprite, LuaVector2D pos, int w, int h, size_t frame) { sprite.render(pos.convert<int>(), w, h, frame); }
+            [](Sprite& sprite, const EngineVector2D& pos, int w, int h) noexcept { sprite.render(pos, w, h); },
+            &Sprite::render
         ),
         "renderAnchor", sol::factories(
-            [](Sprite& sprite, LuaVector2D pos, int w, int h) noexcept { sprite.renderAnchor(pos.convert<int>(), w, h); },
-            [](Sprite& sprite, LuaVector2D pos, int w, int h, size_t frame) { sprite.renderAnchor(pos.convert<int>(), w, h, frame); }
+            [](Sprite& sprite, const EngineVector2D& pos, int w, int h) noexcept { sprite.renderAnchor(pos, w, h); },
+            &Sprite::renderAnchor
         ),
         "renderAngle", sol::factories(
-            [](Sprite& sprite, LuaVector2D pos, double a, int w, int h) noexcept { sprite.renderAngle(pos.convert<int>(), a, w, h); },
-            [](Sprite& sprite, LuaVector2D pos, double a, int w, int h, size_t frame) { sprite.renderAngle(pos.convert<int>(), a, w, h, frame); }
+            [](Sprite& sprite, const EngineVector2D& pos, double a, int w, int h) noexcept { sprite.renderAngle(pos, a, w, h); },
+            &Sprite::renderAngle
         ),
         "renderAnchorAngle", sol::factories(
-            [](Sprite& sprite, LuaVector2D pos, double a, int w, int h) noexcept { sprite.renderAnchorAngle(pos.convert<int>(), a, w, h); },
-            [](Sprite& sprite, LuaVector2D pos, double a, int w, int h, size_t frame) { sprite.renderAnchorAngle(pos.convert<int>(), a, w, h, frame); }
+            [](Sprite& sprite, const EngineVector2D& pos, double a, int w, int h) noexcept { sprite.renderAnchorAngle(pos, a, w, h); },
+            &Sprite::renderAnchorAngle
         ),
 
         "getWidth", &Sprite::getWidth,
@@ -172,7 +190,7 @@ void LuaSystem::initUsertypeComponents() {
 
                 return &c;
             },
-            [](sol::object, Entity& e, sol::table rect, const LuaVector2D& position) {
+            [](sol::object, Entity& e, sol::table rect, const EngineVector2D& position) {
                 auto& c = e.addComponent<AnchorComponent>();
 
                 e.componentsLua[USERTYPE_ANCHOR_COMPONENT] = &c;
@@ -183,7 +201,7 @@ void LuaSystem::initUsertypeComponents() {
                     rect["w"].get<int>(),
                     rect["h"].get<int>()
                 );
-                c.setPosition(position.convert<int>());
+                c.setPosition(position);
 
                 return &c;
             }
@@ -191,7 +209,7 @@ void LuaSystem::initUsertypeComponents() {
 
         "isCollide", [](AnchorComponent& self, Entity* e) {
             if(!e->hasComponent<HitboxComponent>()) { cout << "Warning: the entity: `" << e->getTag() << "` must have hitboxComponent" << endl; return false; }
-            return self.getHitbox()->isCollide(&e->getComponent<HitboxComponent>());
+            return self.getHitbox()->isCollide(e->getComponent<HitboxComponent>());
         },
 
         "getPosition", [](AnchorComponent& self) noexcept { return self.getPosition().convert<lua_Number>(); }
@@ -223,7 +241,7 @@ void LuaSystem::initUsertypeComponents() {
 
                 return &c;
             },
-            [](sol::object, Entity& e, sol::table rect, const LuaVector2D& position) {
+            [](sol::object, Entity& e, sol::table rect, const EngineVector2D& position) {
                 auto& c = e.addComponent<PhysicComponent>();
 
                 e.componentsLua[USERTYPE_PHYSIC_COMPONENT] = &c;
@@ -234,7 +252,7 @@ void LuaSystem::initUsertypeComponents() {
                     rect["w"].get<int>(),
                     rect["h"].get<int>()
                 );
-                c.setPosition(position.convert<int>());
+                c.setPosition(position);
 
                 return &c;
             }
@@ -242,24 +260,24 @@ void LuaSystem::initUsertypeComponents() {
 
         "isCollide", [](AnchorComponent& self, Entity* e) {
             if(!e->hasComponent<HitboxComponent>()) { cout << "Warning: the entity: `" << e->getTag() << "` must have hitboxComponent" << endl; return false; }
-            return self.getHitbox()->isCollide(&e->getComponent<HitboxComponent>());
+            return self.getHitbox()->isCollide(e->getComponent<HitboxComponent>());
         },
 
-        "getAcceleration", [](PhysicComponent& self) noexcept { return self.getMovement()->acc.convert<lua_Number>(); },
+        "getAcceleration", &PhysicComponent::getAccelation,
         "getMasse", &PhysicComponent::getMasse,
-        "getPosition", [](PhysicComponent& self) noexcept { return self.getPosition().convert<lua_Number>(); },
-        "getVelocity", [](PhysicComponent& self) noexcept { return self.getVelocity().convert<lua_Number>(); },
-        "getFriction", [](PhysicComponent& self) noexcept { return self.getFriction().convert<lua_Number>(); },
-        "getSpeed", [](PhysicComponent& self) noexcept { return self.getSpeed().convert<lua_Number>(); },
-        "getMaxSpeed", [](PhysicComponent& self) noexcept { return self.getMaxSpeed().convert<lua_Number>(); },
+        "getPosition", &PhysicComponent::getPosition,
+        "getVelocity", &PhysicComponent::getVelocity,
+        "getFriction", &PhysicComponent::getFriction,
+        "getSpeed", &PhysicComponent::getSpeed,
+        "getMaxSpeed", &PhysicComponent::getMaxSpeed,
 
-        "setAcceleration", [](PhysicComponent& self, const LuaVector2D& acc) noexcept { self.getMovement()->acc = acc.convert<double>(); },
+        "setAcceleration", &PhysicComponent::getAccelation,
         "setMasse", &PhysicComponent::setMasse,
-        "setPosition", [](PhysicComponent& self, const LuaVector2D& pos) noexcept { self.setPosition(pos.convert<int>()); },
-        "setVelocity", [](PhysicComponent& self, const LuaVector2D& vel) noexcept { self.setVelocity(vel.convert<double>()); },
-        "setFriction", [](PhysicComponent& self, const LuaVector2D& friction) { self.setFriction(friction.convert<double>()); },
-        "setSpeed", [](PhysicComponent& self, const LuaVector2D& speed) noexcept { self.setSpeed(speed.convert<double>()); },
-        "setMaxSpeed", [](PhysicComponent& self, const LuaVector2D& maxSpeed) noexcept { self.setMaxSpeed(maxSpeed.convert<double>()); }
+        "setPosition", &PhysicComponent::setPosition,
+        "setVelocity", &PhysicComponent::setVelocity,
+        "setFriction", &PhysicComponent::setFriction,
+        "setSpeed", &PhysicComponent::setSpeed,
+        "setMaxSpeed", &PhysicComponent::setMaxSpeed
     );
 
     lua.new_usertype<SpriteComponent>(USERTYPE_SPRITE_COMPONENT,
@@ -340,6 +358,10 @@ void LuaSystem::initEngine() noexcept {
 
     #define hLua self.get<intptr_t>("_handler")
 
+    lua["engine"]["addTile"] = [](sol::table self, Sprite* sprite, int flags) {
+        ((Handler*) hLua)->getGame()->getStateManager()->getTileManager()->addTile(sprite, bitset<SIZE_BIT_TILE_FLAG>(flags));
+    };
+
     // ============ ALL SUBSYS METHODS ====
     lua["engine"]["getWinHeight"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getWinHeight(); };
     lua["engine"]["getWinWidth"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getWinWidth(); };
@@ -357,7 +379,7 @@ void LuaSystem::initEngine() noexcept {
     lua["engine"]["getButtonCode"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getSubsystem()->getMouseListener()->getButtonCode(); };
     lua["engine"]["getMousePosition"] = [](sol::table self) noexcept {
         auto vec = ((Handler*) hLua)->getMousePosition();
-        return make_shared<LuaVector2D>(vec.x, vec.y);
+        return make_shared<EngineVector2D>(vec.x, vec.y);
     };
 
     lua["engine"]["mute"] = [](sol::table self) noexcept { ((Handler*) hLua)->getSubsystem()->mute(); };
@@ -370,24 +392,27 @@ void LuaSystem::initEngine() noexcept {
 
     // ======== ALL STATES METHODS =====
     lua["engine"]["setState"] = [](sol::table self, size_t state) { ((Handler*) hLua)->getGame()->getStateManager()->setState(state); };
+    lua["engine"]["getState"] = [](sol::table self) { return ((Handler*) hLua)->getGame()->getStateManager()->getState(); };
     lua["engine"]["getCurrentState"] = [](sol::table self) noexcept { ((Handler*) hLua)->getGame()->getStateManager()->getCurrentState(); };
     lua["engine"]["restart"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
     lua["engine"]["nextState"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->nextState(); };
     lua["engine"]["previousState"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->previousState(); };
     lua["engine"]["restart"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
 
+    lua["engine"]["setSizeTile"] = [](int size) noexcept { Tile::size = size; };
+
     // ========= ALL GFX METHODS
     lua["engine"]["setColor"] = sol::factories(
         [](sol::table self, int r, int g, int b) noexcept { ((Handler*) hLua)->getGraphic()->setColor(r, g, b); },
         [](sol::table self, int r, int g, int b, int a) noexcept { ((Handler*) hLua)->getGraphic()->setColor(r, g, b, a); }
     );
-    lua["engine"]["renderRect"] = [](sol::table self, const LuaVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderRect(position.convert<int>(), w, h); };
-    lua["engine"]["renderFillRect"] = [](sol::table self, const LuaVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderFillRect(position.convert<int>(), w, h); };
-    lua["engine"]["renderAnchorRect"] = [](sol::table self, const LuaVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderAnchorRect(position.convert<int>(), w, h); };
-    lua["engine"]["renderAnchorFillRect"] = [](sol::table self, const LuaVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(position.convert<int>(), w, h); };
+    lua["engine"]["renderRect"] = [](sol::table self, const EngineVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderRect(position, w, h); };
+    lua["engine"]["renderFillRect"] = [](sol::table self, const EngineVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderFillRect(position, w, h); };
+    lua["engine"]["renderAnchorRect"] = [](sol::table self, const EngineVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderAnchorRect(position, w, h); };
+    lua["engine"]["renderAnchorFillRect"] = [](sol::table self, const EngineVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(position, w, h); };
     lua["engine"]["centerOnEntity"] = [](sol::table self, Entity* entity) noexcept { ((Handler*) hLua)->getGraphic()->centerOnEntity(entity); };
-    lua["engine"]["getCameraPosition"] = [](sol::table self) noexcept {  return ((Handler*) hLua)->getGraphic()->getCamera()->getPosition().convert<lua_Number>(); };
-    lua["engine"]["renderText"] = [](sol::table self, const LuaVector2D& position, int width, int height, string text) {
+    lua["engine"]["getCameraPosition"] = [](sol::table self) noexcept {  return ((Handler*) hLua)->getGraphic()->getCamera()->getPosition(); };
+    lua["engine"]["renderText"] = [](sol::table self, const EngineVector2D& position, int width, int height, string text) {
         ((Handler*) hLua)->getGraphic()->renderText(
             static_cast<int>(position.x),
             static_cast<int>(position.y),
@@ -397,14 +422,15 @@ void LuaSystem::initEngine() noexcept {
             ((Handler*) hLua)->getGraphic()->getFont("res/FreeRoyalty.ttf", 20)
         );
     };
-    lua["engine"]["renderPolygon"] = [](sol::table self, const LuaVector2D& position, const Polygon& polygon) noexcept {
-        ((Handler*) hLua)->getGraphic()->renderPolygon(position.convert<int>(), polygon);
+    lua["engine"]["renderPolygon"] = [](sol::table self, const EngineVector2D& position, const Polygon& polygon) noexcept {
+        ((Handler*) hLua)->getGraphic()->renderPolygon(position, polygon);
     };
     
     
     lua["engine"]["getSprite"] = sol::factories(
         [](sol::table self, const string& key) { return ((Handler*) hLua)->getGraphic()->getSprite(key); },
         [](sol::table self, const string& key, const string& path) { return ((Handler*) hLua)->getGraphic()->getSprite(key, path); },
+        [](sol::table self, const string& key, const string& path, int xPos, int yPos, int width, int height) { return ((Handler*) hLua)->getGraphic()->loadSpriteSheet(key, path, xPos, yPos, width, height); },
         [](sol::table self, const string& key, const string& path, int nCol, int nRow, int wsrc, int hsrc, size_t nbFrames) { return ((Handler*) hLua)->getGraphic()->getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrames); }
     );
     lua["engine"]["getBackground"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getGame()->getStateManager()->getBackground(); };

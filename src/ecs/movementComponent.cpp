@@ -12,15 +12,14 @@ void MovementComponent::move() noexcept {
     vel += acc.scalar(handler->getDeltaTime());
     
     if(isMovingRight())
-        pos.x += static_cast<int>(ceil(vel.x));
+        pos.x += ceil(vel.x);
     else if(isMovingLeft())
-        pos.x += static_cast<int>(floor(vel.x));     
+        pos.x += floor(vel.x);     
 
     if(isMovingUp())
-        pos.y += static_cast<int>(floor(vel.y));
+        pos.y += floor(vel.y);
     else if(isMovingDown())
-       pos.y += static_cast<int>(ceil(vel.y));
-    
-       
+       pos.y += ceil(vel.y);
+     
     vel *= friction;
 }

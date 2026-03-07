@@ -23,10 +23,10 @@ namespace exocet {
             /**
              * \brief Render the texture
              */
-            void render(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
-            void renderAnchor(const IntVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
-            void renderAnchorAngle(const IntVector2D& position, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
-            void renderAngle(const IntVector2D&, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
+            void render(const EngineVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
+            void renderAnchor(const EngineVector2D& position, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
+            void renderAnchorAngle(const EngineVector2D& position, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
+            void renderAngle(const EngineVector2D&, double angle, int wdest, int hdest, int xsrc, int ysrc, int wsrc, int hsrc) noexcept;
 
             inline int getHeight() const noexcept { return h; }
             inline int getWidth() const noexcept { return w; }

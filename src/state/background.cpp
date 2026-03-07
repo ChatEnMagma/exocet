@@ -16,10 +16,10 @@ void Background::render() noexcept {
             s->render(position, w, h);
 
             if(handler->getGraphic()->getCamera()->getPosition().x <= position.x) {
-                s->render(position - Vector2D<int>(w, 0), w, h);
+                s->render(position - EngineVector2D(w, 0), w, h);
             }
             if(handler->getGraphic()->getCamera()->getPosition().x + handler->getWinWidth() >= position.x) {
-                s->render(position + Vector2D<int>(w, 0), w, h);
+                s->render(position + EngineVector2D(w, 0), w, h);
             }
 
             if(position.x <= -w)

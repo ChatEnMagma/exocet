@@ -39,10 +39,10 @@ void EntityManager::refresh() {
         std::end(entities)
     );
     // Add all entities from entity tmp will add
-    for(Entity* e: entitiedAdd) {
-        unique_ptr<Entity> uPtr { e };
-        entities.emplace_back(move(uPtr));
-    }
+    for_each(entitiedAdd.begin(), entitiedAdd.end(), [this](Entity* e) {
+        entities.emplace_back(move(unique_ptr<Entity> { e }));
+    });
+    
     entitiedAdd.clear();
 }
 

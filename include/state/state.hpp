@@ -5,9 +5,12 @@
 #include <map>
 #include <memory>
 
-#include "ecs/components.hpp"
-#include "background.hpp"
 #include "tool/playSong.hpp"
+
+#include "ecs/components.hpp"
+
+#include "background.hpp"
+#include "tile.hpp"
 
 namespace exocet {
     class State {
@@ -17,6 +20,7 @@ namespace exocet {
             EntityManager* eManager;
             EntityManager* uiManager;
             Background* background;
+            TileManager* tileManager;
 
             sol::function initLua;
             sol::function updateLua;
@@ -24,52 +28,33 @@ namespace exocet {
 
             std::string tag;
             std::map<std::string, std::unique_ptr<PlaySong>> songs;
+
+            int w, h;
+            std::vector<std::size_t> tiles;
+
+            void renderTiles();
         public:
-            State(Handler* handler) noexcept { 
-                this->handler = handler;
-                
-                this->tag = "no_name"; 
-
-                this->initLua = sol::nil;
-                this->updateLua = sol::nil;
-                this->renderLua = sol::nil;
-            }
-
-            State(Handler* handler, std::string tag, sol::function initLua, sol::function updateLua, sol::function renderLua) noexcept { 
-                this->handler = handler;
-                
-                this->tag = tag; 
-
-                this->initLua = initLua;
-                this->updateLua = updateLua;
-                this->renderLua = renderLua;
-            }
+            State(Handler* handler) noexcept;
+            State(Handler* handler, std::string tag, sol::function initLua, sol::function updateLua, sol::function renderLua) noexcept;
             ~State() noexcept { songs.clear(); }
 
             void init() { if(initLua != sol::nil) initLua(); }
-            void update() { 
-                if(updateLua != sol::nil) updateLua();
-                
-                background->update(); 
-                eManager->update(); 
-                eManager->refresh(); 
-                uiManager->update(); 
-                uiManager->refresh(); 
-            }
-            void render() {
-                if(renderLua != sol::nil) renderLua();
+            void update();
+            void render();
 
-                background->render(); 
-                eManager->render(); 
-                uiManager->render(); 
-            }
+            void settupTiles(int width, int height, std::vector<std::size_t> tiles);
 
+            Tile* getTile(const EngineVector2D& position) const noexcept {
+                auto pos = position.convert<int>();
+
+                if(pos.x < 0 || pos.y < 0 || pos.x > w || pos.y > h) return tileManager->getDefaultTile();
+                return tileManager->getTile(tiles[(w * pos.y) + pos.x]);
+            }
+            inline bool getTileFlags(const EngineVector2D& position, int flags) const noexcept { return getTile(position)->isFlags(flags); }
             inline EntityManager* getEntityManager() noexcept { return eManager; }
             inline EntityManager* getUIManager() noexcept { return uiManager; }
             inline std::string getTag() const noexcept { return tag; }
-            inline void setEntityManager(EntityManager* entityManager) noexcept { eManager = entityManager; }
-            inline void setUIManager(EntityManager* uiManager) noexcept { this->uiManager = uiManager; }
-            inline void setBackground(Background* background) noexcept { this->background = background; }
+
             PlaySong* getSong(const std::string& key, const std::string& path = "") {
                 auto it = songs.find(key);
 
@@ -80,6 +65,11 @@ namespace exocet {
 
                 return songs[key].get();
             }
+
+            inline void setEntityManager(EntityManager* entityManager) noexcept { eManager = entityManager; }
+            inline void setUIManager(EntityManager* uiManager) noexcept { this->uiManager = uiManager; }
+            inline void setBackground(Background* background) noexcept { this->background = background; }
+            inline void setTileManager(TileManager* tileManager) noexcept { this->tileManager = tileManager; }
     };
 
     class StateManager {
@@ -87,8 +77,12 @@ namespace exocet {
             Handler* handler;
 
             std::vector<std::unique_ptr<State>> states;
+
             std::unique_ptr<EntityManager> eManager;
             std::unique_ptr<EntityManager> uiManager;
+
+            std::unique_ptr<TileManager> tileManager;
+
             std::unique_ptr<Background> background;
 
             /**
@@ -106,6 +100,7 @@ namespace exocet {
                 state->setEntityManager(getEntityManager());
                 state->setUIManager(getUIManager());
                 state->setBackground(getBackground());
+                state->setTileManager(getTileManager());
 
                 states.emplace_back(std::move(state));
             }
@@ -115,12 +110,17 @@ namespace exocet {
             inline void restart() { setState(current); }
             inline void nextState() { if(current < states.size() - 1) setState(current + 1); }
             inline void previousState() { if(current > 0) setState(current - 1); }
-
+            
+            // All getters and setters
+            
+            inline State* getState() noexcept { return states[current].get(); }
             inline std::size_t getCurrentState() noexcept { return current; }
+
             inline EntityManager* getEntityManager() noexcept { return eManager.get(); }
             inline EntityManager* getUIManager() noexcept { return uiManager.get(); }
+            
             inline Background* getBackground() noexcept { return background.get(); }
-            inline State* getState() noexcept { return states[current].get(); }
+            inline TileManager* getTileManager() noexcept { return tileManager.get(); }
             
             void setState(std::size_t state);
     };

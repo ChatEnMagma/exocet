@@ -7,8 +7,6 @@
 
 #include <sol/sol.hpp>
 
-namespace exocet { class Handler; }
-
 #define EXOCET_ENGIN_VERSION 0
 #define EXICET_ENGIN_MINOR_VERSION 2
 
@@ -28,3 +26,14 @@ namespace exocet { class Handler; }
 #define PHYSIC_DEFAULT_MAXSPEED 10.f
 
 #define PARTICLE_DEFAULT_TIME 1000
+
+#include "tool/vectors.hpp"
+
+namespace exocet {
+    /**
+     * \brief All the engine use the same type of vectors
+     */
+    using EngineVector2D = Vector2D<double>;
+    
+    class Handler;
+}

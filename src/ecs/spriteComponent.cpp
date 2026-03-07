@@ -5,16 +5,12 @@
 using namespace exocet;
 using namespace std;
 
-void SpriteComponent::init() noexcept {
-    if(!entity->hasComponent<MovementComponent>())
-        movement = &entity->addComponent<MovementComponent>();
-    else
-        movement = &entity->getComponent<MovementComponent>();
-    
+void SpriteComponent::init() noexcept {    
     if(!entity->hasComponent<HitboxComponent>())
         hitbox = &entity->addComponent<HitboxComponent>();
     else
         hitbox = &entity->getComponent<HitboxComponent>();
+    movement = &entity->getComponent<MovementComponent>();
 
     fps = FPS;
     frame = 0;

@@ -26,6 +26,8 @@ Game::Game(Subsystem* subsys) {
     // init StateManager
     (sManager = new StateManager(handler))->initStates();
 
+    (*lua)["config"]["init"]();
+
     cout << "Success to initiate all states" << endl;
 
     // set the state, and try to fetch the config file lua

@@ -1,16 +1,18 @@
 #pragma once
 
+#include <ranges>
 #include <vector>
 
+#include "constantes.hpp"
 #include "tool/vectors.hpp"
 
 namespace exocet {
-    using Vertex = DoubleVector2D;
+    using Vertex = Vector2D<double>;
     using Vertices = std::vector<Vertex>;
 
     class Polygon {
         private:
-            std::vector<Vertex> vertices;
+            Vertices vertices;
             Vertex pos;
             int width, height;
         public:
@@ -45,31 +47,31 @@ namespace exocet {
                 this->width = 0;
                 this->height = 0;
 
-                for(Vertex v: this->vertices) {
+                for_each(vertices.begin(), vertices.end(), [this](const auto v) {
                     this->width = std::max<int>(this->width, v.x);
                     this->height = std::max<int>(this->height, v.y);
 
                     this->pos.x = std::min<double>(this->pos.x, v.x);
                     this->pos.y = std::min<double>(this->pos.y, v.y);
-                }
+                });
             }
             /**
              * \brief Make a polygon with lua table like {{x: 0, y: 0}, {x: 0, y: 32}, ...}
              */
-            Polygon(sol::table vertices) {
-                vertices.for_each([&](sol::object, sol::object const& value) { this->vertices.push_back(value.as<LuaVector2D>()); });
+            Polygon(sol::table luaVertices) {
+                luaVertices.for_each([&](sol::object, sol::object const& value) { this->vertices.push_back(value.as<EngineVector2D>()); });
 
                 this->width = 0;
                 this->height = 0;
                 this->pos = Vertex(0, 0);
 
-                for(Vertex v: this->vertices) {
+                for_each(vertices.begin(), vertices.end(), [this](const auto v) {
                     this->width = std::max<int>(this->width, v.x);
                     this->height = std::max<int>(this->height, v.y);
 
                     this->pos.x = std::min<double>(this->pos.x, v.x);
                     this->pos.y = std::min<double>(this->pos.y, v.y);
-                }
+                });
             }
             ~Polygon() noexcept = default;
 
@@ -94,7 +96,7 @@ namespace exocet {
             /**
              * \return Get all vertices
              */
-            inline std::vector<Vertex> getVertices() const noexcept { return vertices; }
+            inline Vertices getVertices() const noexcept { return vertices; }
             /**
              * \return The number of vertices
              */
@@ -120,37 +122,27 @@ namespace exocet {
              * \brief Transpose the polygon
              * \return The polygon transposed
              */
-            Polygon translate(Vertex position) const noexcept {
-                std::vector<Vertex> vrt = std::vector<Vertex>(size());
+            Polygon translate(const Vertex& position) const noexcept {
+                auto newVertices = std::ranges::views::transform(vertices, [position](auto& v) {
+                    return v + position;
+                });
 
-                for(std::size_t i = 0; i < size(); i++) {
-                    vrt[i] = vertices[i] + position;
-                }
-
-                return Polygon(vrt);
+                return Polygon({ newVertices.begin(), newVertices.end() });
             }
             /**
              * \brief Rotate the polygon
              * \return The polygon rotated
              */
             Polygon rotate(double angle) const noexcept {
-                Polygon poly(vertices);
+                auto rotateVertices = std::ranges::views::transform(vertices, [angle](auto& v) { 
+                    return Vertex(v.x * cos(angle) - v.y * sin(angle), v.x * sin(angle) + v.y * cos(angle));
+                });
 
-                int x, y;
-
-                for(Vertex p: poly) {
-                    x = p.x;
-                    y = p.y;
-                    
-                    p.x = x * cos(angle) - y * sin(angle);
-                    p.y = x * sin(angle) + y * cos(angle);
-                }
-
-                return poly;
+                return Polygon({ rotateVertices.begin(), rotateVertices.end() });
             }
 
-            std::vector<Vertex>::iterator begin() noexcept { return vertices.begin(); }
-            std::vector<Vertex>::iterator end() noexcept { return vertices.end(); }
+            Vertices::iterator begin() noexcept { return vertices.begin(); }
+            Vertices::iterator end() noexcept { return vertices.end(); }
 
             inline Vertex operator[](std::size_t i) const { return getVertex(i); }
 

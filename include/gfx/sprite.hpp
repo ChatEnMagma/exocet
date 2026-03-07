@@ -11,7 +11,7 @@ namespace exocet {
         private:
             Texture* texture;
 
-            int nCol, nRow, w, h;
+            int nCol, nRow, x, y, w, h;
             std::size_t nFrames;
 
             inline int getSheetX(std::size_t i) noexcept { return (i % nCol) * w; }
@@ -19,24 +19,25 @@ namespace exocet {
         public:
             Sprite(Handler* handler, const std::string& path);
             Sprite(Handler* handler, const std::string& path, int nCol, int nRow, int width, int height, std::size_t nFrames);
+            Sprite(Handler* handler, const std::string& path, int xPos, int yPos, int width, int height);
             ~Sprite() noexcept = default;
 
-            void render(const IntVector2D& position, int width, int height, std::size_t i = 0) {
+            void render(const EngineVector2D& position, int width, int height, std::size_t i = 0) {
                 if(i > size()) throw std::runtime_error("overflow");
-                texture->render(position, width, height, getSheetX(i), getSheetY(i), w, h);
+                texture->render(position, width, height, x + getSheetX(i), y + getSheetY(i), w, h);
             }
-            void renderAnchor(const IntVector2D& position, int width, int height, std::size_t i = 0) {
+            void renderAnchor(const EngineVector2D& position, int width, int height, std::size_t i = 0) {
                 if(i > size()) throw std::runtime_error("overflow");
-                texture->renderAnchor(position, width, height, getSheetX(i), getSheetY(i), w, h);
+                texture->renderAnchor(position, width, height, x + getSheetX(i), y + getSheetY(i), w, h);
             }
 
-            void renderAngle(const IntVector2D& position, double angle, int width, int height, std::size_t i = 0) {
+            void renderAngle(const EngineVector2D& position, double angle, int width, int height, std::size_t i = 0) {
                 if(i > size()) throw std::runtime_error("overflow");
-                texture->renderAngle(position, angle, width, height, getSheetX(i), getSheetY(i), w, h);
+                texture->renderAngle(position, angle, width, height, x + getSheetX(i), y + getSheetY(i), w, h);
             }
-            void renderAnchorAngle(const IntVector2D& position, double angle, int width, int height, std::size_t i = 0) {
+            void renderAnchorAngle(const EngineVector2D& position, double angle, int width, int height, std::size_t i = 0) {
                 if(i > size()) throw std::runtime_error("overflow");
-                texture->renderAnchorAngle (position, angle, width, height, getSheetX(i), getSheetY(i), w, h);
+                texture->renderAnchorAngle (position, angle, width, height, x + getSheetX(i), y + getSheetY(i), w, h);
             }
 
             inline int getHeight() noexcept { return h; }

@@ -154,7 +154,7 @@ namespace exocet {
             EntityManager(Handler* handler) noexcept { this->handler = handler; }
 
             inline void update() { for(auto& e: entities) e->update(); }
-            inline void render() {for(auto& e: entities) e->render(); }
+            inline void render() { for(auto& e: entities) e->render(); }
 
             /**
              * \brief Refresh the entity and group array, and clear if the entity is not active

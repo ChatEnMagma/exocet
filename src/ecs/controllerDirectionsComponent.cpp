@@ -12,7 +12,7 @@ void ControllerDirectionsComponent::init() {
     }
                 
     movement = &entity->getComponent<MovementComponent>();
-    direction = DoubleVector2D::vectorZeros();
+    direction = EngineVector2D::vectorZeros();
 }
 
 void ControllerDirectionsComponent::update() {

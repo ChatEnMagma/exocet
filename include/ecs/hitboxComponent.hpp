@@ -16,9 +16,12 @@ namespace exocet {
             void init() noexcept override;
             void render() noexcept override;
 
-            bool isCollide(HitboxComponent* hitbox) const noexcept;
-            bool isCollideHorizontal(HitboxComponent* hitbox) const noexcept;
-            bool isCollideVertical(HitboxComponent* hitbox) const noexcept;
+            std::optional<Entity*> getCollide() const;
+            std::vector<Entity*> getCollideEntities() const;
+
+            bool isCollide(const HitboxComponent& hitbox) const noexcept;
+            bool isCollideHorizontal(const HitboxComponent& hitbox) const noexcept;
+            bool isCollideVertical(const HitboxComponent& hitbox) const noexcept;
 
             /**
              * \return True if the mouse is inside the entity else false
@@ -37,7 +40,7 @@ namespace exocet {
             /**
              * \return The focal point of the entity
              */
-            inline DoubleVector2D getCenter() const noexcept { return movement->pos.convert<double>() + DoubleVector2D(getWidth() / 2, getHeight() / 2); }
+            inline EngineVector2D getCenter() const noexcept { return movement->pos.convert<double>() + EngineVector2D(getWidth() / 2, getHeight() / 2); }
             double getLeft() const noexcept { return polygons.getLeft() + static_cast<double>(movement->pos.x); }
             double getRight() const noexcept { return polygons.getRight() + static_cast<double>(movement->pos.x); }
             double getUp() const noexcept { return polygons.getUp() + static_cast<double>(movement->pos.y); }
@@ -59,13 +62,13 @@ namespace exocet {
              * \brief Set a rectangular hitbox for the entity
              */
             inline void setRect(int xpos, int ypos, int width, int height) noexcept { polygons = Polygon(xpos, ypos, width, height); }
-            inline void setHitbox(Polygon polygon) noexcept { polygons = polygon; }
+            inline void setHitbox(const Polygon& polygon) noexcept { polygons = polygon; }
             inline void setColor(Uint8 red, Uint8 green, Uint8 blue) noexcept { color[0] = red; color[1] = green; color[2] = blue; }
 
             inline int getPositionX() const noexcept { return movement->getPosition().x; }
             inline int getPositionY() const noexcept { return movement->getPosition().y; }
-            inline IntVector2D getPosition() const noexcept { return movement->getPosition(); } 
+            inline EngineVector2D getPosition() const noexcept { return movement->getPosition(); } 
 
-            inline Polygon getPolygon() const noexcept { return polygons; }
+            inline const Polygon& getPolygon() const noexcept { return polygons; }
     };
 }

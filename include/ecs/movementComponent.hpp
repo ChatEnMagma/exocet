@@ -8,22 +8,22 @@
 namespace exocet {
     class MovementComponent: public Component {
         private:
-            DoubleVector2D speed, maxSpeed;
-            DoubleVector2D friction;
+            EngineVector2D speed, maxSpeed;
+            EngineVector2D friction;
         public:
             MovementComponent() noexcept = default;
 
-            IntVector2D pos;
-            DoubleVector2D vel;
-            DoubleVector2D acc;
+            EngineVector2D pos;
+            EngineVector2D vel;
+            EngineVector2D acc;
 
             void init() noexcept override {
-                setAccelaration(DoubleVector2D::vectorZeros());
-                setPosition(IntVector2D::vectorZeros());
-                setVelocity(DoubleVector2D::vectorZeros());
+                setAccelaration(EngineVector2D::vectorZeros());
+                setPosition(EngineVector2D::vectorZeros());
+                setVelocity(EngineVector2D::vectorZeros());
 
-                setSpeed(DoubleVector2D(1.l, 1.f));
-                setMaxSpeed(DoubleVector2D(std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
+                setSpeed(EngineVector2D(1.l, 1.f));
+                setMaxSpeed(EngineVector2D(std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
             }
 
             /**
@@ -39,24 +39,24 @@ namespace exocet {
             inline bool isMovingDown() const noexcept { return vel.y > 0; }
 
             // ALL GETTERS
-            inline DoubleVector2D getAccelation() const noexcept { return acc; }
-            inline IntVector2D getPosition() const noexcept { return pos; }
-            inline DoubleVector2D getVelocity() const noexcept { return vel.normalized() * speed; }
-            inline DoubleVector2D getFriction() const noexcept { return friction; }
-            inline DoubleVector2D getSpeed() const noexcept { return speed; }
-            inline DoubleVector2D getMaxSpeed() const noexcept { return maxSpeed; }
+            inline EngineVector2D getAccelation() const noexcept { return acc; }
+            inline EngineVector2D getPosition() const noexcept { return pos; }
+            inline EngineVector2D getVelocity() const noexcept { return vel.normalized() * speed; }
+            inline EngineVector2D getFriction() const noexcept { return friction; }
+            inline EngineVector2D getSpeed() const noexcept { return speed; }
+            inline EngineVector2D getMaxSpeed() const noexcept { return maxSpeed; }
             inline double getAngle() const noexcept { return vel.getAngle(); }
 
             // ALL SETTERS
-            inline void setAccelaration(const DoubleVector2D& accelaration) noexcept { acc = accelaration; }
-            inline void setPosition(const IntVector2D& position) noexcept { pos = position; }
-            inline void setVelocity(const DoubleVector2D& velocity) noexcept { vel = velocity; }
-            inline void setFriction(const DoubleVector2D& friction) {
+            inline void setAccelaration(const EngineVector2D& accelaration) noexcept { acc = accelaration; }
+            inline void setPosition(const EngineVector2D& position) noexcept { pos = position; }
+            inline void setVelocity(const EngineVector2D& velocity) noexcept { vel = velocity; }
+            inline void setFriction(const EngineVector2D& friction) {
                 if(friction.x > 1 || friction.x < 0 || friction.y > 1 || friction.y < 0) throw new std::runtime_error("your friction must be in [0, 1]");
                 this->friction = friction; 
             }
-            inline void setSpeed(const DoubleVector2D& speed) noexcept { this->speed = speed; }
-            inline void setMaxSpeed(const DoubleVector2D& maxSpeed) noexcept { this->maxSpeed = maxSpeed; }
+            inline void setSpeed(const EngineVector2D& speed) noexcept { this->speed = speed; }
+            inline void setMaxSpeed(const EngineVector2D& maxSpeed) noexcept { this->maxSpeed = maxSpeed; }
 
             inline friend std::ostream& operator<<(std::ostream& os, const MovementComponent* component) noexcept {
                 return os << "move: {pos: " << component->getPosition() << " ; vel: " << component->getVelocity() << "}";

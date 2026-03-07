@@ -1,4 +1,5 @@
 #include <climits>
+#include <ranges>
 
 #include "ecs/hitboxComponent.hpp"
 #include "handler.hpp"
@@ -14,8 +15,10 @@ void HitboxComponent::init() noexcept {
     }
 
     polygons = Polygon(0, 0, HITBOX_DEFAULT_SIZE, HITBOX_DEFAULT_SIZE);
-
+    
     setColor(0xff, 0x00, 0x00);
+
+    handler->getEntityManager()->addToGroup(entity, GROUP_COLLIDER);
 }
 
 void projection(const Polygon& poly, const Vector2D<double> axis, double* max, double* min) noexcept {
@@ -32,14 +35,14 @@ bool overlaps(double max1, double max2, double min1, double min2) noexcept {
     return !(min1 > max2 || min2 > max1);
 }
 
-bool HitboxComponent::isCollide(HitboxComponent* hitbox) const noexcept {
+bool HitboxComponent::isCollide(const HitboxComponent& hitbox) const noexcept {
     // Use the Separating Axis Theorem
 
     double max1, max2, min1, min2;
 
     // Get the transpos of the hitbox
     Polygon p1 = polygons.translate(movement->getPosition().convert<double>());
-    Polygon p2 = hitbox->getPolygon().translate(hitbox->getPosition().convert<double>());
+    Polygon p2 = hitbox.getPolygon().translate(hitbox.getPosition().convert<double>());
 
     auto axes1 = p1.getAxes();
     auto axes2 = p2.getAxes();
@@ -62,21 +65,42 @@ bool HitboxComponent::isCollide(HitboxComponent* hitbox) const noexcept {
     return true;
 }
 
-bool HitboxComponent::isCollideHorizontal(HitboxComponent* hitbox) const noexcept {
+optional<Entity*> HitboxComponent::getCollide() const {
+    auto group = handler->getEntityManager()->getGroup(GROUP_COLLIDER);
+
+    auto it = ranges::find_if(group, [this](const Entity* e) { return e != this->entity && this->isCollide(e->getComponent<HitboxComponent>()); } );
+
+    if(it != group.end())
+        return optional<Entity*>(*it);
+
+    return nullopt;
+}
+
+vector<Entity*> HitboxComponent::getCollideEntities() const {
+    auto group = handler->getEntityManager()->getGroup(GROUP_COLLIDER);
+
+    auto colliding = group
+        | views::filter([this](const Entity* e) { return e != entity && e->hasComponent<HitboxComponent>(); })
+        | views::filter([this](const Entity* e) { return this->isCollide(e->getComponent<HitboxComponent>()); });
+    
+    return { colliding.begin(), colliding.end() };
+}
+
+bool HitboxComponent::isCollideHorizontal(const HitboxComponent& hitbox) const noexcept {
     return movement->vel.x != 0 && movement->vel.y != 0 && (
-        ((((float) (hitbox->getLeft() - getRight()) / movement->vel.x) > 1.f) ||
-        (((float) (hitbox->getRight() - getLeft()) / movement->vel.x) > 1.f)) &&
-        ((((float) (hitbox->getUp() - getDown()) / movement->vel.y) < 0.f) ||
-        (((float) (hitbox->getDown() - getUp()) / movement->vel.y) < 0.f))
+        ((((float) (hitbox.getLeft() - getRight()) / movement->vel.x) > 1.f) ||
+        (((float) (hitbox.getRight() - getLeft()) / movement->vel.x) > 1.f)) &&
+        ((((float) (hitbox.getUp() - getDown()) / movement->vel.y) < 0.f) ||
+        (((float) (hitbox.getDown() - getUp()) / movement->vel.y) < 0.f))
     );
 }
 
-bool HitboxComponent::isCollideVertical(HitboxComponent* hitbox) const noexcept {
+bool HitboxComponent::isCollideVertical(const HitboxComponent& hitbox) const noexcept {
     return movement->vel.x != 0 && movement->vel.y != 0 && (
-        (((float) ((hitbox->getUp() - getDown()) / movement->vel.y) > 1.f) ||
-        (((float) (hitbox->getDown() - getUp()) / movement->vel.y) > 1.f)) &&
-        (((float) ((hitbox->getLeft() - getRight()) / movement->vel.x) < 0.f) ||
-        (((float) (hitbox->getRight() - getLeft()) / movement->vel.x) < 0.f))
+        (((float) ((hitbox.getUp() - getDown()) / movement->vel.y) > 1.f) ||
+        (((float) (hitbox.getDown() - getUp()) / movement->vel.y) > 1.f)) &&
+        (((float) ((hitbox.getLeft() - getRight()) / movement->vel.x) < 0.f) ||
+        (((float) (hitbox.getRight() - getLeft()) / movement->vel.x) < 0.f))
     );
 }
 
@@ -88,7 +112,7 @@ void HitboxComponent::render() noexcept {
 }
 
 bool HitboxComponent::isInsideMouse() const noexcept {
-    Vector2D<int> pos = handler->getMousePosition() + handler->getGraphic()->getCamera()->getPosition();
+    auto pos = handler->getMousePosition() + handler->getGraphic()->getCamera()->getPosition();
     
     return (
         pos.x >= getLeft()  &&
@@ -99,7 +123,7 @@ bool HitboxComponent::isInsideMouse() const noexcept {
 }
 
 bool HitboxComponent::isInsideScreen() const noexcept {
-    IntVector2D posCam = handler->getGraphic()->getCamera()->getPosition();
+    auto posCam = handler->getGraphic()->getCamera()->getPosition();
 
     return (
         movement->pos.x > posCam.x - getWidth() && 

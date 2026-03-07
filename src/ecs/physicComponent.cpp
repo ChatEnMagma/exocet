@@ -19,8 +19,6 @@ void PhysicComponent::init() noexcept {
     setFriction(DoubleVector2D(0.4f, 0.4f));
 
     setMasse(PHYSIC_DEFALULT_MASSE);
-
-    handler->getEntityManager()->addToGroup(entity, GROUP_COLLIDER);
 }
 
 void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
@@ -59,25 +57,8 @@ void PhysicComponent::collisionWithPhysicEntity(Entity* e) {
     }
 }
 
-vector<Entity*> PhysicComponent::getCollideEntities() {
-    vector<Entity*> entities = {}; // empty vector
-
-    for(auto& e: handler->getEntityManager()->getGroup(GROUP_COLLIDER)) {
-        if(e == entity) continue;
-        // if this physicCompenent is well collid with the other entity grouped collide
-        if(hitbox->isCollide(&e->getComponent<HitboxComponent>())) {
-            entities.emplace_back(e);
-        }
-    }
-    return entities;
-}
-
 void PhysicComponent::update() noexcept {
-    auto collides = getCollideEntities();
-
-    if(collides.empty())
-        movement->move();
-    for(auto& e: collides) this->collisionWithPhysicEntity(e);
+    movement->move();
 }
 
 void PhysicComponent::render() noexcept {
@@ -87,8 +68,8 @@ void PhysicComponent::render() noexcept {
     if(handler->getGame()->isShowingHitbox()) {
         handler->getGraphic()->setRenderColor(0xff, 0xff, 0xff);
         handler->getGraphic()->renderLine(
-            hitbox->getCenter().convert<int>(), 
-            (hitbox->getCenter() + movement->vel.clampMagnitude(getSpeed().x).scalar(getSpeed().x * 4)).convert<int>());
+            hitbox->getCenter(), 
+            hitbox->getCenter() + movement->vel.clampMagnitude(getSpeed().x).scalar(getSpeed().x * 4));
     }
     // Render the pointer address
     if(handler->getGame()->isShowingPointerEntities()) {

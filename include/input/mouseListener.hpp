@@ -1,7 +1,6 @@
 #pragma once
 
 #include "constantes.hpp"
-#include "tool/vectors.hpp"
 
 #define NB_BUTTONS 6
 
@@ -11,7 +10,7 @@ namespace exocet {
             bool buttons[NB_BUTTONS];
             bool cantPress[NB_BUTTONS];
             bool justPress[NB_BUTTONS];
-            Vector2D<int> pos;
+            EngineVector2D pos;
 
             Uint16 scancode;
         public:
@@ -37,7 +36,7 @@ namespace exocet {
 
             inline void interact(Uint16 scancode, bool pressing) noexcept { this->scancode = scancode; buttons[scancode] = pressing; }
             inline void move(int x, int y) noexcept { pos.x = x; pos.y = y; }
-            inline Vector2D<int> getPosition() const noexcept { return pos; }
+            inline EngineVector2D getPosition() const noexcept { return pos; }
             inline bool getButton(Uint16 scancode) const noexcept { return buttons[scancode]; }
             inline bool getJustButton(Uint16 scancode) const noexcept { return justPress[scancode]; }
 

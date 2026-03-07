@@ -12,6 +12,8 @@
 #define USERTYPE_SONG "Song"
 #define USERTYPE_BACKGROUND "Background"
 
+#define USERTYPE_TILE_BUILDER "TileBuilder"
+
 #define USERTYPE_ENTITY "Entity"
 
 #define USERTYPE_ANCHOR_COMPONENT "AnchorComponent"
@@ -33,6 +35,7 @@ namespace exocet {
             void initUsertypeSprite();
             void initUsertypeSong();
             void initUsertypeBackground();
+            void initUsertypeTileBuilder();
 
             void initUsertypeEntity();
             void initUsertypeComponents();
