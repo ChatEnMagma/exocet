@@ -7,9 +7,7 @@ using namespace exocet;
 
 int Tile::size = DEFAULT_TILE_SIZE;
 
-State::State(Handler* handler) noexcept {
-    this->handler = handler;
-                
+State::State(Handler& handler): handler(handler) {
     this->tag = "no_name"; 
 
     this->initLua = sol::nil;
@@ -20,41 +18,43 @@ State::State(Handler* handler) noexcept {
     h = 0;
 }
 
-State::State(Handler* handler, std::string tag, sol::function initLua, sol::function updateLua, sol::function renderLua) noexcept { 
-    this->handler = handler;
-                
+State::State(Handler& handler, std::string tag, sol::function initLua, sol::function updateLua, sol::function renderLua): handler(handler) { 
     this->tag = tag; 
 
-    this->initLua = initLua;
-    this->updateLua = updateLua;
-    this->renderLua = renderLua;
+    this->initLua = move(initLua);
+    this->updateLua = move(updateLua);
+    this->renderLua = move(renderLua);
 
     w = 0;
     h = 0;
 }
 
 void State::update() {
-    if(updateLua != sol::nil) updateLua();
-                
-    background->update(); 
-    eManager->update(); 
-    eManager->refresh(); 
-    uiManager->update(); 
-    uiManager->refresh(); 
+    if(updateLua.valid()) updateLua();
+
+    auto& sManager = handler.getGame().getStateManager();
+
+    sManager.getBackground().update();
+    sManager.getEntityManager().update();
+    sManager.getEntityManager().refresh();
+    sManager.getUIManager().update();
+    sManager.getUIManager().refresh();
 }
 
 void State::render() {
-    if(renderLua != sol::nil) renderLua();
+    if(renderLua.valid()) renderLua();
 
-    background->render(); 
+    auto& sManager = handler.getGame().getStateManager();
+
+    sManager.getBackground().render();
     renderTiles();
 
-    eManager->render(); 
-    uiManager->render(); 
+    sManager.getEntityManager().render(); 
+    sManager.getUIManager().render(); 
 }
 
 void State::renderTiles() {
-    auto posCam = handler->getGraphic()->getCamera();
+    auto posCam = handler.getGraphic().getCamera();
     
     EngineVector2D posTile;
 
@@ -62,7 +62,7 @@ void State::renderTiles() {
         for(int x = 0; x < w; x++) {
             posTile.setPoints(x, y);
 
-            getTile(posTile)->render(posTile);
+            getTile(posTile).render(posTile);
         }
     }
 }
@@ -73,19 +73,27 @@ void State::settupTiles(int w, int h, vector<size_t> tiles) {
     this->tiles = tiles;
 }
 
-StateManager::StateManager(Handler* handler) noexcept {
-    this->handler = handler;
+Tile& State::getTile(const EngineVector2D& position) const noexcept {
+    auto pos = position.convert<int>();
 
+    if(pos.x < 0 || pos.y < 0 || pos.x >= w || pos.y >= h) return handler.getGame().getStateManager().getTileManager().getDefaultTile();
+
+    return handler.getGame().getStateManager().getTileManager().getTile(tiles[(pos.y * w) + pos.x]);
+}
+
+StateManager::StateManager(Handler& handler): handler(handler) {
     eManager = make_unique<EntityManager>(handler);
     uiManager = make_unique<EntityManager>(handler);
 
-    tileManager = make_unique<TileManager>(handler);
+    tileManager = make_unique<TileManager>();
 
     background = make_unique<Background>(handler);
+
+    current = 0;
 }
 
 void StateManager::initStates() {
-    sol::state_view lua(handler->getLua()->lua_state());
+    sol::state_view lua(handler.getLua().lua_state());
 
     // Check if the config file from lua have states field
     if(lua["config"]["states"] == sol::nil)
@@ -105,7 +113,7 @@ void StateManager::initStates() {
             lua[value.as<string>()]["update"].get<sol::function>(),
             lua[value.as<string>()]["render"].get<sol::function>()
         );
-        addState(move(state));
+        states.emplace_back(move(state));
     });
 }
 
@@ -114,11 +122,11 @@ void StateManager::setState(std::size_t state) {
     uiManager->destroyAllEntities();
     background->refresh();
 
-    handler->getGraphic()->getCamera()->setPosition(EngineVector2D::vectorZeros());
+    handler.getGraphic().getCamera().setPosition(EngineVector2D::vectorZeros());
 
     current = state;
 
-    getState()->init();
+    getState().init();
 
     cout << "Finish initiate the state" << endl;
 }

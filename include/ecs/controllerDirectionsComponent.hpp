@@ -10,6 +10,7 @@ namespace exocet {
 
             EngineVector2D direction;
         public:
+            using Component::Component;
             ~ControllerDirectionsComponent() = default;
 
             void init() override;

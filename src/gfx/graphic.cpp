@@ -3,10 +3,10 @@
 using namespace std;
 using namespace exocet;
 
-Graphic::Graphic(SDL_Renderer* ren) {
-    //this->handler = handler;
-
+Graphic::Graphic(Subsystem& subsys, SDL_Renderer* ren) {
     this->ren = ren;
+
+    this->camera = make_unique<Camera>(subsys);
 
     color.r = 0x00;
     color.g = 0x00;

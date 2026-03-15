@@ -11,6 +11,7 @@ namespace exocet {
             MovementComponent* movement;
             Uint8 color[3];
         public:
+            using Component::Component;
             ~HitboxComponent() noexcept = default;
 
             void init() noexcept override;

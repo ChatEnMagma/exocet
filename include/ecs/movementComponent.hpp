@@ -11,6 +11,7 @@ namespace exocet {
             EngineVector2D speed, maxSpeed;
             EngineVector2D friction;
         public:
+            using Component::Component;
             MovementComponent() noexcept = default;
 
             EngineVector2D pos;

@@ -7,6 +7,8 @@ namespace exocet {
         private:
             PhysicComponent* physic;
         public:
+            using Component::Component;
+            
             AnchorComponent() = default;
 
             void init() noexcept override;

@@ -6,6 +6,25 @@ using namespace exocet;
 
 Uint8 PlaySong::volume[] = { 0, 0, 0, 0 };
 
+Subsystem::Subsystem() {
+    this->keys = make_unique<KeyListener>();
+    this->mouse = make_unique<MouseListener>();
+}
+
+Subsystem::~Subsystem() noexcept {
+    gfx.reset();
+    SDL_FreeSurface(icon);
+
+    // All SDL clean
+    SDL_DestroyWindow(win);
+    IMG_Quit();
+    Mix_Quit();
+    TTF_Quit();
+    SDL_Quit();
+
+    cout << "The subsystem is well clean, bye..." << endl;
+}
+
 void Subsystem::init(int w, int h, string title) {
     // init the SDL
     if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -52,7 +71,7 @@ void Subsystem::init(int w, int h, string title) {
     SDL_SetWindowMinimumSize(win, WIN_MIN_WIDTH, WIN_MIN_HEIGHT);
 
     // create the renderer
-    gfx = make_unique<Graphic>(SDL_CreateRenderer(
+    gfx = make_unique<Graphic>(*this, SDL_CreateRenderer(
         win, 
         -1, 
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE
@@ -87,32 +106,18 @@ void Subsystem::handleEvents() noexcept {
             break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                keys.interactKey(e.key.keysym.sym, (e.type == SDL_KEYDOWN));
+                keys->interactKey(e.key.keysym.sym, (e.type == SDL_KEYDOWN));
             break;
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
-                mouse.interact(e.button.button, (e.type == SDL_MOUSEBUTTONDOWN));
+                mouse->interact(e.button.button, (e.type == SDL_MOUSEBUTTONDOWN));
             break;
         }
 
         // MouseListener methods
-        mouse.move(e.motion.x, e.motion.y);
+        mouse->move(e.motion.x, e.motion.y);
     }
 
-    keys.update();
-    mouse.update();
-}
-
-void Subsystem::clean() noexcept {
-    gfx.reset();
-    SDL_FreeSurface(icon);
-
-    // All SDL clean
-    SDL_DestroyWindow(win);
-    IMG_Quit();
-    Mix_Quit();
-    TTF_Quit();
-    SDL_Quit();
-
-    cout << "The subsystem is well clean, bye..." << endl;
+    keys->update();
+    mouse->update();
 }

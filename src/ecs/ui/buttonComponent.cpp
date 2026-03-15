@@ -20,7 +20,7 @@ void ButtonComponent::update() {
 }
 
 bool ButtonComponent::isMouseover() const noexcept {
-    auto mousePos = handler->getMousePosition();
+    auto mousePos = handler.getMousePosition();
     auto pos = ui->getPosition();
 
     return (
@@ -32,5 +32,5 @@ bool ButtonComponent::isMouseover() const noexcept {
 }
 
 bool ButtonComponent::click() const noexcept {
-    return isMouseover() && handler->getJustButton(SDL_BUTTON_LEFT); 
+    return isMouseover() && handler.getJustButton(SDL_BUTTON_LEFT); 
 }

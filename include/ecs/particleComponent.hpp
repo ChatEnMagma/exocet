@@ -8,6 +8,8 @@ namespace exocet {
             MovementComponent* movement;
             std::size_t time;
         public:
+            using Component::Component;
+            
             void init() noexcept override;
             void update() noexcept override;
 

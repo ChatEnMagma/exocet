@@ -3,7 +3,7 @@ INCDIR = include
 OBJDIR = obj
 
 CXX = g++
-CXXFLAGS = -Wall -Wextra -g -std=c++20 -I$(INCDIR) `sdl2-config --cflags`
+CXXFLAGS = -Wall -Wextra -O3 -g -std=c++20 -ffast-math -fno-rtti -I$(INCDIR) `sdl2-config --cflags`
 CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
 
 ifeq ($(OS),Windows_NT)
@@ -36,7 +36,7 @@ INC = 	$(wildcard $(INCDIR)/*.hpp) \
 		$(wildcard $(SRCDIR)/ecs/ui/*.hpp) \
 		$(wildcard $(INCDIR)/input/*.hpp) \
 		$(wildcard $(SRCDIR)/gfx/*.hpp) \
-		$(wildcard $(SRCDIR)/state/*.cpp)
+		$(wildcard $(SRCDIR)/state/*.hpp)
 
 OBJ = $(SRC:$(SRCDIR)%.cpp=$(OBJDIR)%.o)
 
@@ -53,11 +53,7 @@ exocet.res: exocet.rc
 $(EXE): $(OBJ)
 	$(END_COPILE)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INC)
-	@mkdir -p $(OBJDIR)
-	@mkdir -p $(OBJDIR)/ecs
-	@mkdir -p $(OBJDIR)/ecs/ui
-	@mkdir -p $(OBJDIR)/gfx
-	@mkdir -p $(OBJDIR)/state
+	@mkdir -p $(dir $@)
 
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 

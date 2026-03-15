@@ -17,9 +17,9 @@ namespace exocet {
             inline int getSheetX(std::size_t i) noexcept { return (i % nCol) * w; }
             inline int getSheetY(std::size_t i) noexcept { return (i / nCol) * h; }
         public:
-            Sprite(Handler* handler, const std::string& path);
-            Sprite(Handler* handler, const std::string& path, int nCol, int nRow, int width, int height, std::size_t nFrames);
-            Sprite(Handler* handler, const std::string& path, int xPos, int yPos, int width, int height);
+            Sprite(Texture* texture);
+            Sprite(Texture* texture, int nCol, int nRow, int width, int height, std::size_t nFrames);
+            Sprite(Texture* texture, int xPos, int yPos, int width, int height);
             ~Sprite() noexcept = default;
 
             void render(const EngineVector2D& position, int width, int height, std::size_t i = 0) {

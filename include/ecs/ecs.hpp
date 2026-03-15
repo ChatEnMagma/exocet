@@ -3,6 +3,7 @@
 #include <array>
 #include <algorithm>
 #include <bitset>
+#include <execution>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -46,10 +47,10 @@ namespace exocet {
      */
     class Component {
         protected:
-            Handler* handler;
+            Handler& handler;
             Entity* entity;
         public:
-            Component() {}
+            Component(Handler& handler): handler(handler) {}
             virtual ~Component() = default;
             
             virtual void init() {}
@@ -58,12 +59,11 @@ namespace exocet {
 
             inline Entity* getEntity() noexcept { return entity; }
             inline void setEntity(Entity* entity) noexcept { this->entity = entity; }
-            inline void setHandler(Handler* handler) noexcept { this->handler = handler; }
     };
 
     class Entity {
         private:
-            Handler* handler;
+            Handler& handler;
 
             bool active;
 
@@ -75,7 +75,7 @@ namespace exocet {
             ComponentBitset componentBitset;
             GroupBitset groupBitset;
         public:
-            Entity(Handler* handler, std::string tag);
+            Entity(Handler& handler, std::string tag);
 
             // ONLY FOR LUA DONT TOUCH IN C++ CODE
             sol::table componentsLua;
@@ -127,10 +127,9 @@ namespace exocet {
              */
             template <typename T, typename... Targs> 
             T& addComponent(Targs&&... args) {
-                T* c(new T(std::forward<Targs>(args)...));
+                T* c(new T(handler, std::forward<Targs>(args)...));
 
                 c->setEntity(this);
-                c->setHandler(handler);
 
                 std::unique_ptr<Component> uPtr { c };
                 components.emplace_back(move(uPtr));
@@ -145,16 +144,16 @@ namespace exocet {
 
     class EntityManager {
         private:
-            Handler* handler;
+            Handler& handler;
 
             std::vector<std::unique_ptr<Entity>> entities;
             std::vector<Entity*> entitiedAdd;
             std::array<std::vector<Entity*>, maxGroup> groupedEntities;
         public:
-            EntityManager(Handler* handler) noexcept { this->handler = handler; }
+            EntityManager(Handler& handler): handler(handler) {}
 
             inline void update() { for(auto& e: entities) e->update(); }
-            inline void render() { for(auto& e: entities) e->render(); }
+            inline void render() { for_each(std::execution::par_unseq, entities.begin(), entities.end(), [](auto& e) noexcept { e->render(); }); }
 
             /**
              * \brief Refresh the entity and group array, and clear if the entity is not active
@@ -170,9 +169,9 @@ namespace exocet {
             /**
              * \brief Destroy all entities in the EntityManager
              */
-            inline void destroyAllEntities() { 
-                for(auto& e: entities) e->destroy();
-                for(auto& e: entitiedAdd) e->destroy();
+            inline void destroyAllEntities() {
+                for_each(std::execution::par_unseq, entities.begin(), entities.end(), [](auto& e) noexcept { e->destroy(); });
+                for_each(std::execution::par_unseq, entitiedAdd.begin(), entitiedAdd.end(), [](auto& e) noexcept { e->destroy(); });
             }
             /**
              * \brief Add the group into this entity

@@ -12,39 +12,35 @@
 using namespace std;
 using namespace exocet;
 
-Game::Game(Subsystem* subsys) {
-    handler = new Handler(this, subsys);
-
-    // set handler graphics parts
-    handler->getGraphic()->setHandler(handler);
-    handler->getGraphic()->getCamera()->setHandler(handler);
+Game::Game(Subsystem& subsys) {
+    handler = make_unique<Handler>(*this, subsys);
 
     // Init all modules and function lua
-    lua = new LuaSystem(handler);
+    lua = make_unique<LuaSystem>(*handler);
+    
     cout << "Success to initiate the luaSystem" << endl;
 
     // init StateManager
-    (sManager = new StateManager(handler))->initStates();
-
-    (*lua)["config"]["init"]();
+    (sManager = make_unique<StateManager>(*handler))->initStates();
 
     cout << "Success to initiate all states" << endl;
 
-    // set the state, and try to fetch the config file lua
-    setState((*lua)["config"]["init_state"].get_or<size_t>(0));
-
     // All debug functions pre-define bu config lua file
-    if((*lua)["config"]["showHitbox"].get_or<bool>(0)) showHitbox();
-    if((*lua)["config"]["showPointerEntities"].get_or<bool>(0)) showPointerEntities();
+    if(getLua()["config"]["showHitbox"].get_or<bool>(0)) showHitbox();
+    if(getLua()["config"]["showPointerEntities"].get_or<bool>(0)) showPointerEntities();
+
+    getLua()["config"]["init"]();
+
+    // set the state, and try to fetch the config file lua
+    setState(getLua()["config"]["init_state"].get_or<size_t>(0));
 
     deltaTime = 0.f;
-
-    cout << "Success to config the game" << endl;
 }
+
 Game::~Game() {
-    delete sManager;
-    delete lua;
-    delete handler;
+    sManager.reset();
+    lua.reset();
+    handler.reset();
 }
 
 void Game::update(double deltaTime) {
@@ -55,15 +51,15 @@ void Game::update(double deltaTime) {
     
     sManager->update();
 
-    handler->getSubsystem()->setTitle("Exocet state: " + to_string(sManager->getCurrentState()) + " | e: " + to_string(sManager->getEntityManager()->size()));
+    handler->getSubsystem().setTitle("Exocet state: " + to_string(sManager->getCurrentState()) + " | e: " + to_string(sManager->getEntityManager().size()));
 }
 
 void Game::render() {
-    handler->getGraphic()->setRenderColor(0x00, 0x00, 0x00);
-    handler->getGraphic()->renderClear();
+    handler->getGraphic().setRenderColor(0x00, 0x00, 0x00);
+    handler->getGraphic().renderClear();
 
     // render all game here
     sManager->render();
 
-    handler->getGraphic()->renderPresent();
+    handler->getGraphic().renderPresent();
 }

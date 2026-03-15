@@ -22,7 +22,7 @@ function Box:new(position)
     setmetatable(e.data, Box)
 
     PhysicComponent:new(e, Rect:new(128, 128), position):setMasse(1)
-    SpriteComponent:new(e, engine:getSprite("wall", "wall.png")):fitSizeWithHitbox()
+    SpriteComponent:new(e, engine.getSprite("wall", "wall.png")):fitSizeWithHitbox()
     ScriptComponent:new(e, function ()
         e.data.update(e)
     end)

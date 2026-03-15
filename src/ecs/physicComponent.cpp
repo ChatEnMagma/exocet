@@ -65,24 +65,24 @@ void PhysicComponent::render() noexcept {
     if(!hitbox->isInsideScreen()) return;
 
     // Render the hitbox
-    if(handler->getGame()->isShowingHitbox()) {
-        handler->getGraphic()->setRenderColor(0xff, 0xff, 0xff);
-        handler->getGraphic()->renderLine(
+    if(handler.getGame().isShowingHitbox()) {
+        handler.getGraphic().setRenderColor(0xff, 0xff, 0xff);
+        handler.getGraphic().renderLine(
             hitbox->getCenter(), 
             hitbox->getCenter() + movement->vel.clampMagnitude(getSpeed().x).scalar(getSpeed().x * 4));
     }
     // Render the pointer address
-    if(handler->getGame()->isShowingPointerEntities()) {
+    if(handler.getGame().isShowingPointerEntities()) {
         std::ostringstream text;
         text << std::hex << (intptr_t) entity;
 
-        handler->getGraphic()->renderText(
-            hitbox->getCenter().x - hitbox->getWidth() - handler->getGraphic()->getCamera()->getPosition().x,
-            movement->getPosition().y - 32 - handler->getGraphic()->getCamera()->getPosition().y,
+        handler.getGraphic().renderText(
+            hitbox->getCenter().x - hitbox->getWidth() - handler.getGraphic().getCamera().getPosition().x,
+            movement->getPosition().y - 32 - handler.getGraphic().getCamera().getPosition().y,
             hitbox->getWidth() * 2,
             32,
             text.str(),
-            handler->getGraphic()->getFont("res/FreeRoyalty.ttf", 20)
+            handler.getGraphic().getFont("res/FreeRoyalty.ttf", 20)
         );
     }
 }

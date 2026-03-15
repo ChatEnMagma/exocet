@@ -13,14 +13,11 @@
 #include "tile.hpp"
 
 namespace exocet {
+    class StateManager;
+
     class State {
         protected:
-            Handler* handler;
-
-            EntityManager* eManager;
-            EntityManager* uiManager;
-            Background* background;
-            TileManager* tileManager;
+            Handler& handler;
 
             sol::function initLua;
             sol::function updateLua;
@@ -34,25 +31,18 @@ namespace exocet {
 
             void renderTiles();
         public:
-            State(Handler* handler) noexcept;
-            State(Handler* handler, std::string tag, sol::function initLua, sol::function updateLua, sol::function renderLua) noexcept;
+            State(Handler& handler);
+            State(Handler& handler, std::string tag, sol::function initLua, sol::function updateLua, sol::function renderLua);
             ~State() noexcept { songs.clear(); }
 
-            void init() { if(initLua != sol::nil) initLua(); }
+            void init() { if(initLua.valid()) initLua(); }
             void update();
             void render();
 
             void settupTiles(int width, int height, std::vector<std::size_t> tiles);
 
-            Tile* getTile(const EngineVector2D& position) const noexcept {
-                auto pos = position.convert<int>();
-
-                if(pos.x < 0 || pos.y < 0 || pos.x > w || pos.y > h) return tileManager->getDefaultTile();
-                return tileManager->getTile(tiles[(w * pos.y) + pos.x]);
-            }
-            inline bool getTileFlags(const EngineVector2D& position, int flags) const noexcept { return getTile(position)->isFlags(flags); }
-            inline EntityManager* getEntityManager() noexcept { return eManager; }
-            inline EntityManager* getUIManager() noexcept { return uiManager; }
+            Tile& getTile(const EngineVector2D& position) const noexcept;
+            inline bool getTileFlags(const EngineVector2D& position, int flags) const noexcept { return getTile(position).isFlags(flags); }
             inline std::string getTag() const noexcept { return tag; }
 
             PlaySong* getSong(const std::string& key, const std::string& path = "") {
@@ -65,16 +55,11 @@ namespace exocet {
 
                 return songs[key].get();
             }
-
-            inline void setEntityManager(EntityManager* entityManager) noexcept { eManager = entityManager; }
-            inline void setUIManager(EntityManager* uiManager) noexcept { this->uiManager = uiManager; }
-            inline void setBackground(Background* background) noexcept { this->background = background; }
-            inline void setTileManager(TileManager* tileManager) noexcept { this->tileManager = tileManager; }
     };
 
     class StateManager {
         private:
-            Handler* handler;
+            Handler& handler;
 
             std::vector<std::unique_ptr<State>> states;
 
@@ -90,20 +75,13 @@ namespace exocet {
              */
             std::size_t current;
         public:
-            StateManager(Handler* handler) noexcept;
+            StateManager(Handler& handler);
             ~StateManager() noexcept = default;
 
-            inline void update() { getState()->update(); }
-            inline void render() { getState()->render(); }
+            inline void update() { states[current]->update(); }
+            inline void render() { states[current]->render(); }
 
-            inline void addState(std::unique_ptr<State> state) noexcept {
-                state->setEntityManager(getEntityManager());
-                state->setUIManager(getUIManager());
-                state->setBackground(getBackground());
-                state->setTileManager(getTileManager());
-
-                states.emplace_back(std::move(state));
-            }
+            inline void addState(std::unique_ptr<State> state) noexcept { states.emplace_back(std::move(state)); }
 
             void initStates();
             
@@ -113,14 +91,14 @@ namespace exocet {
             
             // All getters and setters
             
-            inline State* getState() noexcept { return states[current].get(); }
+            inline State& getState() noexcept { return *states[current].get(); }
             inline std::size_t getCurrentState() noexcept { return current; }
 
-            inline EntityManager* getEntityManager() noexcept { return eManager.get(); }
-            inline EntityManager* getUIManager() noexcept { return uiManager.get(); }
+            inline EntityManager& getEntityManager() noexcept { return *eManager.get(); }
+            inline EntityManager& getUIManager() noexcept { return *uiManager.get(); }
             
-            inline Background* getBackground() noexcept { return background.get(); }
-            inline TileManager* getTileManager() noexcept { return tileManager.get(); }
+            inline Background& getBackground() noexcept { return *background.get(); }
+            inline TileManager& getTileManager() noexcept { return *tileManager.get(); }
             
             void setState(std::size_t state);
     };

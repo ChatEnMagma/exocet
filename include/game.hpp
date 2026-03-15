@@ -9,17 +9,16 @@
 namespace exocet {
     class Game {
         private:
-            Handler* handler = nullptr;
-            StateManager* sManager = nullptr;
+            std::unique_ptr<Handler> handler;
+            std::unique_ptr<StateManager>sManager;
+            std::unique_ptr<LuaSystem> lua;
 
             bool showingHitbox = false;
             bool showingPointerEntities = false;
 
-            LuaSystem* lua;
-
             double deltaTime;
         public:
-            Game(Subsystem* subsystem);
+            Game(Subsystem& subsystem);
             ~Game();
 
             void update(double deltaTime);
@@ -51,17 +50,17 @@ namespace exocet {
              */
             inline void unshowPointerEntities() noexcept { showingPointerEntities = false; }
 
-            inline State* getState() noexcept { return sManager->getState(); }
-            inline StateManager* getStateManager() noexcept { return sManager; }
-            inline EntityManager* getEntityManager() noexcept { return sManager->getEntityManager(); }
+            inline State& getState() noexcept { return sManager->getState(); }
+            inline StateManager& getStateManager() noexcept { return *sManager; }
+            inline EntityManager& getEntityManager() noexcept { return sManager->getEntityManager(); }
             inline void setState(std::size_t state) { sManager->setState(state); }
 
             inline double getDeltaTime() const noexcept { return deltaTime; }
 
-            inline Handler* getHandler() noexcept { return handler; };
+            inline Handler& getHandler() noexcept { return *handler; };
             /** 
              * \return Get the lua with all libs and functions
              */
-            inline LuaSystem* getLua() noexcept { return lua; }
+            inline LuaSystem& getLua() noexcept { return *lua; }
     };
 }

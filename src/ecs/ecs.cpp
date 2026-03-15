@@ -5,14 +5,12 @@
 using namespace std;
 using namespace exocet;
 
-Entity::Entity(Handler* handler, std::string tag) {
-    this->handler = handler;
-
+Entity::Entity(Handler& handler, std::string tag): handler(handler) {
     this->tag = tag;
     this->active = true;
 
-    this->componentsLua = handler->getLua()->create_table();
-    this->data = handler->getLua()->create_table();
+    this->componentsLua = handler.getLua().create_table();
+    this->data = handler.getLua().create_table();
 }
 
 void Entity::addGroup(Group group) {

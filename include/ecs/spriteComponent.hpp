@@ -17,6 +17,8 @@ namespace exocet {
             double a;
             int w, h;
         public:
+            using Component::Component;
+            
             void init() noexcept override;
             void update() noexcept override;
             void render() noexcept override;

@@ -13,12 +13,13 @@
 #include "gfx/sprite.hpp"
 
 namespace exocet {
+    class Subsystem;
+
     class Graphic {
         private:
-            Handler* handler;
             SDL_Renderer* ren = NULL;
 
-            Camera camera;
+            std::unique_ptr<Camera> camera;
 
             SDL_Color color;
 
@@ -26,7 +27,7 @@ namespace exocet {
             std::map<std::string, std::shared_ptr<Texture>> textures;
             std::map<std::string, std::shared_ptr<Sprite>> sprites;
         public:
-            Graphic(SDL_Renderer* renderer);
+            Graphic(Subsystem& subsystem, SDL_Renderer* renderer);
             ~Graphic() noexcept {
                 fonts.clear();
                 sprites.clear();
@@ -34,8 +35,6 @@ namespace exocet {
                 
                 SDL_DestroyRenderer(ren);
             }
-
-            void setHandler(Handler* handler) noexcept { this->handler = handler; }
 
             Font* getFont(const std::string& key, int fontSize) {
                 auto it = fonts.find(key);
@@ -52,7 +51,7 @@ namespace exocet {
                 auto it = textures.find(key);
 
                 if(it == textures.end())
-                    textures[key] = make_shared<Texture>(handler, key);
+                    textures[key] = make_shared<Texture>(*camera, ren, "res/" + key);
 
                 return textures[key].get();
             }
@@ -65,16 +64,16 @@ namespace exocet {
 
                 if(it == sprites.end()) {
                     if(nbFrame == 0)
-                        sprites[key] = make_shared<Sprite>(handler, "res/" + path);
+                        sprites[key] = std::make_shared<Sprite>(getTexture(path));
                     else
-                        sprites[key] = make_shared<Sprite>(handler, "res/" + path, nCol, nRow, wsrc, hsrc, nbFrame);
+                        sprites[key] = std::make_shared<Sprite>(getTexture(path), nCol, nRow, wsrc, hsrc, nbFrame);
                 }
                     
                 return sprites[key].get();
             }
 
             Sprite* loadSpriteSheet(const std::string& key, const std::string& path, int xPos, int yPos, int width, int height) {
-                sprites[key] = make_shared<Sprite>(handler, "res/" + path, xPos, yPos, width, height);
+                sprites[key] = std::make_shared<Sprite>(getTexture(path), xPos, yPos, width, height);
                 return sprites[key].get();
             }
 
@@ -96,8 +95,8 @@ namespace exocet {
                 SDL_RenderFillRect(ren, &rect);
             }
 
-            inline void renderRect(const EngineVector2D& position, int width, int height) noexcept { renderAnchorRect(position - camera.getPosition(), width, height); }
-            inline void renderFillRect(const EngineVector2D& position, int width, int height) noexcept { renderAnchorFillRect(position - camera.getPosition(), width, height); }
+            inline void renderRect(const EngineVector2D& position, int width, int height) noexcept { renderAnchorRect(position - camera->getPosition(), width, height); }
+            inline void renderFillRect(const EngineVector2D& position, int width, int height) noexcept { renderAnchorFillRect(position - camera->getPosition(), width, height); }
 
             void renderText(int x, int y, int w, int h, std::string text, Font* font);
 
@@ -106,7 +105,7 @@ namespace exocet {
             inline void renderPresent() noexcept { SDL_RenderPresent(ren); }
 
             inline void renderAnchorLine(const EngineVector2D& pos1, const EngineVector2D& pos2) noexcept { SDL_RenderDrawLine(ren, pos1.x, pos1.y, pos2.x, pos2.y); }
-            inline void renderLine(const EngineVector2D& pos1, const EngineVector2D& pos2) noexcept { renderAnchorLine(pos1 - camera.getPosition(), pos2 - camera.getPosition()); }
+            inline void renderLine(const EngineVector2D& pos1, const EngineVector2D& pos2) noexcept { renderAnchorLine(pos1 - camera->getPosition(), pos2 - camera->getPosition()); }
 
             void renderAnchorPolygon(const EngineVector2D& position, const Polygon& polygon) noexcept {
                 for(std::size_t i = 0; i < polygon.size(); i++) {
@@ -114,12 +113,12 @@ namespace exocet {
                     renderAnchorLine(position + polygon[i], position + polygon[nxt]);
                 }
             }
-            inline void renderPolygon(const EngineVector2D& position, const Polygon& polygon) noexcept { renderAnchorPolygon(position - camera.getPosition(), polygon); }
+            inline void renderPolygon(const EngineVector2D& position, const Polygon& polygon) noexcept { renderAnchorPolygon(position - camera->getPosition(), polygon); }
 
             inline SDL_Renderer* getRenderer() noexcept { return ren; }
             inline void setRenderer(SDL_Renderer* renderer) noexcept { ren = renderer; }
 
-            inline Camera* getCamera() noexcept { return &camera; }
-            inline void centerOnEntity(Entity* entity) noexcept { camera.centerOnEntity(entity); }
+            inline Camera& getCamera() noexcept { return *camera.get(); }
+            inline void centerOnEntity(Entity* entity) noexcept { camera->centerOnEntity(entity); }
     };
 }

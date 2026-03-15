@@ -10,60 +10,60 @@ engine = {}
 --- @param key string
 --- @param path string the path of the song
 --- @return Song ...
-function engine:getSong(key, path)end
+function engine.getSong(key, path)end
 --- Tell if the game is muting
 --- @return boolean ...
 --- @nodiscard
-function engine:isMuting()end
+function engine.isMuting()end
 --- Mute all the game
-function engine:mute()end
+function engine.mute()end
 --- Unmute all the game
-function engine:unmute()end
+function engine.unmute()end
 --- Get the window frame width
 ---@return integer ...
 ---@nodiscard
-function engine:getWinWidth()end
+function engine.getWinWidth()end
 --- Get the window frame height
 ---@return integer ...
 ---@nodiscard
-function engine:getWinHeight()end
+function engine.getWinHeight()end
 --- Get if the window is resizing
 --- @return boolean ...
 --- @nodiscard
-function engine:isResizing()end
+function engine.isResizing()end
 --- Close the window game
-function engine:closeGame()end
+function engine.closeGame()end
 --- Get boolean if the key is pressing
 ---@return boolean ...
 ---@nodiscard
-function engine:getKey(scancode)end
+function engine.getKey(scancode)end
 --- Get any key is pressing
 --- @return boolean ...
 --- @nodiscard
-function engine:getAnyKey()end
+function engine.getAnyKey()end
 --- @return boolean ...
 --- @nodiscard
-function engine:getJustAnyKey()end
+function engine.getJustAnyKey()end
 --- Get boolean if the key is just pressing
 ---@return boolean ...
 ---@nodiscard
-function engine:getJustKey(scancode)end
+function engine.getJustKey(scancode)end
 --- Get the scancode is pressing
 ---@return integer ...
 ---@nodiscard
-function engine:getKeyCode()end
+function engine.getKeyCode()end
 --- Get boolean if the button is pressing
 ---@return boolean ...
 ---@nodiscard
-function engine:getButton(scancode)end
+function engine.getButton(scancode)end
 --- Get boolean if the button is just pressing
 ---@return boolean ...
 ---@nodiscard
-function engine:getJustButton(scancode)end
+function engine.getJustButton(scancode)end
 --- Get the scancode is pressing
 ---@return integer ...
 ---@nodiscard
-function engine:getButtonCode()end
+function engine.getButtonCode()end
 --- Get the position of the mouse in the game window
 --- @return Vector2D ...
 function engine.getMousePosition()end
@@ -72,23 +72,23 @@ function engine.getMousePosition()end
 
 --- Set the current state
 --- @param state integer the state will state
-function engine:setState(state)end
+function engine.setState(state)end
 --- Get the current state
 --- @return integer ...
 --- @nodiscard
-function engine:getCurrentState()end
+function engine.getCurrentState()end
 --- Restart the state
-function engine:restart()end
+function engine.restart()end
 --- Set the next state
-function engine:nextState()end
+function engine.nextState()end
 --- Set the previous state
-function engine:previousState()end
+function engine.previousState()end
 --- @return Background ...
-function engine:getBackground()end
+function engine.getBackground()end
 
 --=================================== ALL GRAPHICS METHODS ===================================--
 
---- @overload fun(engine, key: string)
+--- @overload fun(key: string)
 --- @param key string
 --- @param path string
 --- @param nCol integer
@@ -98,54 +98,54 @@ function engine:getBackground()end
 --- @param nbFrame integer
 --- @param fps integer?
 --- @return Sprite ...
-function engine:getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrame, fps)end
+function engine.getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrame, fps)end
 --- Set the color of graphics
 --- @param red integer
 --- @param green integer
 --- @param blue integer
 --- @param alpha integer
-function engine:setColor(red, green, blue, alpha) end
+function engine.setColor(red, green, blue, alpha) end
 --- Render a rect
 --- @param position Vector2D
 --- @param width integer
 --- @param height integer
-function engine:renderRect(position, width, height) end
+function engine.renderRect(position, width, height) end
 --- Render a rect
 --- @param position Vector2D
 --- @param width integer
 --- @param height integer
-function engine:renderFillRect(position, width, height) end
+function engine.renderFillRect(position, width, height) end
 --- Render an anchor rect
 --- @param position Vector2D
 --- @param width integer
 --- @param height integer
-function engine:renderAnchorRect(position, width, height) end
+function engine.renderAnchorRect(position, width, height) end
 --- Render a filled anchor rect
 --- @param position Vector2D
 --- @param width integer
 --- @param height integer
-function engine:renderAnchorFillRect(position, width, height) end
+function engine.renderAnchorFillRect(position, width, height) end
 --- Render text
 --- @param position Vector2D
 --- @param width integer
 --- @param height integer
 --- @param text string
-function engine:renderText(position, width, height, text) end
+function engine.renderText(position, width, height, text) end
 --- @param position Vector2D
 --- @param polygon Polygon
-function engine:renderPolygon(position, polygon) end
+function engine.renderPolygon(position, polygon) end
 
 --=================================== ALL CAMERA METHODS =====================================--
 
 --- Get the position of the camera, i.e the offset
 --- @return Vector2D ...
-function engine:getCameraPosition() end
+function engine.getCameraPosition() end
 --- Set the camera on the entity
 --- @param entity Entity The entity will center
-function engine:centerOnEntity(entity) end
+function engine.centerOnEntity(entity) end
 
 --=================================== ALL ENTITY METHODS =====================================--
 
 --- Add a new entity
 --- @param entity Entity The entity will add
-function engine:addEntity(entity) end
+function engine.addEntity(entity) end

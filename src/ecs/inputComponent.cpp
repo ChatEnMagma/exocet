@@ -17,15 +17,15 @@ void InputComponent::controllerKeyboard() {
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Woverflow"
 
-    if(handler->getKey(SDLK_z) || handler->getKey(SDLK_UP))
+    if(handler.getKey(SDLK_z) || handler.getKey(SDLK_UP))
         controller->setDirectionY(-1.f);
-    else if(handler->getKey(SDLK_s) || handler->getKey(SDLK_DOWN))
+    else if(handler.getKey(SDLK_s) || handler.getKey(SDLK_DOWN))
         controller->setDirectionY(1.f);
     else controller->setDirectionY(0.f);
 
-    if(handler->getKey(SDLK_d) || handler->getKey(SDLK_RIGHT))
+    if(handler.getKey(SDLK_d) || handler.getKey(SDLK_RIGHT))
         controller->setDirectionX(1.f);
-    else if(handler->getKey(SDLK_q) || handler->getKey(SDLK_LEFT))
+    else if(handler.getKey(SDLK_q) || handler.getKey(SDLK_LEFT))
         controller->setDirectionX(-1.f);
     else controller->setDirectionX(0.f);
 

@@ -10,6 +10,7 @@ namespace exocet {
             HitboxComponent* hitbox;
             MovementComponent* movement;
         public:
+            using Component::Component;
             DragComponent() = default;
 
             void init() noexcept override;

@@ -10,9 +10,7 @@
 using namespace exocet;
 using namespace std;
 
-LuaSystem::LuaSystem(Handler* handler) {
-    this->handler = handler;
-
+LuaSystem::LuaSystem(Handler& handler): handler(handler) {
     // Load main lib and package
     lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::io, sol::lib::string, sol::lib::os, sol::lib::math);
 
@@ -109,9 +107,9 @@ void LuaSystem::initUsertypeTileBuilder() {
             for(auto v: args)
                 tiles.emplace_back(v.as<size_t>());
 
-            return self.addLine(tiles);
+            return &self.addLine(tiles);
         },
-        "settupTiles", &TileBuilder::settupTiles
+        "settupTiles", [this](TileBuilder& self) { self.settupTiles(this->handler.getState()); }
     );
 }
 
@@ -155,16 +153,8 @@ void LuaSystem::initUsertypeSong() {
 void LuaSystem::initUsertypeEntity() {
     lua.new_usertype<Entity>(USERTYPE_ENTITY,
         sol::meta_function::construct, sol::factories(
-            [](sol::object, sol::this_main_state s) noexcept {
-                sol::state_view mLua(s.lua_state());
-
-                return new Entity((Handler*) mLua["engine"]["_handler"].get<intptr_t>(), "missigno");
-            },
-            [](sol::object, const string& tag, sol::this_main_state s) noexcept {
-                sol::state_view mLua(s.lua_state());
-
-                return new Entity((Handler*) mLua["engine"]["_handler"].get<intptr_t>(), tag);
-            }
+            [&](sol::object) noexcept {return new Entity(handler, "missigno"); },
+            [&](sol::object, const string& tag) noexcept { return new Entity(handler, tag); }
         ),
         "components", &Entity::componentsLua,
         "data", &Entity::data,
@@ -285,7 +275,7 @@ void LuaSystem::initUsertypeComponents() {
             [](sol::object, Entity& e, Sprite* sprite) {
                 auto& c = e.addComponent<SpriteComponent>();
 
-                e.componentsLua[USERTYPE_SPRITE_COMPONENT] = c;
+                e.componentsLua[USERTYPE_SPRITE_COMPONENT] = &c;
                 
                 c.setSprite(sprite);
 
@@ -294,7 +284,7 @@ void LuaSystem::initUsertypeComponents() {
             [](sol::object, Entity& e, Sprite* sprite, int fps) {
                 auto& c = e.addComponent<SpriteComponent>();
 
-                e.componentsLua[USERTYPE_SPRITE_COMPONENT] = c;
+                e.componentsLua[USERTYPE_SPRITE_COMPONENT] = &c;
                 
                 c.setSprite(sprite);
                 c.setFPS(fps);
@@ -311,14 +301,14 @@ void LuaSystem::initUsertypeComponents() {
             [](sol::object, Entity& e, sol::object init, sol::object update, sol::object render) {
                 auto& c = e.addComponent<ScriptComponent>(init, update, render);
 
-                e.componentsLua[USERTYPE_SCRIPT_COMPONENT] = c;
+                e.componentsLua[USERTYPE_SCRIPT_COMPONENT] = &c;
 
                 return &c;
             },
             [](sol::object, Entity& e, sol::object update) {
                 auto& c = e.addComponent<ScriptComponent>(sol::nil, update, sol::nil);
 
-                e.componentsLua[USERTYPE_SCRIPT_COMPONENT] = c;
+                e.componentsLua[USERTYPE_SCRIPT_COMPONENT] = &c;
 
                 return &c;
             }
@@ -354,85 +344,81 @@ void LuaSystem::preloadPackages(const std::string pathDir, const std::string nam
 void LuaSystem::initEngine() noexcept {
     lua.script(R"(engine = {mainEntities={}})");
     // set the handler pointeur in engine.lua lib
-    lua["engine"]["_handler"] = (intptr_t) handler;
+    lua["engine"]["_handler"] = (intptr_t) &handler;
 
     #define hLua self.get<intptr_t>("_handler")
 
-    lua["engine"]["addTile"] = [](sol::table self, Sprite* sprite, int flags) {
-        ((Handler*) hLua)->getGame()->getStateManager()->getTileManager()->addTile(sprite, bitset<SIZE_BIT_TILE_FLAG>(flags));
+    lua["engine"]["addTile"] = [&](Sprite* sprite, int flags) {
+        handler.getGame().getStateManager().getTileManager().addTile(sprite, bitset<SIZE_BIT_TILE_FLAG>(flags));
     };
 
     // ============ ALL SUBSYS METHODS ====
-    lua["engine"]["getWinHeight"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getWinHeight(); };
-    lua["engine"]["getWinWidth"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getWinWidth(); };
-    lua["engine"]["closeGame"] = [](sol::table self) noexcept { ((Handler*) hLua)->closeGame(); };
-    lua["engine"]["isResizing"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getSubsystem()->isResizing(); };
+    lua["engine"]["getWinHeight"] = [&]() noexcept { return handler.getWinHeight(); };
+    lua["engine"]["getWinWidth"] = [&]() noexcept { return handler.getWinWidth(); };
+    lua["engine"]["closeGame"] = [&]() noexcept { handler.closeGame(); };
+    lua["engine"]["isResizing"] = [&]() noexcept { return handler.getSubsystem().isResizing(); };
     
-    lua["engine"]["getKey"] = [](sol::table self, Uint16 scancode) noexcept { return ((Handler*) hLua)->getKey(scancode); };
-    lua["engine"]["getJustKey"] = [](sol::table self, Uint16 scancode) noexcept { return ((Handler*) hLua)->getJustKey(scancode); };
-    lua["engine"]["getKeyCode"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getSubsystem()->getKeyListener()->getKeyCode(); };
-    lua["engine"]["getAnyKey"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getAnyKey(); };
-    lua["engine"]["getJustAnyKey"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getJustAnyKey(); };
+    lua["engine"]["getKey"] = [&](Uint16 scancode) noexcept { return handler.getKey(scancode); };
+    lua["engine"]["getJustKey"] = [&](Uint16 scancode) noexcept { return handler.getJustKey(scancode); };
+    lua["engine"]["getKeyCode"] = [&]() noexcept { return handler.getSubsystem().getKeyListener().getKeyCode(); };
+    lua["engine"]["getAnyKey"] = [&]() noexcept { return handler.getAnyKey(); };
+    lua["engine"]["getJustAnyKey"] = [&]() noexcept { return handler.getJustAnyKey(); };
 
-    lua["engine"]["getButton"] = [](sol::table self, Uint16 scancode) noexcept { return ((Handler*) hLua)->getButton(scancode); };
-    lua["engine"]["getJustButton"] = [](sol::table self, Uint16 scancode) noexcept { return ((Handler*) hLua)->getJustButton(scancode); };
-    lua["engine"]["getButtonCode"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getSubsystem()->getMouseListener()->getButtonCode(); };
-    lua["engine"]["getMousePosition"] = [](sol::table self) noexcept {
-        auto vec = ((Handler*) hLua)->getMousePosition();
-        return make_shared<EngineVector2D>(vec.x, vec.y);
-    };
+    lua["engine"]["getButton"] = [&](Uint16 scancode) noexcept { return handler.getButton(scancode); };
+    lua["engine"]["getJustButton"] = [&](Uint16 scancode) noexcept { return handler.getJustButton(scancode); };
+    lua["engine"]["getButtonCode"] = [&]() noexcept { return handler.getSubsystem().getMouseListener().getButtonCode(); };
+    lua["engine"]["getMousePosition"] = [&]() noexcept { return handler.getMousePosition(); };
 
-    lua["engine"]["mute"] = [](sol::table self) noexcept { ((Handler*) hLua)->getSubsystem()->mute(); };
-    lua["engine"]["unmute"] = [](sol::table self) noexcept { ((Handler*) hLua)->getSubsystem()->unmute(); };
-    lua["engine"]["isMuting"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getSubsystem()->isMuting(); };
-    lua["engine"]["getSong"] = sol::factories(
-        [](sol::table self, const string& key) { return ((Handler*) hLua)->getState()->getSong(key); },
-        [](sol::table self, const string& key, const string& path) { return ((Handler*) hLua)->getState()->getSong(key, "res/" + path); }
+    lua["engine"]["mute"] = [&]() noexcept { handler.getSubsystem().mute(); };
+    lua["engine"]["unmute"] = [&]() noexcept { handler.getSubsystem().unmute(); };
+    lua["engine"]["isMuting"] = [&]() noexcept { return handler.getSubsystem().isMuting(); };
+    lua["engine"]["getSong"] = sol::overload(
+        [&](const string& key) { return handler.getState().getSong(key); },
+        [&](const string& key, const string& path) { return handler.getState().getSong(key, "res/" + path); }
     );
 
     // ======== ALL STATES METHODS =====
-    lua["engine"]["setState"] = [](sol::table self, size_t state) { ((Handler*) hLua)->getGame()->getStateManager()->setState(state); };
-    lua["engine"]["getState"] = [](sol::table self) { return ((Handler*) hLua)->getGame()->getStateManager()->getState(); };
-    lua["engine"]["getCurrentState"] = [](sol::table self) noexcept { ((Handler*) hLua)->getGame()->getStateManager()->getCurrentState(); };
-    lua["engine"]["restart"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
-    lua["engine"]["nextState"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->nextState(); };
-    lua["engine"]["previousState"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->previousState(); };
-    lua["engine"]["restart"] = [](sol::table self) { ((Handler*) hLua)->getGame()->getStateManager()->restart(); };
+    lua["engine"]["setState"] = [&](size_t state) { handler.getGame().getStateManager().setState(state); };
+    lua["engine"]["getState"] = [&]() { return &handler.getGame().getStateManager().getState(); };
+    lua["engine"]["getCurrentState"] = [&]() noexcept { handler.getGame().getStateManager().getCurrentState(); };
+    lua["engine"]["restart"] = [&]() { handler.getGame().getStateManager().restart(); };
+    lua["engine"]["nextState"] = [&]() { handler.getGame().getStateManager().nextState(); };
+    lua["engine"]["previousState"] = [&]() { handler.getGame().getStateManager().previousState(); };
+    lua["engine"]["restart"] = [&]() { handler.getGame().getStateManager().restart(); };
 
     lua["engine"]["setSizeTile"] = [](int size) noexcept { Tile::size = size; };
 
     // ========= ALL GFX METHODS
     lua["engine"]["setColor"] = sol::factories(
-        [](sol::table self, int r, int g, int b) noexcept { ((Handler*) hLua)->getGraphic()->setColor(r, g, b); },
-        [](sol::table self, int r, int g, int b, int a) noexcept { ((Handler*) hLua)->getGraphic()->setColor(r, g, b, a); }
+        [&](int r, int g, int b) noexcept { handler.getGraphic().setColor(r, g, b); },
+        [&](int r, int g, int b, int a) noexcept { handler.getGraphic().setColor(r, g, b, a); }
     );
-    lua["engine"]["renderRect"] = [](sol::table self, const EngineVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderRect(position, w, h); };
-    lua["engine"]["renderFillRect"] = [](sol::table self, const EngineVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderFillRect(position, w, h); };
-    lua["engine"]["renderAnchorRect"] = [](sol::table self, const EngineVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderAnchorRect(position, w, h); };
-    lua["engine"]["renderAnchorFillRect"] = [](sol::table self, const EngineVector2D& position, int w, int h) noexcept { ((Handler*) hLua)->getGraphic()->renderAnchorFillRect(position, w, h); };
-    lua["engine"]["centerOnEntity"] = [](sol::table self, Entity* entity) noexcept { ((Handler*) hLua)->getGraphic()->centerOnEntity(entity); };
-    lua["engine"]["getCameraPosition"] = [](sol::table self) noexcept {  return ((Handler*) hLua)->getGraphic()->getCamera()->getPosition(); };
-    lua["engine"]["renderText"] = [](sol::table self, const EngineVector2D& position, int width, int height, string text) {
-        ((Handler*) hLua)->getGraphic()->renderText(
+    lua["engine"]["renderRect"] = [&](const EngineVector2D& position, int w, int h) noexcept { handler.getGraphic().renderRect(position, w, h); };
+    lua["engine"]["renderFillRect"] = [&](const EngineVector2D& position, int w, int h) noexcept { handler.getGraphic().renderFillRect(position, w, h); };
+    lua["engine"]["renderAnchorRect"] = [&](const EngineVector2D& position, int w, int h) noexcept { handler.getGraphic().renderAnchorRect(position, w, h); };
+    lua["engine"]["renderAnchorFillRect"] = [&](const EngineVector2D& position, int w, int h) noexcept { handler.getGraphic().renderAnchorFillRect(position, w, h); };
+    lua["engine"]["centerOnEntity"] = [&](Entity* entity) noexcept { handler.getGraphic().centerOnEntity(entity); };
+    lua["engine"]["getCameraPosition"] = [&]() noexcept {  return handler.getGraphic().getCamera().getPosition(); };
+    lua["engine"]["renderText"] = [&](const EngineVector2D& position, int width, int height, string text) {
+        handler.getGraphic().renderText(
             static_cast<int>(position.x),
             static_cast<int>(position.y),
             width,
             height,
             text,
-            ((Handler*) hLua)->getGraphic()->getFont("res/FreeRoyalty.ttf", 20)
+            handler.getGraphic().getFont("res/FreeRoyalty.ttf", 20)
         );
     };
-    lua["engine"]["renderPolygon"] = [](sol::table self, const EngineVector2D& position, const Polygon& polygon) noexcept {
-        ((Handler*) hLua)->getGraphic()->renderPolygon(position, polygon);
+    lua["engine"]["renderPolygon"] = [&](const EngineVector2D& position, const Polygon& polygon) noexcept {
+        handler.getGraphic().renderPolygon(position, polygon);
     };
     
-    
-    lua["engine"]["getSprite"] = sol::factories(
-        [](sol::table self, const string& key) { return ((Handler*) hLua)->getGraphic()->getSprite(key); },
-        [](sol::table self, const string& key, const string& path) { return ((Handler*) hLua)->getGraphic()->getSprite(key, path); },
-        [](sol::table self, const string& key, const string& path, int xPos, int yPos, int width, int height) { return ((Handler*) hLua)->getGraphic()->loadSpriteSheet(key, path, xPos, yPos, width, height); },
-        [](sol::table self, const string& key, const string& path, int nCol, int nRow, int wsrc, int hsrc, size_t nbFrames) { return ((Handler*) hLua)->getGraphic()->getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrames); }
+    lua["engine"]["getSprite"] = sol::overload(
+        [&](const string& key) { return handler.getGraphic().getSprite(key); },
+        [&](const string& key, const string& path) { return handler.getGraphic().getSprite(key, path); },
+        [&](const string& key, const string& path, int xPos, int yPos, int width, int height) { return handler.getGraphic().loadSpriteSheet(key, path, xPos, yPos, width, height); },
+        [&]( const string& key, const string& path, int nCol, int nRow, int wsrc, int hsrc, size_t nbFrames) { return handler.getGraphic().getSprite(key, path, nCol, nRow, wsrc, hsrc, nbFrames); }
     );
-    lua["engine"]["getBackground"] = [](sol::table self) noexcept { return ((Handler*) hLua)->getGame()->getStateManager()->getBackground(); };
-    lua["engine"]["addEntity"] = [](sol::table self, Entity* e) noexcept { (((Handler*) hLua)->getEntityManager()->addEntity(e)); };
+    lua["engine"]["getBackground"] = [&]() noexcept { return &handler.getGame().getStateManager().getBackground(); };
+    lua["engine"]["addEntity"] = [&](Entity* e) noexcept { handler.getEntityManager().addEntity(e); };
 }

@@ -9,6 +9,8 @@ namespace exocet {
             EngineVector2D position;
             int w, h;
         public:
+            using Component::Component;
+
             void init() noexcept override {
                 setSize(0, 0);
             }

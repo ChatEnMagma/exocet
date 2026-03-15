@@ -9,7 +9,7 @@ void MovementComponent::move() noexcept {
     if(abs(vel.x) < 0.001) vel.x = 0;
     if(abs(vel.y) < 0.001) vel.y = 0;
 
-    vel += acc.scalar(handler->getDeltaTime());
+    vel += acc.scalar(handler.getDeltaTime());
     
     if(isMovingRight())
         pos.x += ceil(vel.x);

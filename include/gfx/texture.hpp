@@ -7,9 +7,12 @@
 #include "tool/vectors.hpp"
 
 namespace exocet {
+    class Camera;
+    
     class Texture {
         private:
-            Handler* handler;
+            SDL_Renderer* ren;
+            Camera& camera;
 
             SDL_Texture* tex = NULL;
 
@@ -17,7 +20,7 @@ namespace exocet {
 
             void openTexture(const std::string& path);
         public:
-            Texture(Handler* handler, const std::string& path);
+            Texture(Camera& camera, SDL_Renderer* renderer, const std::string& path);
             ~Texture() noexcept { SDL_DestroyTexture(tex); }
 
             /**

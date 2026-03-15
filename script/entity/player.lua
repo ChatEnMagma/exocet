@@ -25,7 +25,7 @@ function Player:new(position)
 
     PhysicComponent:new(e, Rect:new(64, 64), position)
     ScriptComponent:new(e, function () e.data.update(e) end)
-    SpriteComponent:new(e, engine:getSprite("exocet", "exocet_anim.png", 7, 1, 32, 32, 7), 10):fitSizeWithHitbox()
+    SpriteComponent:new(e, engine.getSprite("exocet", "exocet_anim.png", 7, 1, 32, 32, 7), 10):fitSizeWithHitbox()
     InputComponent:new(e)
 
     e.components.PhysicComponent:setSpeed(Vector2D:new(5, 5))
@@ -43,10 +43,10 @@ function Player.update(e)
     --- @type PhysicComponent
     local physic = e.components.PhysicComponent
 
-    if engine:getKey(SDL.SDLK_U) then engine:addEntity(Wall:new(physic:getPosition())) end
+    if engine.getKey(SDL.SDLK_U) then engine.addEntity(Wall:new(physic:getPosition())) end
 
-    if engine:getJustKey(SDL.SDLK_H) then engine:getSong("plouf", "plouf.wav"):play() end
-    if engine:getJustKey(SDL.SDLK_G) then engine:getSong("whoosh", "whoosh0.wav"):play(300) end
+    if engine.getJustKey(SDL.SDLK_H) then engine.getSong("plouf", "plouf.wav"):play() end
+    if engine.getJustKey(SDL.SDLK_G) then engine.getSong("whoosh", "whoosh0.wav"):play(300) end
 
-    engine:centerOnEntity(e)
+    engine.centerOnEntity(e)
 end

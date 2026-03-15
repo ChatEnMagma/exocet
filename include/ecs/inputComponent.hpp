@@ -16,7 +16,7 @@ namespace exocet {
                 KEYBOARD = 0b01,
                 GAMEPAD = 0b10
             };
-
+            using Component::Component;
             ~InputComponent() = default;
 
             void init() override;

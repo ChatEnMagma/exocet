@@ -18,7 +18,7 @@ void HitboxComponent::init() noexcept {
     
     setColor(0xff, 0x00, 0x00);
 
-    handler->getEntityManager()->addToGroup(entity, GROUP_COLLIDER);
+    handler.getEntityManager().addToGroup(entity, GROUP_COLLIDER);
 }
 
 void projection(const Polygon& poly, const Vector2D<double> axis, double* max, double* min) noexcept {
@@ -66,7 +66,7 @@ bool HitboxComponent::isCollide(const HitboxComponent& hitbox) const noexcept {
 }
 
 optional<Entity*> HitboxComponent::getCollide() const {
-    auto group = handler->getEntityManager()->getGroup(GROUP_COLLIDER);
+    auto group = handler.getEntityManager().getGroup(GROUP_COLLIDER);
 
     auto it = ranges::find_if(group, [this](const Entity* e) { return e != this->entity && this->isCollide(e->getComponent<HitboxComponent>()); } );
 
@@ -77,7 +77,7 @@ optional<Entity*> HitboxComponent::getCollide() const {
 }
 
 vector<Entity*> HitboxComponent::getCollideEntities() const {
-    auto group = handler->getEntityManager()->getGroup(GROUP_COLLIDER);
+    auto group = handler.getEntityManager().getGroup(GROUP_COLLIDER);
 
     auto colliding = group
         | views::filter([this](const Entity* e) { return e != entity && e->hasComponent<HitboxComponent>(); })
@@ -105,14 +105,14 @@ bool HitboxComponent::isCollideVertical(const HitboxComponent& hitbox) const noe
 }
 
 void HitboxComponent::render() noexcept {
-    if(!isInsideScreen() || !handler->isShowingHitbox()) return;
+    if(!isInsideScreen() || !handler.isShowingHitbox()) return;
 
-    handler->getGraphic()->setRenderColor(color[0], color[1], color[2]);
-    handler->getGraphic()->renderPolygon(movement->getPosition(), polygons);
+    handler.getGraphic().setRenderColor(color[0], color[1], color[2]);
+    handler.getGraphic().renderPolygon(movement->getPosition(), polygons);
 }
 
 bool HitboxComponent::isInsideMouse() const noexcept {
-    auto pos = handler->getMousePosition() + handler->getGraphic()->getCamera()->getPosition();
+    auto pos = handler.getMousePosition() + handler.getGraphic().getCamera().getPosition();
     
     return (
         pos.x >= getLeft()  &&
@@ -123,12 +123,12 @@ bool HitboxComponent::isInsideMouse() const noexcept {
 }
 
 bool HitboxComponent::isInsideScreen() const noexcept {
-    auto posCam = handler->getGraphic()->getCamera()->getPosition();
+    auto posCam = handler.getGraphic().getCamera().getPosition();
 
     return (
         movement->pos.x > posCam.x - getWidth() && 
-        movement->pos.x + getWidth() < posCam.x + handler->getWinWidth() + getWidth() &&
+        movement->pos.x + getWidth() < posCam.x + handler.getWinWidth() + getWidth() &&
         movement->pos.y > posCam.y - getHeight() &&
-        movement->pos.y + getHeight() < posCam.y + handler->getWinHeight() + getHeight()
+        movement->pos.y + getHeight() < posCam.y + handler.getWinHeight() + getHeight()
     );
 }

@@ -14,9 +14,10 @@ namespace exocet {
     class Subsystem {
         private:
             SDL_Window* win;
+
             std::unique_ptr<Graphic> gfx;
-            KeyListener keys;
-            MouseListener mouse;
+            std::unique_ptr<KeyListener> keys;
+            std::unique_ptr<MouseListener> mouse;
 
             SDL_Surface* icon;
 
@@ -28,7 +29,8 @@ namespace exocet {
 
             bool running;
         public:
-            ~Subsystem() noexcept { clean(); };
+            Subsystem();
+            ~Subsystem() noexcept;
 
             /**
              * \brief Init the subsystem
@@ -42,11 +44,6 @@ namespace exocet {
              * \brief Handle all events from SDL
              */
             void handleEvents() noexcept;
-            /**
-             * \brief Clean the subsystem
-             */
-            void clean() noexcept;
-
             /**
              * \brief Set window title
              * \param title the title for window
@@ -71,15 +68,13 @@ namespace exocet {
             inline bool isMuting() const noexcept { return muting; }
             inline bool isResizing() const noexcept { return resizing; }
 
-            inline Graphic* getGraphic() noexcept { return gfx.get(); }
-            inline KeyListener* getKeyListener() noexcept { return &keys; }
-            inline MouseListener* getMouseListener() noexcept { return &mouse; }
+            inline Graphic& getGraphic() noexcept { return *gfx; }
+            inline KeyListener& getKeyListener() noexcept { return *keys; }
+            inline MouseListener& getMouseListener() noexcept { return *mouse; }
             
             inline int getWinWidth() const noexcept { return w; }
             inline int getWinHeight() const noexcept { return h; }
             inline std::string getWinTitle() const noexcept { return title; }
-
-            inline SDL_Renderer* getRenderer() noexcept { return gfx->getRenderer(); }
 
             inline void setFullscreen() noexcept { SDL_SetWindowFullscreen(win, SDL_WINDOW_FULLSCREEN); }
     };

@@ -13,11 +13,9 @@ namespace exocet {
             int w, h;
             bool loop;
 
-            Handler* handler;
+            Handler& handler;
         public:
-            Background(Handler* handler, bool loop = false) noexcept {
-                this->handler = handler;
-
+            Background(Handler& handler, bool loop = false): handler(handler) {
                 this->loop = loop;
 
                 w = 0;

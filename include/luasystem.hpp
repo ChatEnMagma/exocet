@@ -26,7 +26,7 @@
 namespace exocet {
         class LuaSystem: public sol::state {
         private:
-            Handler* handler;
+            Handler& handler;
 
             void initRectClass() noexcept;
 
@@ -44,7 +44,7 @@ namespace exocet {
 
             void preloadPackages(const std::string pathPackage, const std::string name);
         public:
-            LuaSystem(Handler* handler);
+            LuaSystem(Handler& handler);
             ~LuaSystem() noexcept {
                 this->collect_garbage();
 

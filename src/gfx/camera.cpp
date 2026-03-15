@@ -1,6 +1,6 @@
 #include "gfx/camera.hpp"
-
-#include "handler.hpp"
+#include "ecs/ecs.hpp"
+#include "subsystem.hpp"
 
 using namespace std;
 using namespace exocet;
@@ -13,6 +13,6 @@ void Camera::centerOnEntity(Entity* e) {
     auto center = e->getComponent<HitboxComponent>().getCenter();
 
     // Set the new offset
-    this->pos.x = center.x - handler->getWinWidth() / 2;
-    this->pos.y = center.y - handler->getWinHeight() / 2;
+    this->pos.x = center.x - subsys.getWinWidth() / 2;
+    this->pos.y = center.y - subsys.getWinHeight() / 2;
 }

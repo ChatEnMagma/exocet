@@ -18,6 +18,7 @@ namespace exocet {
              */
             void collisionWithPhysicEntity(Entity* e);
         public:
+            using Component::Component;
             ~PhysicComponent() = default;
 
             void init() noexcept override;

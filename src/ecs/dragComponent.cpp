@@ -15,5 +15,5 @@ void DragComponent::init() noexcept {
 }
 
 void DragComponent::update() noexcept {
-    drag = handler->getButton(0) && hitbox->isInsideMouse();
+    drag = handler.getButton(0) && hitbox->isInsideMouse();
 }

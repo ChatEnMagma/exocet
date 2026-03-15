@@ -34,7 +34,7 @@ namespace exocet {
             inline bool isVectorNull() const noexcept { return (x == 0) && (y == 0); }
 
             inline Vector2D abs() const noexcept { return Vector2D(std::abs(x), std::abs(y)); }
-            inline T magnitude() const noexcept { return sqrt(x * x + y * y); }
+            inline T magnitude() const noexcept { return static_cast<T>(std::hypot(x, y)); }
             inline Vector2D normalized() const noexcept { 
                 T mag = magnitude();
                 return (mag == 0)? Vector2D(0, 0): Vector2D(x / mag, y / mag); 

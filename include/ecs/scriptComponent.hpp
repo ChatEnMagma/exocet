@@ -12,12 +12,12 @@ namespace exocet {
             /**
              * \param component The component settings from lua file
              */
-            ScriptComponent(sol::table component) noexcept {
+            ScriptComponent(Handler& handler, sol::table component): Component(handler) {
                 initLua =   component.get<sol::function>("init");
                 updateLua = component.get<sol::function>("update");
                 renderLua = component.get<sol::function>("render");
             }
-            ScriptComponent(sol::function init, sol::function update, sol::function render) noexcept {
+            ScriptComponent(Handler& handler, sol::function init, sol::function update, sol::function render): Component(handler) {
                 initLua =   init;
                 updateLua = update;
                 renderLua = render;

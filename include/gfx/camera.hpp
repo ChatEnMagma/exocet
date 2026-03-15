@@ -4,11 +4,15 @@
 #include "tool/vectors.hpp"
 
 namespace exocet {
+    class Subsystem;
+
     class Camera {
         private:
-            Handler* handler;
+            Subsystem& subsys;
             EngineVector2D pos;
         public:
+            Camera(Subsystem& subsys): subsys(subsys) {}
+
             /**
              * \brief Center the camera on entity
              * \param entity The entity
@@ -19,7 +23,5 @@ namespace exocet {
              */
             inline EngineVector2D getPosition() const noexcept { return pos; }
             inline void setPosition(const EngineVector2D position) noexcept { pos = position; }
-
-            inline void setHandler(Handler* handler) noexcept { this->handler = handler; }
     };
 }

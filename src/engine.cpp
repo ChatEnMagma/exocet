@@ -7,17 +7,12 @@ using namespace std;
 using namespace exocet;
 
 void Engine::init(int w, int h, std::string title, bool fullscreen) {
-    try {
-        (subsys = make_unique<Subsystem>())->init(w, h, title);
-    } catch(const bad_alloc& e) {
-        cerr << "Error to initiate the subsystem..." << endl;
-        exit(EXIT_FAILURE);
-    }
+    (subsys = make_unique<Subsystem>())->init(w, h, title);
 
     if(fullscreen)
         subsys->setFullscreen();
 
-    game = make_unique<Game>(subsys.get());
+    game = make_unique<Game>(*subsys.get());
 }
 
 void Engine::run() {
