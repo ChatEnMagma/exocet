@@ -57,12 +57,13 @@ void State::renderTiles() {
     auto posCam = handler.getGraphic().getCamera();
     
     EngineVector2D posTile;
+    auto& tileManager = handler.getGame().getStateManager().getTileManager();
 
     for(int y = 0; y < h; y++) {
         for(int x = 0; x < w; x++) {
             posTile.setPoints(x, y);
 
-            getTile(posTile).render(posTile);
+            tileManager.getTile(tiles[(y * w) + x]).render(posTile);
         }
     }
 }
@@ -74,7 +75,7 @@ void State::settupTiles(int w, int h, vector<size_t> tiles) {
 }
 
 Tile& State::getTile(const EngineVector2D& position) const noexcept {
-    auto pos = position.convert<int>();
+    auto pos = position.divAlpha(Tile::size).convert<int>();
 
     if(pos.x < 0 || pos.y < 0 || pos.x >= w || pos.y >= h) return handler.getGame().getStateManager().getTileManager().getDefaultTile();
 

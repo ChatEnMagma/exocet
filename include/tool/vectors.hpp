@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <iostream>
-
+#include <span>
 namespace exocet {
     template <typename T>
     class Vector2D {
@@ -11,10 +11,11 @@ namespace exocet {
 
             Vector2D() { setPoints(0, 0); }
             Vector2D(T x, T y) { setPoints(x, y); }
+            Vector2D(std::span<T, 2> points) { setPoints(points[0], points[1]); }
             ~Vector2D() noexcept = default;
 
             static inline Vector2D magnitude2Vectors(const Vector2D& vector1, const Vector2D& vector2) { 
-                return Vector2D(sqrt(vector1.x * vector1.x - vector2.x * vector2.x), sqrt(vector1.y * vector1.y - vector2.y * vector2.y));
+                return Vector2D(std::hypot(vector1.x, vector2.x), std::hypot(vector1.y, vector2.y));
             }
             static inline Vector2D distance2Vectors(const Vector2D& vector1, const Vector2D& vector2) {
                 return Vector2D(vector2.x - vector1.x, vector2.y - vector1.y);
@@ -44,18 +45,19 @@ namespace exocet {
             inline Vector2D scalar(const T alpha) const noexcept { return Vector2D(x * alpha, y * alpha); }
             inline Vector2D reflect() const noexcept { return Vector2D(-x, -y); }
             inline Vector2D rotate(double angle) const noexcept { return Vector2D(x * std::cos(angle) - y * std::sin(angle), x * std::sin(angle) + y * std::cos(angle)); }
-            inline double getAngle() const noexcept { return std::atan2(x, y); }
+            inline double getAngle() const noexcept { return std::atan2(y, x); }
             inline void setPoints(T x, T y) noexcept { this->x = x; this->y = y; }
+            inline Vector2D trunc() const noexcept { return Vector2D(std::trunc(this->x), std::trunc(this->y)); }
 
             inline void add(const Vector2D& vector) noexcept { x += vector.x; y += vector.y; }
             inline void sub(const Vector2D& vector) noexcept { x -= vector.x; y -= vector.y; }
             inline void mul(const Vector2D& vector) noexcept { x *= vector.x; y *= vector.y; }
             inline void div(const Vector2D& vector) {
-                if(vector.y == 0) throw std::runtime_error("cant divide by 0");
+                if(vector.isVectorNull()) throw std::runtime_error("cant divide by 0");
                 x /= vector.x; 
                 y /= vector.y; 
             }
-            inline Vector2D divAlpha(T alpha) {
+            inline Vector2D divAlpha(T alpha) const {
                 if(alpha == 0) throw std::runtime_error("cant dive by 0");
                 return Vector2D(x / alpha, y / alpha);
             }
@@ -64,9 +66,9 @@ namespace exocet {
             inline Vector2D operator-(const Vector2D& vec) const noexcept { return Vector2D(x - vec.x, y - vec.y); }
             inline Vector2D operator*(const Vector2D& vec) const noexcept { return Vector2D(x * vec.x, y * vec.y); }
             inline Vector2D operator/(const Vector2D& vec) const {
-                if(vec.y == 0) throw std::runtime_error("cant divide by 0");
+                if(vec.isVectorNull() == 0) throw std::runtime_error("cant divide by 0");
                 return Vector2D(x / vec.x, y / vec.y); 
-            } 
+            }
 
             inline Vector2D operator+=(const Vector2D& vec) noexcept { add(vec); return *this; }
             inline Vector2D operator-=(const Vector2D& vec) noexcept { sub(vec); return *this; }

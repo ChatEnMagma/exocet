@@ -5,26 +5,22 @@ using namespace exocet;
 using namespace std;
 
 void ControllerDirectionsComponent::init() {
-    if(!entity->hasComponent<HitboxComponent>()) {
-        hitbox = &entity->addComponent<HitboxComponent>();
+    if(!entity->hasComponent<MovementComponent>()) {
+        movement = &entity->addComponent<MovementComponent>();
     } else {
-        hitbox = &entity->getComponent<HitboxComponent>();
+        movement = &entity->getComponent<MovementComponent>();
     }
-                
-    movement = &entity->getComponent<MovementComponent>();
+
     direction = EngineVector2D::vectorZeros();
 }
 
 void ControllerDirectionsComponent::update() {
-    movement->acc.x = clamp(movement->acc.x, -movement->getMaxSpeed().x, movement->getMaxSpeed().x);
-    movement->acc.y = clamp(movement->acc.y, -movement->getMaxSpeed().y, movement->getMaxSpeed().y);
-
     if(abs(direction.x) > 0.05)
-        movement->acc.x += movement->getSpeed().x;
-    else movement->acc.x = 0;
+        movement->setAccelerationX(movement->getAcceleration().x + movement->getSpeed().x);
+    else movement->setAccelerationX(0.f);
     if(abs(direction.y) > 0.05)
-        movement->acc.y += movement->getSpeed().y;
-    else movement->acc.y = 0;
+        movement->setAccelerationY(movement->getAcceleration().y + movement->getSpeed().y);
+    else movement->setAccelerationY(0.f);
     
-    movement->vel = direction.normalized() * movement->getAccelation();
+    movement->setVelocity(direction.normalized() * movement->getAcceleration());
 }

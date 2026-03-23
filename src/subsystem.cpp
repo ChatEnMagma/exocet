@@ -120,4 +120,6 @@ void Subsystem::handleEvents() noexcept {
 
     keys->update();
     mouse->update();
+
+    SDL_GetWindowSize(win, &w, &h);
 }

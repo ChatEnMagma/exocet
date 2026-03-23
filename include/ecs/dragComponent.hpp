@@ -1,13 +1,12 @@
 #pragma once
 
 #include "ecs/ecs.hpp"
-#include "ecs/hitboxComponent.hpp"
+#include "ecs/movementComponent.hpp"
 
 namespace exocet {
     class DragComponent: public Component {
         private:
             int drag;
-            HitboxComponent* hitbox;
             MovementComponent* movement;
         public:
             using Component::Component;

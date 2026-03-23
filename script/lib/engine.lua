@@ -135,6 +135,10 @@ function engine.renderText(position, width, height, text) end
 --- @param polygon Polygon
 function engine.renderPolygon(position, polygon) end
 
+--- Set the new size of all tiles for all states
+--- @param size integer the size tiles
+function engine.setSizeTile(size)end
+
 --=================================== ALL CAMERA METHODS =====================================--
 
 --- Get the position of the camera, i.e the offset

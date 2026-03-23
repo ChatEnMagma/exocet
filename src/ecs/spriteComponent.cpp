@@ -6,11 +6,10 @@ using namespace exocet;
 using namespace std;
 
 void SpriteComponent::init() noexcept {    
-    if(!entity->hasComponent<HitboxComponent>())
-        hitbox = &entity->addComponent<HitboxComponent>();
+    if(!entity->hasComponent<MovementComponent>())
+        movement = &entity->addComponent<MovementComponent>();
     else
-        hitbox = &entity->getComponent<HitboxComponent>();
-    movement = &entity->getComponent<MovementComponent>();
+        movement = &entity->getComponent<MovementComponent>();
 
     fps = FPS;
     frame = 0;
@@ -18,7 +17,7 @@ void SpriteComponent::init() noexcept {
     
     a = 0;
 
-    setSize(hitbox->getWidth(), hitbox->getHeight());
+    fitSizeWithHitbox();
 }
 
 void SpriteComponent::update() noexcept {
@@ -32,6 +31,6 @@ void SpriteComponent::update() noexcept {
 }
 
 void SpriteComponent::render() noexcept {
-    if(hitbox->isInsideScreen())
-        sprite->renderAngle(movement->getPosition(), a, w, h, frame);
+    if(movement->getHitbox().isInsideScreen())
+        sprite->renderAngle(movement->getHitbox().getRenderPosition(), a, w, h, frame);
 }

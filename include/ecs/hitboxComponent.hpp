@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/movementComponent.hpp"
+#include "ecs/transformComponent.hpp"
 
 #include "tool/polygon.hpp"
 
@@ -8,7 +8,7 @@ namespace exocet {
     class HitboxComponent: public Component {
         private:
             Polygon polygons;
-            MovementComponent* movement;
+            TransformComponent* transform;
             Uint8 color[3];
         public:
             using Component::Component;
@@ -41,16 +41,16 @@ namespace exocet {
             /**
              * \return The focal point of the entity
              */
-            inline EngineVector2D getCenter() const noexcept { return movement->pos.convert<double>() + EngineVector2D(getWidth() / 2, getHeight() / 2); }
-            double getLeft() const noexcept { return polygons.getLeft() + static_cast<double>(movement->pos.x); }
-            double getRight() const noexcept { return polygons.getRight() + static_cast<double>(movement->pos.x); }
-            double getUp() const noexcept { return polygons.getUp() + static_cast<double>(movement->pos.y); }
-            double getDown() const noexcept { return polygons.getDown() + static_cast<double>(movement->pos.y); }
+            inline const EngineVector2D getCenter() const noexcept { return transform->getPosition() + EngineVector2D(getWidth() / 2, getHeight() / 2); }
+            inline double getLeft() const noexcept { return polygons.getLeft() + transform->getPosition().x; }
+            inline double getRight() const noexcept { return polygons.getRight() + transform->getPosition().x; }
+            inline double getUp() const noexcept { return polygons.getUp() + transform->getPosition().y; }
+            inline double getDown() const noexcept { return polygons.getDown() + transform->getPosition().y; }
 
-            inline double getMovementLeft() const noexcept { return movement->getVelocity().x + getLeft(); }
-            inline double getMovementRight() const noexcept { return movement->getVelocity().x + getRight(); }
-            inline double getMovementUp() const noexcept { return movement->getVelocity().y + getUp(); }
-            inline double getMovementDown() const noexcept { return movement->getVelocity().y + getDown(); }
+            inline double getMovementLeft() const noexcept { return transform->getVelocity().x + getLeft(); }
+            inline double getMovementRight() const noexcept { return transform->getVelocity().x + getRight(); }
+            inline double getMovementUp() const noexcept { return transform->getVelocity().y + getUp(); }
+            inline double getMovementDown() const noexcept { return transform->getVelocity().y + getDown(); }
             /**
              * \return The width of the entity
              */
@@ -59,6 +59,7 @@ namespace exocet {
              * \return The height of the entity
              */
             inline int getHeight() const noexcept { return polygons.getHeight(); }
+            inline EngineVector2D getRenderPosition() const { return transform->getPosition() - EngineVector2D(getWidth() / 2, getHeight() / 2); }
             /**
              * \brief Set a rectangular hitbox for the entity
              */
@@ -66,10 +67,7 @@ namespace exocet {
             inline void setHitbox(const Polygon& polygon) noexcept { polygons = polygon; }
             inline void setColor(Uint8 red, Uint8 green, Uint8 blue) noexcept { color[0] = red; color[1] = green; color[2] = blue; }
 
-            inline int getPositionX() const noexcept { return movement->getPosition().x; }
-            inline int getPositionY() const noexcept { return movement->getPosition().y; }
-            inline EngineVector2D getPosition() const noexcept { return movement->getPosition(); } 
-
             inline const Polygon& getPolygon() const noexcept { return polygons; }
+            inline const TransformComponent& getTransform() const { return *transform; }
     };
 }

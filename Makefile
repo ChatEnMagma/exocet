@@ -3,61 +3,51 @@ INCDIR = include
 OBJDIR = obj
 
 CXX = g++
-CXXFLAGS = -Wall -Wextra -O3 -g -std=c++20 -ffast-math -fno-rtti -I$(INCDIR) `sdl2-config --cflags`
+CXXFLAGS = -Wall -Wextra -O3 -g -std=c++20 -ffast-math -fno-rtti -flto=$(shell nproc) -I$(INCDIR) `sdl2-config --cflags`
 CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf
 
 ifeq ($(OS),Windows_NT)
 	EXE = exocet.exe
 
-	CXXLIBS = -static -static-libgcc -static-libstdc++ \
-				`pkg-config --libs --static SDL2` \
-				`pkg-config --libs --static SDL2_image` \
-				`pkg-config --libs --static SDL2_ttf` \
-				`pkg-config --libs --static SDL2_mixer` \
+	CXXLIBS = 	-static -static-libgcc -static-libstdc++ \
+            	$(shell pkg-config --libs --static SDL2 SDL2_image SDL2_ttf SDL2_mixer) \
 				-llua
-	BEGIN_COMPILE = exocet.res | $(EXE)
-	END_COPILE = $(CXX) -o $(EXE) $^ $(CXXLIBS) exocet.res
 else
 	EXE = exocet
-
-	CXXLIBS = `sdl2-config --libs` -lSDL2_image -lSDL2_ttf -lSDL2_mixer -llua5.4
-	BEGIN_COMPILE = $(EXE)
-	END_COPILE = $(CXX) -o $(EXE) $^ $(CXXLIBS)
+	CXXLIBS =  $(shell sdl2-config --libs) -lSDL2_image -lSDL2_ttf -lSDL2_mixer -llua5.4
 endif
 
-SRC = 	$(wildcard $(SRCDIR)/*.cpp) \
-		$(wildcard $(SRCDIR)/ecs/*.cpp) \
-		$(wildcard $(SRCDIR)/ecs/ui/*.cpp) \
-		$(wildcard $(SRCDIR)/gfx/*.cpp) \
-		$(wildcard $(SRCDIR)/state/*.cpp)
-
-INC = 	$(wildcard $(INCDIR)/*.hpp) \
-		$(wildcard $(SRCDIR)/ecs/*.hpp) \
-		$(wildcard $(SRCDIR)/ecs/ui/*.hpp) \
-		$(wildcard $(INCDIR)/input/*.hpp) \
-		$(wildcard $(SRCDIR)/gfx/*.hpp) \
-		$(wildcard $(SRCDIR)/state/*.hpp)
-
-OBJ = $(SRC:$(SRCDIR)%.cpp=$(OBJDIR)%.o)
+SRC = $(shell find $(SRCDIR) -name '*.cpp')
+INC = $(shell find $(INCDIR) -name '*.hpp')
+OBJ = $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRC))
+DEP = $(OBJ:.o=.d)
 
 RM = rm -f
 
-.PHONY: all clean
+.PHONY: all clean run
 
-
-all: $(BEGIN_COMPILE)
-
-exocet.res: exocet.rc
-	windres exocet.rc -O coff -o exocet.res
+all: $(EXE)
 
 $(EXE): $(OBJ)
-	$(END_COPILE)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(CXXLIBS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(INC)
 	@mkdir -p $(dir $@)
 
-	$(CXX) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(CXXFLAGS) -MMD -MP -o $@ -c $<
+
+-include $(DEP)
+
+run: all
+	./$(EXE)
 
 clean:
 	$(RM) -r $(OBJDIR)
 	$(RM) $(EXE)
+
+ifeq ($(OS),Windows_NT)
+$(EXE): exocet.res
+exocet.res: exocet.rc
+	windres exocet.rc -O coff -o exocet.res
+clean::
 	$(RM) exocet.res
+endif

@@ -30,10 +30,8 @@ function Player:new(position)
 
     e.components.PhysicComponent:setSpeed(Vector2D:new(5, 5))
     e.components.PhysicComponent:setMaxSpeed(Vector2D:new(64, 64))
-    e.components.PhysicComponent:setFriction(Vector2D:new(0.999999, 0.999999))
+    e.components.PhysicComponent:setFriction(Vector2D:new(0.99, 0.99))
     e.components.PhysicComponent:setMasse(200)
-
-    print(e:componentSize())
 
     return e
 end

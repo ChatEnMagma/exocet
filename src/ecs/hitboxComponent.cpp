@@ -8,10 +8,10 @@ using namespace std;
 using namespace exocet;
 
 void HitboxComponent::init() noexcept {
-    if(!entity->hasComponent<MovementComponent>()) {
-        movement = &entity->addComponent<MovementComponent>();
+    if(!entity->hasComponent<TransformComponent>()) {
+        transform = &entity->addComponent<TransformComponent>();
     } else {
-        movement = &entity->getComponent<MovementComponent>();
+        transform = &entity->getComponent<TransformComponent>();
     }
 
     polygons = Polygon(0, 0, HITBOX_DEFAULT_SIZE, HITBOX_DEFAULT_SIZE);
@@ -41,8 +41,8 @@ bool HitboxComponent::isCollide(const HitboxComponent& hitbox) const noexcept {
     double max1, max2, min1, min2;
 
     // Get the transpos of the hitbox
-    Polygon p1 = polygons.translate(movement->getPosition().convert<double>());
-    Polygon p2 = hitbox.getPolygon().translate(hitbox.getPosition().convert<double>());
+    Polygon p1 = polygons.translate(transform->getPosition());
+    Polygon p2 = hitbox.getPolygon().translate(hitbox.getTransform().getPosition());
 
     auto axes1 = p1.getAxes();
     auto axes2 = p2.getAxes();
@@ -87,20 +87,20 @@ vector<Entity*> HitboxComponent::getCollideEntities() const {
 }
 
 bool HitboxComponent::isCollideHorizontal(const HitboxComponent& hitbox) const noexcept {
-    return movement->vel.x != 0 && movement->vel.y != 0 && (
-        ((((float) (hitbox.getLeft() - getRight()) / movement->vel.x) > 1.f) ||
-        (((float) (hitbox.getRight() - getLeft()) / movement->vel.x) > 1.f)) &&
-        ((((float) (hitbox.getUp() - getDown()) / movement->vel.y) < 0.f) ||
-        (((float) (hitbox.getDown() - getUp()) / movement->vel.y) < 0.f))
+    return transform->isMoving() && (
+        ((((float) (hitbox.getLeft() - getRight()) / transform->getVelocity().x) > 1.f) ||
+        (((float) (hitbox.getRight() - getLeft()) /transform->getVelocity().x) > 1.f)) &&
+        ((((float) (hitbox.getUp() - getDown()) / transform->getVelocity().y) < 0.f) ||
+        (((float) (hitbox.getDown() - getUp()) / transform->getVelocity().y) < 0.f))
     );
 }
 
 bool HitboxComponent::isCollideVertical(const HitboxComponent& hitbox) const noexcept {
-    return movement->vel.x != 0 && movement->vel.y != 0 && (
-        (((float) ((hitbox.getUp() - getDown()) / movement->vel.y) > 1.f) ||
-        (((float) (hitbox.getDown() - getUp()) / movement->vel.y) > 1.f)) &&
-        (((float) ((hitbox.getLeft() - getRight()) / movement->vel.x) < 0.f) ||
-        (((float) (hitbox.getRight() - getLeft()) / movement->vel.x) < 0.f))
+    return transform->isMoving() && (
+        (((float) ((hitbox.getUp() - getDown()) / transform->getVelocity().y) > 1.f) ||
+        (((float) (hitbox.getDown() - getUp()) / transform->getVelocity().y) > 1.f)) &&
+        (((float) ((hitbox.getLeft() - getRight()) / transform->getVelocity().x) < 0.f) ||
+        (((float) (hitbox.getRight() - getLeft()) / transform->getVelocity().x) < 0.f))
     );
 }
 
@@ -108,7 +108,7 @@ void HitboxComponent::render() noexcept {
     if(!isInsideScreen() || !handler.isShowingHitbox()) return;
 
     handler.getGraphic().setRenderColor(color[0], color[1], color[2]);
-    handler.getGraphic().renderPolygon(movement->getPosition(), polygons);
+    handler.getGraphic().renderPolygon(getRenderPosition(), polygons);
 }
 
 bool HitboxComponent::isInsideMouse() const noexcept {
@@ -126,9 +126,9 @@ bool HitboxComponent::isInsideScreen() const noexcept {
     auto posCam = handler.getGraphic().getCamera().getPosition();
 
     return (
-        movement->pos.x > posCam.x - getWidth() && 
-        movement->pos.x + getWidth() < posCam.x + handler.getWinWidth() + getWidth() &&
-        movement->pos.y > posCam.y - getHeight() &&
-        movement->pos.y + getHeight() < posCam.y + handler.getWinHeight() + getHeight()
+        transform->getPosition().x > posCam.x - getWidth() && 
+        transform->getPosition().x + getWidth() < posCam.x + handler.getWinWidth() + getWidth() &&
+        transform->getPosition().y > posCam.y - getHeight() &&
+        transform->getPosition().y + getHeight() < posCam.y + handler.getWinHeight() + getHeight()
     );
 }

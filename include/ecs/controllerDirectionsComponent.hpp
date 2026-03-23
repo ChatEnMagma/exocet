@@ -1,12 +1,11 @@
 #pragma once
 
-#include "ecs/hitboxComponent.hpp"
+#include "ecs/movementComponent.hpp"
 
 namespace exocet {
     class ControllerDirectionsComponent: public Component {
         private:
             MovementComponent* movement;
-            HitboxComponent* hitbox;
 
             EngineVector2D direction;
         public:
@@ -16,8 +15,8 @@ namespace exocet {
             void init() override;
             void update() override;
 
-            inline EngineVector2D getDirection() const noexcept { return direction; }
-            inline EngineVector2D getSpeed() const noexcept { return movement->getSpeed(); }
+            inline const EngineVector2D& getDirection() const noexcept { return direction; }
+            inline const EngineVector2D& getSpeed() const noexcept { return movement->getSpeed(); }
 
             inline void setDirection(const EngineVector2D& direction) noexcept { this->direction = direction; }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/sprite.hpp"
-#include "ecs/hitboxComponent.hpp"
+#include "ecs/movementComponent.hpp"
 
 namespace exocet {
     class SpriteComponent: public Component {
@@ -12,7 +12,6 @@ namespace exocet {
             Uint64 frameStart, frameTime;
 
             MovementComponent* movement;
-            HitboxComponent* hitbox;
             
             double a;
             int w, h;
@@ -23,7 +22,7 @@ namespace exocet {
             void update() noexcept override;
             void render() noexcept override;
 
-            inline void fitSizeWithHitbox() noexcept { setSize(hitbox->getWidth(), hitbox->getHeight()); }
+            inline void fitSizeWithHitbox() noexcept { setSize(movement->getHitbox().getWidth(), movement->getHitbox().getHeight()); }
 
             inline std::size_t getCurrentFrame() const noexcept { return frame; }
             inline Uint64 getFPS() const noexcept { return fps; }

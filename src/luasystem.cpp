@@ -171,7 +171,7 @@ void LuaSystem::initUsertypeComponents() {
                 
                 e.componentsLua[USERTYPE_ANCHOR_COMPONENT] = &c;
 
-                c.getHitbox()->setRect(
+                c.setHitbox(
                     rect["x"].get<int>(),
                     rect["y"].get<int>(),
                     rect["w"].get<int>(),
@@ -185,7 +185,7 @@ void LuaSystem::initUsertypeComponents() {
 
                 e.componentsLua[USERTYPE_ANCHOR_COMPONENT] = &c;
                 
-                c.getHitbox()->setRect(
+                c.setHitbox(
                     rect["x"].get<int>(),
                     rect["y"].get<int>(),
                     rect["w"].get<int>(),
@@ -197,12 +197,9 @@ void LuaSystem::initUsertypeComponents() {
             }
         ),
 
-        "isCollide", [](AnchorComponent& self, Entity* e) {
-            if(!e->hasComponent<HitboxComponent>()) { cout << "Warning: the entity: `" << e->getTag() << "` must have hitboxComponent" << endl; return false; }
-            return self.getHitbox()->isCollide(e->getComponent<HitboxComponent>());
-        },
+        "isCollide", &AnchorComponent::isCollide,
 
-        "getPosition", [](AnchorComponent& self) noexcept { return self.getPosition().convert<lua_Number>(); }
+        "getPosition", &AnchorComponent::getPosition
     );
 
     lua.new_usertype<InputComponent>(USERTYPE_INPUT_COMPONENT,
@@ -222,7 +219,7 @@ void LuaSystem::initUsertypeComponents() {
                 
                 e.componentsLua[USERTYPE_PHYSIC_COMPONENT] = &c;
 
-                c.getHitbox()->setRect(
+                c.setHitbox(
                     rect["x"].get<int>(),
                     rect["y"].get<int>(),
                     rect["w"].get<int>(),
@@ -236,7 +233,7 @@ void LuaSystem::initUsertypeComponents() {
 
                 e.componentsLua[USERTYPE_PHYSIC_COMPONENT] = &c;
                 
-                c.getHitbox()->setRect(
+                c.setHitbox(
                     rect["x"].get<int>(),
                     rect["y"].get<int>(),
                     rect["w"].get<int>(),
@@ -248,10 +245,7 @@ void LuaSystem::initUsertypeComponents() {
             }
         ),
 
-        "isCollide", [](AnchorComponent& self, Entity* e) {
-            if(!e->hasComponent<HitboxComponent>()) { cout << "Warning: the entity: `" << e->getTag() << "` must have hitboxComponent" << endl; return false; }
-            return self.getHitbox()->isCollide(e->getComponent<HitboxComponent>());
-        },
+        "isCollide", &PhysicComponent::isCollide,
 
         "getAcceleration", &PhysicComponent::getAccelation,
         "getMasse", &PhysicComponent::getMasse,
@@ -386,7 +380,10 @@ void LuaSystem::initEngine() noexcept {
     lua["engine"]["previousState"] = [&]() { handler.getGame().getStateManager().previousState(); };
     lua["engine"]["restart"] = [&]() { handler.getGame().getStateManager().restart(); };
 
-    lua["engine"]["setSizeTile"] = [](int size) noexcept { Tile::size = size; };
+    lua["engine"]["setSizeTile"] = [](int size) {
+        if(size <= 0) throw runtime_error("A size must > 0 of size");
+        Tile::size = size;
+    };
 
     // ========= ALL GFX METHODS
     lua["engine"]["setColor"] = sol::factories(

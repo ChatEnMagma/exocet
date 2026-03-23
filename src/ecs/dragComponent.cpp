@@ -5,15 +5,15 @@ using namespace exocet;
 using namespace std;
 
 void DragComponent::init() noexcept {
-    if(!entity->hasComponent<HitboxComponent>()) {
-        hitbox = &entity->addComponent<HitboxComponent>();
+    if(!entity->hasComponent<MovementComponent>()) {
+        movement = &entity->addComponent<MovementComponent>();
     } else {
-        hitbox = &entity->getComponent<HitboxComponent>();
+        movement = &entity->getComponent<MovementComponent>();
     }
-    movement = &entity->getComponent<MovementComponent>();
+
     drag = false;
 }
 
 void DragComponent::update() noexcept {
-    drag = handler.getButton(0) && hitbox->isInsideMouse();
+    drag = handler.getButton(0) && movement->getHitbox().isInsideMouse();
 }
